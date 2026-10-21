@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURORA — Commodity Intelligence & Relative-Value Platform for MCX Gold</title>
+  <meta name="description" content="AURORA compares every MCX Gold contract, flags spread opportunities and tests each signal against history.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="site3d.css">
+  <script src="auth.js"></script>
+  <style>
+    section { padding: 96px 0; }
+    .sec-head { max-width: 640px; margin-bottom: 52px; }
+    .sec-head h2 { font-family: 'Orbitron', sans-serif; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.2; font-weight: 700; margin-bottom: 14px; }
+    .sec-head p { color: var(--text-dim); font-size: 17px; }
+
+    /* Hero */
+    .hero { padding: 84px 0 70px; }
+    .hero-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: center; }
+    .hero h1 { font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: clamp(34px, 5vw, 58px); line-height: 1.1; margin-bottom: 22px; }
+    .hero h1 .gold { background: linear-gradient(90deg, var(--gold-light), var(--gold) 60%, #ff9d4d); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero p.lead { font-size: 18px; color: var(--text-dim); max-width: 52ch; margin-bottom: 32px; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
+    .hero-meta { margin-top: 28px; display: flex; gap: 22px; flex-wrap: wrap; font-size: 13px; color: var(--text-mute); }
+    .hero-meta i { color: var(--green); margin-right: 7px; }
+
+    /* Hero live preview */
+    .preview { padding: 18px; position: relative; }
+    .preview-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-size: 12px; color: var(--text-dim); }
+    .dots { display: flex; gap: 6px; } .dots i { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.14); }
+    .live { display: inline-flex; align-items: center; gap: 7px; color: var(--green); font-weight: 600; }
+    .live::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); animation: pulse 1.8s infinite; }
+    @keyframes pulse { 50% { opacity: .35; } }
+    .preview svg { width: 100%; height: auto; display: block; border-radius: 14px; background: rgba(5,8,24,.55); box-shadow: var(--clay-inset); }
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font-size: 12px; color: var(--text-dim); }
+    .legend span::before { content: ''; display: inline-block; width: 18px; height: 3px; border-radius: 3px; margin-right: 7px; vertical-align: middle; background: var(--c); }
+    .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .chip { padding: 12px; border-radius: 14px; background: rgba(5,8,24,.5); border: 1px solid var(--glass-border); }
+    .chip small { display: block; font-size: 11px; color: var(--text-mute); }
+    .chip b { font-family: 'Orbitron', sans-serif; font-size: 16px; }
+    .up { color: var(--green); } .gold-t { color: var(--gold-light); }
+
+    /* Facts strip */
+    .facts { padding: 0; }
+    .facts .wrap { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--glass-border); border-radius: 22px; background: var(--glass-bg); backdrop-filter: blur(14px); overflow: hidden; }
+    .fact { padding: 26px 28px; border-right: 1px solid var(--glass-border); }
+    .fact:last-child { border-right: 0; }
+    .fact b { display: block; font-family: 'Orbitron', sans-serif; font-size: 22px; color: var(--gold-light); margin-bottom: 4px; }
+    .fact span { font-size: 13.5px; color: var(--text-dim); }
+
+    /* Problem */
+    .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .compare .panel { padding: 34px; }
+    .compare h3 { font-size: 19px; margin-bottom: 18px; }
+    .compare ul { list-style: none; display: grid; gap: 14px; }
+    .compare li { display: flex; gap: 12px; color: var(--text-dim); font-size: 15px; }
+    .compare .before i { color: var(--red); margin-top: 5px; } .compare .after i { color: var(--green); margin-top: 5px; }
+    .compare .after { border-color: var(--glass-border-bright); }
+
+    /* Modules */
+    .modules { display: grid; grid-template-columns: repeat(6, 1fr); gap: 22px; }
+    .module { padding: 30px; grid-column: span 2; display: flex; flex-direction: column; gap: 12px; transition: transform .25s, border-color .25s; }
+    .module:hover { transform: translateY(-4px); border-color: var(--glass-border-bright); }
+    .module.wide { grid-column: span 3; }
+    .module .ic { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 20px; color: var(--gold-light); background: rgba(240,185,11,.1); border: 1px solid var(--glass-border); }
+    .module h3 { font-size: 19px; }
+    .module p { color: var(--text-dim); font-size: 14.5px; flex: 1; }
+    .module a { color: var(--gold-light); font-weight: 600; font-size: 14px; }
+    .module a:hover { text-decoration: underline; }
+
+    /* Workflow */
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; counter-reset: s; }
+    .steps::before { content: ''; position: absolute; top: 27px; left: 8%; right: 8%; height: 2px; background: linear-gradient(90deg, transparent, var(--gold-dark), transparent); opacity: .6; }
+    .step { text-align: center; padding: 0 16px; position: relative; }
+    .step .n { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 18px; display: grid; place-items: center; font-family: 'Orbitron', sans-serif; font-weight: 700; color: #1a1300; background: linear-gradient(135deg, var(--gold-light), var(--gold-dark)); box-shadow: 0 0 24px var(--gold-glow); }
+    .step h3 { font-size: 17px; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: var(--text-dim); }
+
+    /* Audience + FAQ */
+    .audience { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .audience .panel { padding: 28px; }
+    .audience h3 { font-size: 17px; margin-bottom: 8px; }
+    .audience p { color: var(--text-dim); font-size: 14.5px; }
+    .faq { max-width: 780px; display: grid; gap: 12px; }
+    .faq details { padding: 20px 24px; }
+    .faq summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary::after { content: '+'; color: var(--gold-light); font-size: 20px; line-height: 1; }
+    .faq details[open] summary::after { content: '–'; }
+    .faq details p { margin-top: 12px; color: var(--text-dim); font-size: 15px; }
+
+    /* CTA + footer */
+    .cta { padding: 40px 0 96px; }
+    .cta .panel { padding: 56px 40px; text-align: center; border-color: var(--glass-border-bright); background: radial-gradient(600px 240px at 50% 0%, rgba(240,185,11,.16), transparent 70%), var(--clay-bg); }
+    .cta h2 { font-family: 'Orbitron', sans-serif; font-size: clamp(24px, 3.2vw, 34px); margin-bottom: 12px; }
+    .cta p { color: var(--text-dim); margin-bottom: 28px; }
+    .cta .hero-cta { justify-content: center; }
+    footer { border-top: 1px solid var(--glass-border); padding: 36px 0; color: var(--text-mute); font-size: 13px; }
+    footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; }
+    footer nav { display: flex; gap: 22px; }
+    footer nav a:hover { color: var(--gold-light); }
+
+    @media (max-width: 960px) {
+      section { padding: 70px 0; }
+      .hero-grid, .compare { grid-template-columns: 1fr; }
+      .facts .wrap { grid-template-columns: 1fr 1fr; }
+      .fact:nth-child(2) { border-right: 0; } .fact:nth-child(-n+2) { border-bottom: 1px solid var(--glass-border); }
+      .modules { grid-template-columns: 1fr 1fr; } .module, .module.wide { grid-column: span 1; }
+      .steps { grid-template-columns: 1fr 1fr; gap: 36px 0; } .steps::before { display: none; }
+      .audience { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .modules, .steps { grid-template-columns: 1fr; }
+      .facts .wrap { grid-template-columns: 1fr; } .fact { border-right: 0; border-bottom: 1px solid var(--glass-border); } .fact:last-child { border-bottom: 0; }
+      .chips { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topnav">
+    <div class="wrap">
+      <a href="landing.html" class="brand"><span class="brand-box"><i class="fa-solid fa-gem"></i></span><span class="brand-name">AURORA</span></a>
+      <nav id="nav" aria-label="Main">
+        <a href="index.html" title="Interactive Stitch Intro Experience" style="color: var(--gold-light);"><i class="fa-solid fa-play" style="font-size: 11px; margin-right: 4px;"></i>Intro</a>
+        <a href="#problem">Why AURORA</a>
+        <a href="#platform">Platform</a>
+        <a href="#how">How it works</a>
+        <a href="#who">Who it's for</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <div class="actions">
+        <button class="btn btn-ghost" id="navDemo" type="button" style="color:var(--gold-light);border-color:rgba(240,185,11,.35);"><i class="fa-solid fa-bolt"></i> Demo Login</button>
+        <a href="login.html" class="btn btn-ghost">Log in</a>
+        <a href="signup.html" class="btn btn-gold">Sign up</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <h1>Know which MCX Gold contract is <span class="gold">mispriced</span> before the spread closes.</h1>
+          <p class="lead">AURORA puts every active MCX Gold contract side by side, flags spread opportunities as they appear, and checks each signal against history so you can see why it matters.</p>
+          <div class="hero-cta">
+            <button class="btn btn-gold btn-lg" id="heroDemo" type="button"><i class="fa-solid fa-bolt"></i> Demo Login</button>
+            <a href="signup.html" class="btn btn-ghost btn-lg">Create free account</a>
+          </div>
+          <div class="hero-meta">
+            <span><i class="fa-solid fa-check"></i>No card needed</span>
+            <span><i class="fa-solid fa-check"></i>Runs in your browser</span>
+            <span><i class="fa-solid fa-check"></i>Demo opens instantly</span>
+          </div>
+        </div>
+
+        <div class="scene" data-gold-stack="3,2,1" aria-label="Stack of six gold bars, one for each tracked contract" role="img">
+          <template>
+            <div class="chip3d" style="--x:-330px;--y:-170px;--z:140px"><div style="--fd:-1s"><i class="fa-solid fa-chart-line"></i><span><b class="up">+2.3%</b><small>Spread day-over-day</small></span></div></div>
+            <div class="chip3d" style="--x:150px;--y:-215px;--z:90px"><div style="--fd:-2.6s"><i class="fa-solid fa-bullseye"></i><span><b>3 new</b><small>Radar opportunities</small></span></div></div>
+            <div class="chip3d" style="--x:160px;--y:120px;--z:170px"><div style="--fd:-3.8s"><i class="fa-solid fa-layer-group"></i><span><b>₹127.45/lot</b><small>Avg pairwise basis</small></span></div></div>
+          </template>
+        </div>
+      </div>
+    </section>
+
+    <!-- Facts -->
+    <section class="facts" aria-label="Platform at a glance">
+      <div class="wrap">
+        <div class="fact"><b>5</b><span>connected modules, from dashboard to backtesting</span></div>
+        <div class="fact"><b>6</b><span>active MCX Gold contracts compared pairwise</span></div>
+        <div class="fact"><b>Walk-forward</b><span>validation, not a single lucky back-test</span></div>
+        <div class="fact"><b>Evidence audit</b><span>behind every opportunity that gets flagged</span></div>
+      </div>
+    </section>
+
+    <!-- 3D platform preview -->
+    <section id="preview" style="padding-bottom:40px">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Every contract on one screen</h2>
+          <p>Normalized prices, flagged spreads and expiries sit together, so the odd one out is easy to see.</p>
+        </div>
+        <div class="stage" id="stage">
+          <div class="deck-rig" id="deckRig">
+            <div class="panel preview" aria-label="Preview of the AURORA price comparison chart">
+          <div class="preview-bar">
+            <div class="dots"><i></i><i></i><i></i></div>
+            <span>Normalized price comparison</span>
+            <span class="live">Sample view</span>
+          </div>
+          <svg viewBox="0 0 560 250" role="img" aria-label="Three contract price lines drifting apart and converging">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f0b90b" stop-opacity=".28"/><stop offset="1" stop-color="#f0b90b" stop-opacity="0"/></linearGradient>
+            </defs>
+            <g stroke="rgba(255,255,255,.06)"><path d="M0 50H560M0 100H560M0 150H560M0 200H560"/></g>
+            <path d="M0 150 C60 140 90 120 140 118 S230 135 280 100 S380 70 430 82 S520 60 560 52 V250 H0Z" fill="url(#g1)"/>
+            <path d="M0 150 C60 140 90 120 140 118 S230 135 280 100 S380 70 430 82 S520 60 560 52" fill="none" stroke="#f0b90b" stroke-width="3" stroke-linecap="round"/>
+            <path d="M0 158 C60 152 100 138 150 134 S240 150 290 120 S390 96 440 100 S520 82 560 78" fill="none" stroke="#38bdf8" stroke-width="2.4" stroke-linecap="round"/>
+            <path d="M0 165 C60 164 110 150 160 150 S250 164 300 142 S400 122 450 120 S520 106 560 100" fill="none" stroke="#ff7849" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="430" cy="82" r="15" fill="none" stroke="#ffd700" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <circle cx="430" cy="82" r="4.5" fill="#ffd700"/>
+            <g font-family="Inter, sans-serif" font-size="11" fill="#ffd700"><rect x="345" y="30" width="132" height="26" rx="9" fill="rgba(240,185,11,.14)" stroke="rgba(240,185,11,.5)"/><text x="357" y="47">Spread above normal</text></g>
+          </svg>
+          <div class="legend"><span style="--c:#f0b90b">Near contract</span><span style="--c:#38bdf8">Next contract</span><span style="--c:#ff7849">Far contract</span></div>
+          <div class="chips">
+            <div class="chip"><small>Contracts tracked</small><b class="gold-t">6</b></div>
+            <div class="chip"><small>Avg pairwise basis</small><b>₹127.45/lot</b></div>
+            <div class="chip"><small>Day-over-day</small><b class="up">+2.3%</b></div>
+          </div>
+        </div>
+            <div class="fl fl-a"><div><i class="fa-solid fa-bullseye"></i><span><b>Opportunity Radar</b>3 new setups, ranked</span></div></div>
+            <div class="fl fl-b"><div><i class="fa-solid fa-calendar-days"></i><span><b>Expiry calendar</b>Every active lot tracked</span></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem -->
+    <section id="problem">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Gold has many contracts. Spotting the odd one out is slow work.</h2>
+          <p>MCX Gold trades across several expiries and lot sizes at once. Comparing them by hand means spreadsheets, guesswork and signals you can't explain later.</p>
+        </div>
+        <div class="compare">
+          <div class="panel before">
+            <h3>Without AURORA</h3>
+            <ul>
+              <li><i class="fa-solid fa-xmark"></i>Prices copied between sheets and compared by eye</li>
+              <li><i class="fa-solid fa-xmark"></i>Spread moves noticed after they have already closed</li>
+              <li><i class="fa-solid fa-xmark"></i>No record of why a trade looked attractive</li>
+              <li><i class="fa-solid fa-xmark"></i>Strategies trusted after one favourable back-test</li>
+            </ul>
+          </div>
+          <div class="panel after">
+            <h3>With AURORA</h3>
+            <ul>
+              <li><i class="fa-solid fa-check"></i>All contracts normalized onto one chart</li>
+              <li><i class="fa-solid fa-check"></i>Opportunities flagged and ranked as they appear</li>
+              <li><i class="fa-solid fa-check"></i>An evidence audit you can open for any signal</li>
+              <li><i class="fa-solid fa-check"></i>Walk-forward tests that show how a signal holds up</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Platform -->
+    <section id="platform">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Five modules, one workflow</h2>
+          <p>Start with the big picture, drill into a contract, review the opportunity, check the evidence, then test it.</p>
+        </div>
+        <div class="modules">
+          <article class="panel module wide">
+            <div class="ic"><i class="fa-solid fa-chart-line"></i></div>
+            <h3>Dashboard</h3>
+            <p>Normalized price comparison, contract health, spread analysis, recent alerts, expiry calendar and a live market intelligence feed in one screen.</p>
+            <a href="dashboard.html">Open dashboard →</a>
+          </article>
+          <article class="panel module wide">
+            <div class="ic"><i class="fa-solid fa-layer-group"></i></div>
+            <h3>Contract Explorer</h3>
+            <p>Specifications, pricing and health for each MCX Gold contract, so you can compare lots and expiries without leaving the page.</p>
+            <a href="contract-explorer.html">Explore contracts →</a>
+          </article>
+          <article class="panel module">
+            <div class="ic"><i class="fa-solid fa-bullseye"></i></div>
+            <h3>Opportunity Radar</h3>
+            <p>Relative-value setups ranked by strength, each with the numbers behind it.</p>
+            <a href="opportunity-radar.html">See the radar →</a>
+          </article>
+          <article class="panel module">
+            <div class="ic"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
+            <h3>Market Detective</h3>
+            <p>An evidence audit that shows what drove a signal and how similar events played out before.</p>
+            <a href="market-detective.html">Investigate →</a>
+          </article>
+          <article class="panel module">
+            <div class="ic"><i class="fa-solid fa-flask-vial"></i></div>
+            <h3>Backtesting Lab</h3>
+            <p>Walk-forward validation that tests a strategy on data it has not seen.</p>
+            <a href="backtesting-lab.html">Run a test →</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- How -->
+    <section id="how">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>From raw prices to a signal you can defend</h2>
+          <p>Every opportunity in AURORA follows the same four steps, and you can inspect each one.</p>
+        </div>
+        <div class="steps">
+          <div class="step"><div class="n">1</div><h3>Collect</h3><p>MCX contract prices are brought together and lined up on a common scale.</p></div>
+          <div class="step"><div class="n">2</div><h3>Compare</h3><p>Every contract is measured against the others to find where spreads drift.</p></div>
+          <div class="step"><div class="n">3</div><h3>Flag</h3><p>Unusual spreads become ranked opportunities, with the evidence attached.</p></div>
+          <div class="step"><div class="n">4</div><h3>Validate</h3><p>Walk-forward tests show whether a similar signal has held up in the past.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Audience -->
+    <section id="who">
+      <div class="wrap">
+        <div class="sec-head">
+          <h2>Built for people who trade or study the gold curve</h2>
+        </div>
+        <div class="audience">
+          <div class="panel"><h3>Quant analysts</h3><p>Test relative-value ideas with walk-forward validation and keep the evidence next to every result.</p></div>
+          <div class="panel"><h3>Commodity traders</h3><p>See which contract is rich or cheap right now, and how big the gap is against its usual range.</p></div>
+          <div class="panel"><h3>Risk managers and students</h3><p>Follow contract health and expiries, or learn how gold futures spreads behave using real contract structure.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <div class="wrap">
+        <div class="sec-head"><h2>Questions before you log in</h2></div>
+        <div class="faq">
+          <details class="panel"><summary>Do I need an account to look around?</summary><p>No. Choose Demo login and the full platform opens straight away as a sample user.</p></details>
+          <details class="panel"><summary>Is this connected to a live trading account?</summary><p>No. AURORA is a research and analysis tool. It does not place orders.</p></details>
+          <details class="panel"><summary>Where is my account information stored?</summary><p>In this demo, accounts are saved only in your own browser. Nothing is sent to a server.</p></details>
+          <details class="panel"><summary>Is AURORA investment advice?</summary><p>No. Signals show where prices differ and how similar setups behaved before. Trading decisions stay with you.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+      <div class="wrap">
+        <div class="panel">
+          <h2>Open the platform and see it for yourself</h2>
+          <p>Use the demo to explore every module now, or create an account to keep your own profile.</p>
+          <div class="hero-cta">
+            <button class="btn btn-gold btn-lg" id="ctaDemo" type="button"><i class="fa-solid fa-bolt"></i> Demo Login</button>
+            <a href="signup.html" class="btn btn-ghost btn-lg">Create account</a>
+            <a href="login.html" class="btn btn-ghost btn-lg">Log in</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <a href="#top" class="brand"><span class="brand-box" style="width:32px;height:32px;font-size:14px"><i class="fa-solid fa-gem"></i></span><span class="brand-name" style="font-size:15px">AURORA</span></a>
+      <nav><a href="#platform">Platform</a><a href="login.html">Log in</a><a href="signup.html">Sign up</a></nav>
+      <span>For research use. Not investment advice.</span>
+    </div>
+  </footer>
+
+  <script>
+    function demo(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      if (e && e.stopPropagation) e.stopPropagation();
+      Aurora.demoLogin();
+      window.location.href = 'dashboard.html';
+    }
+    document.getElementById('heroDemo')?.addEventListener('click', demo);
+    document.getElementById('ctaDemo')?.addEventListener('click', demo);
+    document.getElementById('navDemo')?.addEventListener('click', demo);
+    // Module links go to the app: send logged-out visitors through login first (auth.js handles redirect).
+    var t = document.getElementById('navToggle'), n = document.getElementById('nav');
+    t.addEventListener('click', function () { var o = n.classList.toggle('open'); t.setAttribute('aria-expanded', o); });
+    n.querySelectorAll('a').forEach(function (a) { a.addEventListener('click', function () { n.classList.remove('open'); t.setAttribute('aria-expanded', false); }); });
+  </script>
+  <script src="scene3d.js"></script>
+</body>
+</html>

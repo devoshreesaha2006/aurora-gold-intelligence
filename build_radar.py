@@ -1,0 +1,3674 @@
+# -*- coding: utf-8 -*-
+"""
+Script to generate the complete opportunity-radar.html file for AURORA
+MCX Gold Relative-Value Investigation Platform.
+"""
+
+import os
+
+html_content = r'''<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURORA — Opportunity Radar | MCX Gold RV Platform</title>
+  
+  <!-- Google Fonts: Orbitron, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js 4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       AURORA DESIGN SYSTEM — NAVY / GOLD / CLAYMORPHISM / GLASSMORPHISM / 3D
+       ========================================================================== */
+    :root {
+      --bg-dark: #060b18;
+      --bg-midnight: #0a1126;
+      --bg-card: rgba(13, 24, 48, 0.68);
+      --bg-card-elevated: rgba(19, 34, 68, 0.78);
+      --bg-card-hover: rgba(25, 44, 88, 0.85);
+      --bg-clay: rgba(22, 38, 76, 0.85);
+      --bg-input: rgba(10, 18, 38, 0.75);
+
+      /* Gold & Cyber Palette */
+      --gold-primary: #D4AF37;
+      --gold-bright: #FEE180;
+      --gold-light: #F5C542;
+      --gold-dark: #996515;
+      --gold-glow: rgba(212, 175, 55, 0.4);
+      --gold-glow-subtle: rgba(212, 175, 55, 0.15);
+      --gold-gradient: linear-gradient(135deg, #FFF6D0 0%, #F5C542 40%, #D4AF37 75%, #996515 100%);
+      --gold-gradient-soft: linear-gradient(135deg, rgba(245, 197, 66, 0.2) 0%, rgba(212, 175, 55, 0.05) 100%);
+      
+      /* Accents */
+      --cyan-accent: #38BDF8;
+      --cyan-glow: rgba(56, 189, 248, 0.35);
+      --blue-accent: #3B82F6;
+      --purple-accent: #A855F7;
+      
+      /* Severity States */
+      --critical-red: #FF4757;
+      --critical-glow: rgba(255, 71, 87, 0.45);
+      --high-amber: #FFA502;
+      --high-glow: rgba(255, 165, 2, 0.4);
+      --medium-blue: #38BDF8;
+      --medium-glow: rgba(56, 189, 248, 0.35);
+      --success-green: #2ED573;
+      --success-glow: rgba(46, 213, 115, 0.35);
+      --danger-red: #FF4757;
+
+      /* Typography & Neutral Colors */
+      --text-white: #FFFFFF;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --text-dim: #475569;
+      --border-glass: rgba(212, 175, 55, 0.22);
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(212, 175, 55, 0.5);
+
+      /* Typography Families */
+      --font-display: 'Orbitron', -apple-system, sans-serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      /* Shadows & Transitions */
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --shadow-3d: 0 16px 40px -10px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 0, 0, 0.3);
+      --shadow-clay: 
+        inset 2px 2px 4px rgba(255, 255, 255, 0.14),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.5),
+        4px 6px 15px rgba(0, 0, 0, 0.35);
+      --shadow-clay-btn: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.4),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.35),
+        0 6px 20px rgba(212, 175, 55, 0.35);
+    }
+
+    /* Reset & Base Setup */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(255, 71, 87, 0.05) 0%, transparent 50%),
+        linear-gradient(180deg, #060b18 0%, #0a1126 100%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Background Particle Canvas */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(6, 11, 24, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--gold-primary), var(--gold-dark));
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-bright);
+    }
+
+    /* Utility Classes */
+    .golden-text {
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline-block;
+    }
+
+    .orbitron {
+      font-family: var(--font-display);
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    /* Glassmorphism Panel */
+    .glass-panel {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid var(--border-glass);
+      border-radius: 20px;
+      box-shadow: 
+        0 12px 40px 0 rgba(0, 0, 0, 0.45),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 2px 0 rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition-smooth);
+    }
+
+    .glass-panel:hover {
+      border-color: rgba(212, 175, 55, 0.35);
+      box-shadow: 
+        0 16px 48px 0 rgba(0, 0, 0, 0.55),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+        0 0 25px rgba(212, 175, 55, 0.12);
+    }
+
+    /* Claymorphic Badges & Chips */
+    .clay-chip {
+      background: linear-gradient(145deg, rgba(24, 40, 78, 0.85), rgba(13, 23, 46, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      box-shadow: var(--shadow-clay);
+      padding: 6px 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 500;
+    }
+
+    .clay-btn {
+      background: var(--gold-gradient);
+      color: #060b18;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 18px;
+      box-shadow: var(--shadow-clay-btn);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: var(--transition-smooth);
+      text-decoration: none;
+    }
+
+    .clay-btn:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        inset 0 1px 2px rgba(255, 255, 255, 0.6),
+        0 8px 24px rgba(212, 175, 55, 0.5);
+      color: #000;
+    }
+
+    .clay-btn:active {
+      transform: translateY(1px);
+    }
+
+    .clay-btn-outline {
+      background: rgba(14, 25, 50, 0.85);
+      color: var(--gold-light);
+      border: 1px solid rgba(212, 175, 55, 0.35);
+      border-radius: 12px;
+      padding: 8px 16px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-clay);
+      transition: var(--transition-smooth);
+    }
+
+    .clay-btn-outline:hover {
+      border-color: var(--gold-primary);
+      background: rgba(212, 175, 55, 0.12);
+      color: #FFF;
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+    }
+
+    /* ==========================================================================
+       SIDEBAR NAVIGATION
+       ========================================================================== */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: rgba(8, 14, 30, 0.85);
+      backdrop-filter: blur(25px);
+      border-right: 1px solid var(--border-glass);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 24px 16px;
+    }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 6px 12px 24px 12px;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+      margin-bottom: 24px;
+    }
+
+    .brand-logo-gem {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, rgba(245, 197, 66, 0.25), rgba(13, 24, 48, 0.95));
+      border: 1.5px solid var(--gold-primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        0 0 20px var(--gold-glow-subtle),
+        inset 0 0 10px rgba(212, 175, 55, 0.3);
+      position: relative;
+    }
+
+    .brand-logo-gem i {
+      font-size: 1.35rem;
+      color: var(--gold-bright);
+      filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.8));
+    }
+
+    .brand-info h1 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .brand-info span {
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      display: block;
+    }
+
+    .nav-section-title {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--text-dim);
+      font-weight: 700;
+      margin: 14px 12px 8px 12px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .nav-item a .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-item a i {
+      font-size: 1.05rem;
+      width: 22px;
+      text-align: center;
+      color: var(--text-muted);
+      transition: var(--transition-smooth);
+    }
+
+    .nav-item a:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+
+    .nav-item a:hover i {
+      color: var(--gold-light);
+    }
+
+    /* Active Nav Item */
+    .nav-item.active a {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(13, 24, 48, 0.8) 100%);
+      color: #FFFFFF;
+      font-weight: 600;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      box-shadow: 
+        0 6px 18px rgba(0, 0, 0, 0.4),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15),
+        0 0 15px rgba(212, 175, 55, 0.18);
+    }
+
+    .nav-item.active a i {
+      color: var(--gold-bright);
+      filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6));
+    }
+
+    .nav-badge-live {
+      background: linear-gradient(135deg, var(--critical-red), #c0392b);
+      color: white;
+      font-size: 0.68rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(255, 71, 87, 0.6);
+      animation: pulseAlert 2s infinite;
+    }
+
+    /* Sidebar System Health Card */
+    .sidebar-health {
+      margin-top: auto;
+      padding-top: 16px;
+    }
+
+    .health-card {
+      background: rgba(11, 20, 40, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 0.78rem;
+    }
+
+    .health-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .status-dot-pulse {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success-green);
+      box-shadow: 0 0 8px var(--success-green);
+      animation: pulseGreen 1.8s infinite;
+      margin-right: 6px;
+    }
+
+    .health-metric-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .health-stat-item .label {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      display: block;
+    }
+
+    .health-stat-item .val {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT CONTAINER
+       ========================================================================== */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Top Navigation Header */
+    .top-header {
+      height: 70px;
+      background: rgba(8, 14, 30, 0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-glass);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .header-breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .header-breadcrumbs span.active {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* Ticker Pill Marquee */
+    .market-ticker-bar {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: rgba(13, 24, 48, 0.6);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 40px;
+      padding: 6px 18px;
+      box-shadow: var(--shadow-clay);
+    }
+
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      white-space: nowrap;
+    }
+
+    .ticker-name {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .ticker-price {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: #FFF;
+    }
+
+    .ticker-tag-up {
+      color: var(--success-green);
+      font-size: 0.7rem;
+    }
+
+    .header-right-tools {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .tool-icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(16, 29, 58, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-clay);
+      position: relative;
+      transition: var(--transition-smooth);
+    }
+
+    .tool-icon-btn:hover {
+      color: var(--gold-bright);
+      border-color: rgba(212, 175, 55, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .badge-count {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--critical-red);
+      color: white;
+      font-size: 0.65rem;
+      font-weight: 700;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 8px rgba(255, 71, 87, 0.6);
+    }
+
+    /* Content Area */
+    .page-content {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      max-width: 1680px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ==========================================================================
+       1. PAGE HEADER & FILTER CONTROLS
+       ========================================================================== */
+    .page-header-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .page-title-block h2 {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 2px 12px rgba(212, 175, 55, 0.3));
+    }
+
+    .page-title-block p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(11, 20, 42, 0.7);
+      padding: 8px 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border-glass);
+      box-shadow: var(--shadow-clay);
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-label {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .filter-select {
+      background: var(--bg-input);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border-radius: 10px;
+      outline: none;
+      cursor: pointer;
+      box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.5);
+      transition: var(--transition-smooth);
+    }
+
+    .filter-select:focus {
+      border-color: var(--gold-primary);
+      box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+    }
+
+    .filter-select option {
+      background: #0d1830;
+      color: var(--text-primary);
+    }
+
+    /* ==========================================================================
+       2. RADAR HERO SECTION (Large Radar / Polar Visualization)
+       ========================================================================== */
+    .radar-hero-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 28px;
+    }
+
+    @media (max-width: 1200px) {
+      .radar-hero-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .radar-container-card {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .radar-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .radar-card-header .title-area h3 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .radar-card-header .title-area p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .radar-legend-chips {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .legend-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Animated Radar Canvas Container */
+    .radar-chart-wrapper {
+      position: relative;
+      width: 100%;
+      height: 440px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto 0;
+    }
+
+    /* The Military Sweep Effect */
+    .radar-sweep-beam {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg, 
+        rgba(212, 175, 55, 0.28) 0deg, 
+        rgba(212, 175, 55, 0.08) 35deg, 
+        transparent 65deg, 
+        transparent 360deg
+      );
+      animation: radarSweep 8s linear infinite;
+      pointer-events: none;
+      z-index: 1;
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.05);
+    }
+
+    .radar-crosshair-h, .radar-crosshair-v {
+      position: absolute;
+      background: rgba(212, 175, 55, 0.15);
+      pointer-events: none;
+    }
+    .radar-crosshair-h {
+      width: 80%;
+      height: 1px;
+    }
+    .radar-crosshair-v {
+      height: 80%;
+      width: 1px;
+    }
+
+    .radar-concentric-ring {
+      position: absolute;
+      border: 1px dashed rgba(212, 175, 55, 0.18);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .ring-1 { width: 120px; height: 120px; }
+    .ring-2 { width: 230px; height: 230px; }
+    .ring-3 { width: 340px; height: 340px; }
+
+    #radarChartCanvas {
+      position: relative;
+      z-index: 2;
+      max-height: 420px;
+    }
+
+    /* Radar Side Overview & Matrix */
+    .radar-summary-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .hero-stat-claybox {
+      background: linear-gradient(135deg, rgba(20, 36, 72, 0.75), rgba(10, 18, 38, 0.85));
+      border: 1px solid var(--border-glass);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: var(--shadow-clay);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .stat-headline-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .stat-badge-pulse {
+      background: rgba(255, 71, 87, 0.15);
+      border: 1px solid var(--critical-red);
+      color: #FF7685;
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: pulseCriticalBorder 2s infinite;
+    }
+
+    .headline-pair-title {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #FFF;
+    }
+
+    .headline-metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: rgba(6, 12, 26, 0.5);
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .headline-metric-cell .label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+
+    .headline-metric-cell .value {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    /* Pairwise Matrix Heatmap Table */
+    .pairwise-matrix-card {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .matrix-title {
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 6px;
+      font-size: 0.76rem;
+    }
+
+    .matrix-table th {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-weight: 600;
+      padding: 4px;
+      text-align: center;
+    }
+
+    .matrix-table td {
+      text-align: center;
+      padding: 8px 4px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .matrix-table td.cell-self {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-dim);
+    }
+
+    .matrix-table td.cell-normal {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--cyan-accent);
+    }
+
+    .matrix-table td.cell-high {
+      background: rgba(255, 165, 2, 0.15);
+      border: 1px solid rgba(255, 165, 2, 0.35);
+      color: var(--high-amber);
+    }
+
+    .matrix-table td.cell-critical {
+      background: rgba(255, 71, 87, 0.2);
+      border: 1px solid rgba(255, 71, 87, 0.45);
+      color: #FF7685;
+      box-shadow: 0 0 10px rgba(255, 71, 87, 0.25);
+      animation: pulseAlert 2s infinite;
+    }
+
+    .matrix-table td:hover {
+      transform: scale(1.08);
+      z-index: 10;
+    }
+
+    /* ==========================================================================
+       3. ACTIVE SIGNALS GRID (3 Signal Cards)
+       ========================================================================== */
+    .signals-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .signals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 1080px) {
+      .signals-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Signal Card Base */
+    .signal-card {
+      background: var(--bg-card-elevated);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: var(--shadow-3d);
+      transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+      transform-style: preserve-3d;
+      perspective: 1000px;
+    }
+
+    /* Card 1: Critical Style */
+    .signal-card.critical {
+      border: 1.5px solid var(--critical-red);
+      box-shadow: 
+        0 14px 40px rgba(0, 0, 0, 0.6),
+        0 0 25px rgba(255, 71, 87, 0.35),
+        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+      animation: pulseCriticalCard 3s infinite alternate;
+    }
+
+    /* Card 2: High Style */
+    .signal-card.high {
+      border: 1.5px solid var(--high-amber);
+      box-shadow: 
+        0 14px 40px rgba(0, 0, 0, 0.6),
+        0 0 20px rgba(255, 165, 2, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+      animation: pulseHighCard 3s infinite alternate;
+    }
+
+    /* Card 3: Medium Style */
+    .signal-card.medium {
+      border: 1.5px solid var(--medium-blue);
+      box-shadow: 
+        0 14px 40px rgba(0, 0, 0, 0.6),
+        0 0 18px rgba(56, 189, 248, 0.25),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+
+    /* Card Header */
+    .card-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .severity-pill {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pill-critical {
+      background: rgba(255, 71, 87, 0.15);
+      border: 1px solid var(--critical-red);
+      color: #FF6B81;
+    }
+
+    .pill-high {
+      background: rgba(255, 165, 2, 0.15);
+      border: 1px solid var(--high-amber);
+      color: var(--high-amber);
+    }
+
+    .pill-medium {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid var(--medium-blue);
+      color: var(--cyan-accent);
+    }
+
+    /* Radial Confidence Meter */
+    .confidence-radial-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .radial-svg-wrap {
+      width: 44px;
+      height: 44px;
+      position: relative;
+    }
+
+    .radial-svg-wrap svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .radial-svg-wrap circle {
+      fill: none;
+      stroke-width: 3.5;
+    }
+
+    .circle-bg {
+      stroke: rgba(255, 255, 255, 0.08);
+    }
+
+    .circle-val {
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+
+    .circle-val-critical {
+      stroke: var(--gold-bright);
+      filter: drop-shadow(0 0 4px var(--gold-primary));
+    }
+    .circle-val-high {
+      stroke: var(--high-amber);
+    }
+    .circle-val-medium {
+      stroke: var(--cyan-accent);
+    }
+
+    .radial-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #FFF;
+    }
+
+    /* Pair Info Area */
+    .card-pair-block {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      padding-bottom: 14px;
+    }
+
+    .pair-symbols {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #FFF;
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pair-direction-tag {
+      font-size: 0.72rem;
+      font-family: var(--font-body);
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--gold-light);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pair-specs-sub {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Key Statistics Inset Grid */
+    .card-stats-claygrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-claycell {
+      background: linear-gradient(145deg, rgba(16, 28, 56, 0.8), rgba(9, 17, 36, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 10px 12px;
+      box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.06), inset -1px -1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-claycell .stat-lbl {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .stat-claycell .stat-num {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #FFF;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .stat-claycell.highlight-cell .stat-num {
+      color: var(--gold-bright);
+      text-shadow: 0 0 10px var(--gold-glow);
+    }
+
+    .stat-subtext {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+    }
+
+    /* Validation Checks Checklist */
+    .card-validations-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .validation-badge {
+      background: rgba(10, 18, 38, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 7px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      box-shadow: var(--shadow-clay);
+    }
+
+    .validation-badge .v-name {
+      font-size: 0.64rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .validation-badge .v-status {
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+
+    .status-pass { color: var(--success-green); text-shadow: 0 0 6px var(--success-glow); }
+    .status-warning { color: var(--high-amber); text-shadow: 0 0 6px var(--high-glow); }
+    .status-fail { color: var(--danger-red); text-shadow: 0 0 6px var(--critical-glow); }
+
+    /* Mini Sparkline Chart Container */
+    .sparkline-box {
+      width: 100%;
+      height: 70px;
+      background: rgba(6, 12, 26, 0.5);
+      border-radius: 10px;
+      padding: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      position: relative;
+    }
+
+    .sparkline-label {
+      position: absolute;
+      top: 6px;
+      left: 10px;
+      font-size: 0.64rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      z-index: 2;
+    }
+
+    /* Card Action Footer */
+    .card-footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .card-investigate-btn {
+      flex: 1;
+      padding: 11px;
+      font-size: 0.84rem;
+    }
+
+    /* ==========================================================================
+       4. OPPORTUNITY vs TRAP ANALYSIS (Full Width Panel)
+       ========================================================================== */
+    .trap-filter-panel {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .trap-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .trap-headline h3 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .trap-headline p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .pipeline-summary-pill {
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(15, 26, 52, 0.9));
+      border: 1px solid var(--gold-primary);
+      border-radius: 30px;
+      padding: 8px 18px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--gold-bright);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+
+    /* Visual 5-Stage Horizontal Pipeline Flow */
+    .pipeline-flow-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      position: relative;
+      margin: 10px 0;
+    }
+
+    @media (max-width: 1000px) {
+      .pipeline-flow-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .pipeline-connector {
+        transform: rotate(90deg);
+        margin: 10px auto;
+      }
+    }
+
+    .pipeline-node {
+      flex: 1;
+      background: linear-gradient(145deg, rgba(18, 32, 64, 0.8), rgba(9, 17, 36, 0.9));
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 16px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-clay);
+      position: relative;
+      transition: var(--transition-smooth);
+      cursor: pointer;
+    }
+
+    .pipeline-node:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold-primary);
+      box-shadow: 
+        0 10px 25px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(212, 175, 55, 0.25);
+    }
+
+    .pipeline-node.final-node {
+      border: 1.5px solid var(--gold-bright);
+      background: linear-gradient(145deg, rgba(35, 55, 95, 0.85), rgba(16, 28, 56, 0.95));
+      box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.6),
+        0 0 25px rgba(212, 175, 55, 0.35);
+    }
+
+    .node-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .node-icon-box {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-light);
+      font-size: 0.95rem;
+    }
+
+    .node-step-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .node-title {
+      font-family: var(--font-display);
+      font-size: 0.94rem;
+      font-weight: 700;
+      color: #FFF;
+    }
+
+    .node-count-badge {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--gold-light);
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+
+    .node-drop-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #FF6B81;
+      background: rgba(255, 71, 87, 0.12);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .node-desc {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Pipeline Connector Arrow */
+    .pipeline-connector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-primary);
+      font-size: 1.1rem;
+      opacity: 0.7;
+      animation: pulseConnector 2s infinite;
+    }
+
+    /* Funnel & Trap Rejection Cards */
+    .trap-breakdown-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 2fr;
+      gap: 20px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .trap-breakdown-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .funnel-visual-box {
+      background: rgba(8, 15, 32, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .funnel-title {
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+
+    .funnel-bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .funnel-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+    }
+
+    .funnel-track {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .funnel-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 1s ease;
+    }
+
+    .funnel-1 { width: 100%; background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+    .funnel-2 { width: 66.7%; background: linear-gradient(90deg, #38BDF8, #2DD4BF); }
+    .funnel-3 { width: 50.0%; background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+    .funnel-4 { width: 33.3%; background: linear-gradient(90deg, #F5C542, #D4AF37); }
+    .funnel-5 { width: 25.0%; background: linear-gradient(90deg, #FFDF73, #D4AF37); box-shadow: 0 0 10px var(--gold-glow); }
+
+    /* Traps Filtered Breakdown Accordion/Grid */
+    .traps-list-box {
+      background: rgba(8, 15, 32, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .trap-item-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 14px;
+      background: rgba(14, 25, 52, 0.7);
+      border-radius: 12px;
+      border-left: 3px solid var(--danger-red);
+      font-size: 0.8rem;
+    }
+
+    .trap-item-row.marginal {
+      border-left-color: var(--high-amber);
+    }
+
+    .trap-item-icon {
+      font-size: 1rem;
+      color: #FF6B81;
+    }
+
+    .trap-item-details {
+      flex: 1;
+    }
+
+    .trap-item-details .t-title {
+      font-weight: 700;
+      color: #FFF;
+      margin-bottom: 2px;
+    }
+
+    .trap-item-details .t-desc {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .trap-tag-eliminated {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #FF7685;
+      background: rgba(255, 71, 87, 0.15);
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    /* ==========================================================================
+       5. HISTORICAL SPREAD DISTRIBUTION (Bottom Panel)
+       ========================================================================== */
+    .distribution-panel {
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .dist-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .dist-title h3 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .dist-title p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .dist-pair-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(8, 15, 32, 0.8);
+      padding: 5px;
+      border-radius: 14px;
+      border: 1px solid var(--border-glass);
+    }
+
+    .dist-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .dist-tab-btn:hover {
+      color: #FFF;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .dist-tab-btn.active {
+      background: var(--gold-gradient);
+      color: #060b18;
+      font-weight: 700;
+      box-shadow: var(--shadow-clay-btn);
+    }
+
+    /* Chart Container */
+    .distribution-chart-container {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      background: rgba(7, 13, 28, 0.5);
+      border-radius: 16px;
+      padding: 16px 20px 24px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Statistical Parameter Chips Bar */
+    .stats-parameter-strip {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 1100px) {
+      .stats-parameter-strip {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .param-chip {
+      background: linear-gradient(145deg, rgba(16, 28, 56, 0.8), rgba(9, 17, 36, 0.85));
+      border: 1px solid rgba(212, 175, 55, 0.18);
+      border-radius: 12px;
+      padding: 12px 14px;
+      box-shadow: var(--shadow-clay);
+    }
+
+    .param-chip .p-name {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .param-chip .p-val {
+      font-family: var(--font-mono);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #FFF;
+    }
+
+    .param-chip.highlight-gold .p-val {
+      color: var(--gold-bright);
+      text-shadow: 0 0 10px var(--gold-glow);
+    }
+
+    /* Distribution Legend Zones */
+    .dist-zones-legend {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .zone-indicator-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+
+    .zone-color-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
+
+    /* ==========================================================================
+       INVESTIGATION MODAL
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(3, 6, 16, 0.82);
+      backdrop-filter: blur(16px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-box {
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: linear-gradient(145deg, rgba(16, 29, 60, 0.95), rgba(8, 15, 34, 0.98));
+      border: 1.5px solid var(--gold-primary);
+      border-radius: 24px;
+      box-shadow: 
+        0 25px 60px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(212, 175, 55, 0.3),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+
+    .modal-backdrop.open .modal-box {
+      transform: scale(1);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+      padding-bottom: 18px;
+    }
+
+    .modal-title-group h3 {
+      font-family: var(--font-display);
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #FFF;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title-group p {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .modal-close-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-smooth);
+    }
+
+    .modal-close-btn:hover {
+      background: var(--critical-red);
+      color: white;
+      border-color: var(--critical-red);
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .modal-math-box {
+      background: rgba(6, 12, 26, 0.8);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+
+    .modal-math-box .formula {
+      color: var(--gold-light);
+      margin-top: 4px;
+      font-size: 0.86rem;
+    }
+
+    .modal-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .modal-breakdown-card {
+      background: rgba(10, 19, 40, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 16px;
+    }
+
+    .modal-breakdown-card h4 {
+      font-family: var(--font-display);
+      font-size: 0.86rem;
+      color: var(--gold-light);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-kv-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.8rem;
+    }
+
+    .modal-kv-row:last-child {
+      border-bottom: none;
+    }
+
+    .modal-kv-row .k { color: var(--text-secondary); }
+    .modal-kv-row .v { font-family: var(--font-mono); font-weight: 600; color: #FFF; }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 18px;
+    }
+
+    /* ==========================================================================
+       KEYFRAME ANIMATIONS
+       ========================================================================== */
+    @keyframes radarSweep {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulseCriticalCard {
+      0% {
+        border-color: rgba(255, 71, 87, 0.7);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 71, 87, 0.3);
+      }
+      100% {
+        border-color: rgba(245, 197, 66, 0.9);
+        box-shadow: 0 14px 45px rgba(0, 0, 0, 0.6), 0 0 35px rgba(245, 197, 66, 0.45);
+      }
+    }
+
+    @keyframes pulseHighCard {
+      0% {
+        border-color: rgba(255, 165, 2, 0.7);
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 16px rgba(255, 165, 2, 0.25);
+      }
+      100% {
+        border-color: rgba(255, 165, 2, 1);
+        box-shadow: 0 14px 45px rgba(0, 0, 0, 0.6), 0 0 28px rgba(255, 165, 2, 0.4);
+      }
+    }
+
+    @keyframes pulseCriticalBorder {
+      0%, 100% { border-color: rgba(255, 71, 87, 0.8); box-shadow: 0 0 8px rgba(255, 71, 87, 0.4); }
+      50% { border-color: rgba(245, 197, 66, 0.9); box-shadow: 0 0 14px rgba(245, 197, 66, 0.5); }
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.85; }
+    }
+
+    @keyframes pulseGreen {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 8px var(--success-green); }
+      50% { transform: scale(1.2); box-shadow: 0 0 14px var(--success-green); }
+    }
+
+    @keyframes pulseConnector {
+      0%, 100% { transform: translateX(0); opacity: 0.6; }
+      50% { transform: translateX(3px); opacity: 1; }
+    }
+
+    /* Toast Notification */
+    #toast-notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: rgba(14, 25, 50, 0.95);
+      border: 1px solid var(--gold-primary);
+      border-radius: 12px;
+      padding: 12px 20px;
+      color: #FFF;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--gold-glow);
+      z-index: 2000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #toast-notification.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Particle canvas for deep dynamic 3D space atmosphere -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ==========================================================================
+       SIDEBAR NAVIGATION
+       ========================================================================== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo-gem">
+        <i class="fa-solid fa-gem"></i>
+      </div>
+      <div class="brand-info">
+        <h1 class="golden-text">AURORA</h1>
+        <span>MCX QUANT RV ENGINE</span>
+      </div>
+    </div>
+
+    <div class="nav-section-title">Analytical Workspaces</div>
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a href="dashboard.html">
+          <div class="nav-left">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Overview Dashboard</span>
+          </div>
+        </a>
+      </li>
+      <li class="nav-item active">
+        <a href="opportunity-radar.html">
+          <div class="nav-left">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <span>Opportunity Radar</span>
+          </div>
+          <span class="nav-badge-live">3 Live</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="contract-comparison.html">
+          <div class="nav-left">
+            <i class="fa-solid fa-code-compare"></i>
+            <span>Contract Comparison</span>
+          </div>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="event-investigation.html">
+          <div class="nav-left">
+            <i class="fa-solid fa-microscope"></i>
+            <span>Event Investigation</span>
+          </div>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="backtesting-lab.html">
+          <div class="nav-left">
+            <i class="fa-solid fa-filter-circle-dollar"></i>
+            <span>Trap Filter & Simulator</span>
+          </div>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="network.html">
+          <div class="nav-left">
+            <i class="fa-solid fa-circle-nodes"></i>
+            <span>Relationship Network</span>
+          </div>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="history.html">
+          <div class="nav-left">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Historical Memory</span>
+          </div>
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-health">
+      <div class="health-card">
+        <div class="health-status-row">
+          <span style="font-weight: 600; color: #FFF;">
+            <span class="status-dot-pulse"></span> MCX Engine Online
+          </span>
+          <span class="mono" style="color: var(--success-green); font-size: 0.74rem;">18ms</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.7rem;">Continuous 10-tick VWAP synchronization active.</p>
+        
+        <div class="health-metric-grid">
+          <div class="health-stat-item">
+            <span class="label">Pairs Monitored</span>
+            <span class="val">6 Active</span>
+          </div>
+          <div class="health-stat-item">
+            <span class="label">Last MCX Sync</span>
+            <span class="val" id="live-sidebar-time">11:24:08 IST</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       MAIN VIEWPORT
+       ========================================================================== -->
+  <div class="main-wrapper">
+
+    <!-- Top Header Bar -->
+    <header class="top-header">
+      <div class="header-breadcrumbs">
+        <span>AURORA</span>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem;"></i>
+        <span>RELATIVE-VALUE</span>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.65rem;"></i>
+        <span class="active">OPPORTUNITY RADAR</span>
+      </div>
+
+      <!-- Real-time Ticker -->
+      <div class="market-ticker-bar">
+        <div class="ticker-item">
+          <span class="ticker-name">MCX SPOT (999):</span>
+          <span class="ticker-price">₹74,850.00</span>
+          <span class="ticker-tag-up"><i class="fa-solid fa-caret-up"></i> +0.42%</span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-name">GOLDM:</span>
+          <span class="ticker-price">₹74,920.00</span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-name">GOLDTEN:</span>
+          <span class="ticker-price">₹74,849.65</span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-name">GOLDPETAL:</span>
+          <span class="ticker-price">₹7,607.62</span>
+        </div>
+        <div class="ticker-item">
+          <span class="ticker-name">GOLDGUINEA:</span>
+          <span class="ticker-price">₹60,021.34</span>
+        </div>
+      </div>
+
+      <!-- Header Tools -->
+      <div class="header-right-tools">
+        <button class="tool-icon-btn" id="sfx-toggle-btn" title="Toggle Sound Feedback">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+        <button class="tool-icon-btn" id="refresh-radar-btn" title="Force Refresh Stream">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+        <div class="tool-icon-btn" title="Active Anomaly Alerts">
+          <i class="fa-solid fa-bell"></i>
+          <span class="badge-count">3</span>
+        </div>
+        <div class="clay-chip" style="font-family: var(--font-mono); color: var(--gold-bright);">
+          <i class="fa-regular fa-clock"></i>
+          <span id="live-header-clock">11:24:08 IST</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="page-content">
+
+      <!-- ==========================================================================
+           1. PAGE HEADER & FILTER CONTROLS
+           ========================================================================== -->
+      <section class="page-header-row">
+        <div class="page-title-block">
+          <h2 class="golden-text">Opportunity Radar</h2>
+          <p>
+            <i class="fa-solid fa-shield-halved" style="color: var(--gold-light);"></i>
+            Real-time relative-value anomaly detection across MCX gold contracts
+          </p>
+        </div>
+
+        <!-- Filter Controls Toolbar -->
+        <div class="filter-toolbar">
+          <div class="filter-group">
+            <span class="filter-label"><i class="fa-solid fa-filter"></i> Status:</span>
+            <select class="filter-select" id="statusFilter">
+              <option value="all">All Statuses (12)</option>
+              <option value="active" selected>Active Only (3)</option>
+              <option value="investigating">Investigating (2)</option>
+              <option value="dismissed">Dismissed Traps (7)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label"><i class="fa-solid fa-triangle-exclamation"></i> Severity:</span>
+            <select class="filter-select" id="severityFilter">
+              <option value="all" selected>All Severities</option>
+              <option value="critical">Critical (≥ 2.0σ)</option>
+              <option value="high">High (1.5σ - 2.0σ)</option>
+              <option value="medium">Medium (1.0σ - 1.5σ)</option>
+              <option value="low">Low (&lt; 1.0σ)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label"><i class="fa-regular fa-calendar-days"></i> Window:</span>
+            <select class="filter-select" id="dateRangeFilter">
+              <option value="today" selected>Today (15 Oct 2026)</option>
+              <option value="3d">Last 3 Days</option>
+              <option value="7d">Last 7 Days</option>
+              <option value="14d">Last 14 Days</option>
+              <option value="30d">Last 30 Days</option>
+            </select>
+          </div>
+
+          <button class="clay-btn-outline" id="resetFiltersBtn" style="padding: 7px 12px;">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           2. RADAR VISUALIZATION (HERO SECTION)
+           ========================================================================== -->
+      <section class="radar-hero-grid">
+        <!-- Main Radar Panel -->
+        <div class="glass-panel radar-container-card">
+          <div class="radar-card-header">
+            <div class="title-area">
+              <h3>
+                <i class="fa-solid fa-satellite" style="color: var(--gold-light);"></i>
+                Pairwise Anomaly Radar
+              </h3>
+              <p>Spread deviation intensity across all 6 contract combinations (0 – 100 Scale)</p>
+            </div>
+            
+            <div class="radar-legend-chips">
+              <div class="legend-indicator">
+                <span class="legend-dot" style="background: var(--gold-bright); box-shadow: 0 0 6px var(--gold-glow);"></span>
+                <span>Current Spread Deviation</span>
+              </div>
+              <div class="legend-indicator">
+                <span class="legend-dot" style="background: var(--cyan-accent); opacity: 0.6;"></span>
+                <span>30-Day Historical Norm</span>
+              </div>
+              <div class="legend-indicator">
+                <span class="legend-dot" style="background: rgba(255, 71, 87, 0.7);"></span>
+                <span>Trap / Friction Limit</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Radar Chart Visual with Sweep -->
+          <div class="radar-chart-wrapper">
+            <!-- Animated conical sweep overlay -->
+            <div class="radar-sweep-beam"></div>
+            
+            <!-- Concentric helper rings -->
+            <div class="radar-crosshair-h"></div>
+            <div class="radar-crosshair-v"></div>
+            <div class="radar-concentric-ring ring-1"></div>
+            <div class="radar-concentric-ring ring-2"></div>
+            <div class="radar-concentric-ring ring-3"></div>
+
+            <canvas id="radarChartCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Radar Side Analytics & Pairwise Heatmap Matrix -->
+        <div class="radar-summary-panel">
+          
+          <!-- Key Focus Card -->
+          <div class="hero-stat-claybox">
+            <div class="stat-headline-row">
+              <span class="stat-badge-pulse">
+                <i class="fa-solid fa-bolt"></i> CRITICAL DISLOCATION
+              </span>
+              <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);">
+                Half-life: ~3.4 Days
+              </span>
+            </div>
+
+            <div>
+              <div class="headline-pair-title">GOLDM vs GOLDPETAL</div>
+              <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
+                Normalized Spread Divergence: <span class="mono" style="color: var(--gold-bright); font-weight: 700;">+₹122.62/10g</span>
+              </div>
+            </div>
+
+            <div class="headline-metrics-row">
+              <div class="headline-metric-cell">
+                <div class="label">Z-Score</div>
+                <div class="value" style="color: #FF7685;">+2.47σ</div>
+              </div>
+              <div class="headline-metric-cell">
+                <div class="label">Historical %ile</div>
+                <div class="value">97.3%</div>
+              </div>
+              <div class="headline-metric-cell">
+                <div class="label">Exec. Confidence</div>
+                <div class="value">78%</div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+              <button class="clay-btn" style="flex: 1;" onclick="openInvestigationModal('GOLDM-GOLDPETAL')">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> Deep Dive Pair
+              </button>
+              <button class="clay-btn-outline" onclick="triggerToast('Added GOLDM-GOLDPETAL to high-priority watchlist')">
+                <i class="fa-regular fa-star"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Pairwise Spread Deviation Heatmap Matrix -->
+          <div class="glass-panel pairwise-matrix-card">
+            <div class="matrix-title">
+              <span><i class="fa-solid fa-table-cells" style="margin-right: 6px;"></i> Pairwise Spread Matrix (₹ / 10g)</span>
+              <span class="mono" style="font-size: 0.7rem; color: var(--text-muted);">Z-Score Coded</span>
+            </div>
+            
+            <table class="matrix-table">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th>GOLDM</th>
+                  <th>GOLDTEN</th>
+                  <th>G-GUINEA</th>
+                  <th>G-PETAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th style="color: var(--gold-light);">GOLDM</th>
+                  <td class="cell-self">-</td>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')" title="Spread: ₹70.35 | Z: 1.42σ">+70.35<br><span style="font-size:0.6rem;">1.42σ</span></td>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDGUINEA')" title="Spread: ₹38.20 | Z: 0.88σ">+38.20<br><span style="font-size:0.6rem;">0.88σ</span></td>
+                  <td class="cell-critical" onclick="selectPairFromMatrix('GOLDM-GOLDPETAL')" title="Spread: ₹122.62 | Z: 2.47σ">+122.62<br><span style="font-size:0.6rem;">2.47σ</span></td>
+                </tr>
+                <tr>
+                  <th style="color: var(--gold-light);">GOLDTEN</th>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')">-70.35</td>
+                  <td class="cell-self">-</td>
+                  <td class="cell-high" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDTEN')" title="Spread: ₹141.34 | Z: 1.89σ">+141.34<br><span style="font-size:0.6rem;">1.89σ</span></td>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDTEN-GOLDPETAL')" title="Spread: ₹52.27 | Z: 1.15σ">+52.27<br><span style="font-size:0.6rem;">1.15σ</span></td>
+                </tr>
+                <tr>
+                  <th style="color: var(--gold-light);">G-GUINEA</th>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDGUINEA')">-38.20</td>
+                  <td class="cell-high" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDTEN')">-141.34</td>
+                  <td class="cell-self">-</td>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDPETAL')" title="Spread: ₹84.42 | Z: 1.28σ">+84.42<br><span style="font-size:0.6rem;">1.28σ</span></td>
+                </tr>
+                <tr>
+                  <th style="color: var(--gold-light);">G-PETAL</th>
+                  <td class="cell-critical" onclick="selectPairFromMatrix('GOLDM-GOLDPETAL')">-122.62</td>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDTEN-GOLDPETAL')">-52.27</td>
+                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDPETAL')">-84.42</td>
+                  <td class="cell-self">-</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
+              <span><i class="fa-solid fa-circle-info"></i> Click cell to highlight pair</span>
+              <span class="mono">Fine-Gold 999 Standardized</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           3. ACTIVE SIGNALS GRID (3 SIGNAL CARDS)
+           ========================================================================== -->
+      <section class="signals-section">
+        <div class="section-header-row">
+          <div class="section-title">
+            <i class="fa-solid fa-wave-square" style="color: var(--gold-light);"></i>
+            Active Spread Signals
+            <span class="clay-chip" style="font-size: 0.72rem; color: var(--gold-bright); font-family: var(--font-mono);">
+              3 Signals Requiring Attention
+            </span>
+          </div>
+
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">
+            Ranked by Anomaly Severity & Confidence
+          </div>
+        </div>
+
+        <div class="signals-grid">
+
+          <!-- ================= SIGNAL CARD 1: CRITICAL ================= -->
+          <div class="signal-card critical tilt-card" data-severity="critical" data-pair="GOLDM-GOLDPETAL">
+            <div class="card-top-bar">
+              <span class="severity-pill pill-critical">
+                <i class="fa-solid fa-radiation"></i> CRITICAL ANOMALY
+              </span>
+              
+              <!-- Radial Confidence: 78% -->
+              <div class="confidence-radial-box" title="Signal Confidence Score: 78%">
+                <div class="radial-svg-wrap">
+                  <svg viewBox="0 0 36 36">
+                    <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
+                    <circle class="circle-val circle-val-critical" cx="18" cy="18" r="14" stroke-dasharray="88, 100" stroke-dashoffset="0"></circle>
+                  </svg>
+                  <span class="radial-text">78%</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Confidence</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--gold-bright);">High Edge</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pair Info -->
+            <div class="card-pair-block">
+              <div class="pair-symbols">
+                <span>GOLDM vs GOLDPETAL</span>
+                <span class="pair-direction-tag">
+                  <i class="fa-solid fa-arrow-trend-up"></i> GOLDPETAL Premium
+                </span>
+              </div>
+              <div class="pair-specs-sub">
+                MCX Gold Mini (100g 995) vs MCX Gold Petal (1g 999)
+              </div>
+            </div>
+
+            <!-- Key Metrics Grid -->
+            <div class="card-stats-claygrid">
+              <div class="stat-claycell highlight-cell">
+                <div class="stat-lbl">Normalized Spread</div>
+                <div class="stat-num">
+                  ₹122.62 <span class="stat-subtext">/ 10g</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Z-Score Deviation</div>
+                <div class="stat-num" style="color: #FF7685;">
+                  +2.47σ <span class="stat-subtext">extreme</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Hist. Percentile</div>
+                <div class="stat-num">
+                  97.3% <span class="stat-subtext">365d</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Anomaly Duration</div>
+                <div class="stat-num">
+                  3 days <span class="stat-subtext">persisting</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Validation Pipeline Checks -->
+            <div class="card-validations-row">
+              <div class="validation-badge">
+                <span class="v-name">Volume Conf.</span>
+                <span class="v-status status-pass">Yes ✓</span>
+              </div>
+              <div class="validation-badge">
+                <span class="v-name">Liquidity</span>
+                <span class="v-status status-pass">Passed ✓</span>
+              </div>
+              <div class="validation-badge" title="STT & Slippage consume 36% of gross spread">
+                <span class="v-name">Cost Filter</span>
+                <span class="v-status status-warning">Marginal ⚠️</span>
+              </div>
+            </div>
+
+            <!-- Mini Sparkline Chart -->
+            <div class="sparkline-box">
+              <div class="sparkline-label">14-Day Spread Trajectory</div>
+              <canvas id="sparkline-critical"></canvas>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="card-footer-actions">
+              <button class="clay-btn card-investigate-btn" onclick="openInvestigationModal('GOLDM-GOLDPETAL')">
+                Investigate →
+              </button>
+              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDPETAL to active tracker')">
+                <i class="fa-regular fa-bookmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ================= SIGNAL CARD 2: HIGH ================= -->
+          <div class="signal-card high tilt-card" data-severity="high" data-pair="GOLDGUINEA-GOLDTEN">
+            <div class="card-top-bar">
+              <span class="severity-pill pill-high">
+                <i class="fa-solid fa-triangle-exclamation"></i> HIGH SEVERITY
+              </span>
+              
+              <!-- Radial Confidence: 52% -->
+              <div class="confidence-radial-box" title="Signal Confidence Score: 52%">
+                <div class="radial-svg-wrap">
+                  <svg viewBox="0 0 36 36">
+                    <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
+                    <circle class="circle-val circle-val-high" cx="18" cy="18" r="14" stroke-dasharray="52, 100" stroke-dashoffset="0"></circle>
+                  </svg>
+                  <span class="radial-text">52%</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Confidence</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--high-amber);">Trap Risk</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pair Info -->
+            <div class="card-pair-block">
+              <div class="pair-symbols">
+                <span>GOLDGUINEA vs GOLDTEN</span>
+                <span class="pair-direction-tag">
+                  <i class="fa-solid fa-arrow-trend-up"></i> GOLDGUINEA Premium
+                </span>
+              </div>
+              <div class="pair-specs-sub">
+                MCX Gold Guinea (8g 995) vs MCX Gold Ten (10g 999)
+              </div>
+            </div>
+
+            <!-- Key Metrics Grid -->
+            <div class="card-stats-claygrid">
+              <div class="stat-claycell highlight-cell">
+                <div class="stat-lbl">Normalized Spread</div>
+                <div class="stat-num">
+                  ₹141.34 <span class="stat-subtext">/ 10g</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Z-Score Deviation</div>
+                <div class="stat-num" style="color: var(--high-amber);">
+                  +1.89σ <span class="stat-subtext">elevated</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Hist. Percentile</div>
+                <div class="stat-num">
+                  93.1% <span class="stat-subtext">365d</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Anomaly Duration</div>
+                <div class="stat-num">
+                  1 day <span class="stat-subtext">fresh</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Validation Pipeline Checks -->
+            <div class="card-validations-row">
+              <div class="validation-badge">
+                <span class="v-name">Volume Conf.</span>
+                <span class="v-status status-warning">Partial ⚠️</span>
+              </div>
+              <div class="validation-badge" title="Thin order book depth in GOLDGUINEA leg">
+                <span class="v-name">Liquidity</span>
+                <span class="v-status status-warning">Warning ⚠️</span>
+              </div>
+              <div class="validation-badge" title="Fails after ₹148/10g estimated execution drag">
+                <span class="v-name">Cost Filter</span>
+                <span class="v-status status-fail">Not Passed ✗</span>
+              </div>
+            </div>
+
+            <!-- Mini Sparkline Chart -->
+            <div class="sparkline-box">
+              <div class="sparkline-label">14-Day Spread Trajectory</div>
+              <canvas id="sparkline-high"></canvas>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="card-footer-actions">
+              <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #FFA502 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDGUINEA-GOLDTEN')">
+                Investigate →
+              </button>
+              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDGUINEA-GOLDTEN to active tracker')">
+                <i class="fa-regular fa-bookmark"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- ================= SIGNAL CARD 3: MEDIUM ================= -->
+          <div class="signal-card medium tilt-card" data-severity="medium" data-pair="GOLDM-GOLDTEN">
+            <div class="card-top-bar">
+              <span class="severity-pill pill-medium">
+                <i class="fa-solid fa-circle-dot"></i> MEDIUM SPREAD
+              </span>
+              
+              <!-- Radial Confidence: 65% -->
+              <div class="confidence-radial-box" title="Signal Confidence Score: 65%">
+                <div class="radial-svg-wrap">
+                  <svg viewBox="0 0 36 36">
+                    <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
+                    <circle class="circle-val circle-val-medium" cx="18" cy="18" r="14" stroke-dasharray="65, 100" stroke-dashoffset="0"></circle>
+                  </svg>
+                  <span class="radial-text">65%</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Confidence</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--cyan-accent);">Clean Flow</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pair Info -->
+            <div class="card-pair-block">
+              <div class="pair-symbols">
+                <span>GOLDM vs GOLDTEN</span>
+                <span class="pair-direction-tag">
+                  <i class="fa-solid fa-arrow-trend-up"></i> GOLDM Premium
+                </span>
+              </div>
+              <div class="pair-specs-sub">
+                MCX Gold Mini (100g 995) vs MCX Gold Ten (10g 999)
+              </div>
+            </div>
+
+            <!-- Key Metrics Grid -->
+            <div class="card-stats-claygrid">
+              <div class="stat-claycell highlight-cell">
+                <div class="stat-lbl">Normalized Spread</div>
+                <div class="stat-num">
+                  ₹70.35 <span class="stat-subtext">/ 10g</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Z-Score Deviation</div>
+                <div class="stat-num" style="color: var(--cyan-accent);">
+                  +1.42σ <span class="stat-subtext">moderate</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Hist. Percentile</div>
+                <div class="stat-num">
+                  84.7% <span class="stat-subtext">365d</span>
+                </div>
+              </div>
+              <div class="stat-claycell">
+                <div class="stat-lbl">Anomaly Duration</div>
+                <div class="stat-num">
+                  5 days <span class="stat-subtext">extended</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Validation Pipeline Checks -->
+            <div class="card-validations-row">
+              <div class="validation-badge">
+                <span class="v-name">Volume Conf.</span>
+                <span class="v-status status-pass">Yes ✓</span>
+              </div>
+              <div class="validation-badge">
+                <span class="v-name">Liquidity</span>
+                <span class="v-status status-pass">Passed ✓</span>
+              </div>
+              <div class="validation-badge" title="High volume contracts with friction of only ₹14.20/10g">
+                <span class="v-name">Cost Filter</span>
+                <span class="v-status status-pass">Passed ✓</span>
+              </div>
+            </div>
+
+            <!-- Mini Sparkline Chart -->
+            <div class="sparkline-box">
+              <div class="sparkline-label">14-Day Spread Trajectory</div>
+              <canvas id="sparkline-medium"></canvas>
+            </div>
+
+            <!-- Footer Action -->
+            <div class="card-footer-actions">
+              <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #38BDF8 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDM-GOLDTEN')">
+                Investigate →
+              </button>
+              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDTEN to active tracker')">
+                <i class="fa-regular fa-bookmark"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           4. OPPORTUNITY vs TRAP ANALYSIS (FULL WIDTH PANEL)
+           ========================================================================== -->
+      <section class="glass-panel trap-filter-panel">
+        <div class="trap-panel-header">
+          <div class="trap-headline">
+            <h3>
+              <i class="fa-solid fa-filter-circle-dollar" style="color: var(--gold-light);"></i>
+              Opportunity vs Trap Filter
+            </h3>
+            <p>5-Stage Quantitative Validation Engine — Filtering phantom arbitrage from actionable edge</p>
+          </div>
+
+          <div class="pipeline-summary-pill">
+            <span>12 Raw Signals</span> → 
+            <span>8 Passed Liquidity</span> → 
+            <span>6 Passed Expiry</span> → 
+            <span>4 Passed Cost</span> → 
+            <span style="color: #FFF; text-shadow: 0 0 8px var(--gold-bright);">3 Active Investigations</span>
+          </div>
+        </div>
+
+        <!-- 5-Stage Horizontal Interactive Flow -->
+        <div class="pipeline-flow-wrapper">
+          
+          <!-- Step 1: Raw Signal -->
+          <div class="pipeline-node" onclick="inspectPipelineStep(1)">
+            <div class="node-header-row">
+              <div class="node-icon-box"><i class="fa-solid fa-bolt"></i></div>
+              <span class="node-step-tag">STAGE 01</span>
+            </div>
+            <div class="node-title">Raw Signal</div>
+            <div class="node-count-badge">
+              <span>12 Signals</span>
+              <span style="font-size: 0.7rem; color: var(--cyan-accent); font-weight: 500;">100%</span>
+            </div>
+            <div class="node-desc">Statistical price dislocation detected (|Z| &gt; 1.2σ threshold).</div>
+          </div>
+
+          <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
+
+          <!-- Step 2: Liquidity Check -->
+          <div class="pipeline-node" onclick="inspectPipelineStep(2)">
+            <div class="node-header-row">
+              <div class="node-icon-box"><i class="fa-solid fa-water"></i></div>
+              <span class="node-step-tag">STAGE 02</span>
+            </div>
+            <div class="node-title">Liquidity Check</div>
+            <div class="node-count-badge">
+              <span>8 Passed</span>
+              <span class="node-drop-tag">-4 Traps</span>
+            </div>
+            <div class="node-desc">Bid-Ask spread &lt; 25 bps; Top-5 order book depth &gt; 50 lots.</div>
+          </div>
+
+          <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
+
+          <!-- Step 3: Expiry Check -->
+          <div class="pipeline-node" onclick="inspectPipelineStep(3)">
+            <div class="node-header-row">
+              <div class="node-icon-box"><i class="fa-regular fa-calendar-check"></i></div>
+              <span class="node-step-tag">STAGE 03</span>
+            </div>
+            <div class="node-title">Expiry Check</div>
+            <div class="node-count-badge">
+              <span>6 Passed</span>
+              <span class="node-drop-tag">-2 Traps</span>
+            </div>
+            <div class="node-desc">Days to tender &gt; 5; eliminates compulsory physical delivery squeeze.</div>
+          </div>
+
+          <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
+
+          <!-- Step 4: Cost Analysis -->
+          <div class="pipeline-node" onclick="inspectPipelineStep(4)">
+            <div class="node-header-row">
+              <div class="node-icon-box"><i class="fa-solid fa-coins"></i></div>
+              <span class="node-step-tag">STAGE 04</span>
+            </div>
+            <div class="node-title">Cost Analysis</div>
+            <div class="node-count-badge">
+              <span>4 Passed</span>
+              <span class="node-drop-tag">-2 Traps</span>
+            </div>
+            <div class="node-desc">Spread &gt; 2.5× STT (0.01%) + Exchange levy + Slippage model.</div>
+          </div>
+
+          <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
+
+          <!-- Step 5: Final Score / Active Investigations -->
+          <div class="pipeline-node final-node" onclick="inspectPipelineStep(5)">
+            <div class="node-header-row">
+              <div class="node-icon-box" style="background: var(--gold-gradient); color: #000;">
+                <i class="fa-solid fa-bullseye"></i>
+              </div>
+              <span class="node-step-tag" style="color: var(--gold-bright);">FINAL STAGE</span>
+            </div>
+            <div class="node-title" style="color: var(--gold-bright);">Active Investigations</div>
+            <div class="node-count-badge" style="color: #FFF;">
+              <span>3 Confirmed</span>
+              <span style="font-size: 0.72rem; color: var(--gold-bright);">25% Yield</span>
+            </div>
+            <div class="node-desc">Validated executable relative-value opportunities with positive EV.</div>
+          </div>
+
+        </div>
+
+        <!-- Funnel Visualization & Trap Rejections Breakdown -->
+        <div class="trap-breakdown-grid">
+          
+          <!-- Funnel Visual -->
+          <div class="funnel-visual-box">
+            <div class="funnel-title">
+              <i class="fa-solid fa-chart-column"></i> Multi-Stage Funnel Conversion
+            </div>
+
+            <div class="funnel-bar-item">
+              <div class="funnel-bar-labels">
+                <span>1. Raw Signals</span>
+                <span>12 Pairs (100%)</span>
+              </div>
+              <div class="funnel-track"><div class="funnel-fill funnel-1"></div></div>
+            </div>
+
+            <div class="funnel-bar-item">
+              <div class="funnel-bar-labels">
+                <span>2. Liquidity Filter</span>
+                <span>8 Pairs (66.7%)</span>
+              </div>
+              <div class="funnel-track"><div class="funnel-fill funnel-2"></div></div>
+            </div>
+
+            <div class="funnel-bar-item">
+              <div class="funnel-bar-labels">
+                <span>3. Expiry Calendar</span>
+                <span>6 Pairs (50.0%)</span>
+              </div>
+              <div class="funnel-track"><div class="funnel-fill funnel-3"></div></div>
+            </div>
+
+            <div class="funnel-bar-item">
+              <div class="funnel-bar-labels">
+                <span>4. Transaction Friction</span>
+                <span>4 Pairs (33.3%)</span>
+              </div>
+              <div class="funnel-track"><div class="funnel-fill funnel-4"></div></div>
+            </div>
+
+            <div class="funnel-bar-item">
+              <div class="funnel-bar-labels">
+                <span style="color: var(--gold-bright); font-weight: 700;">5. Final Executable</span>
+                <span style="color: var(--gold-bright); font-weight: 700;">3 Active (25.0%)</span>
+              </div>
+              <div class="funnel-track"><div class="funnel-fill funnel-5"></div></div>
+            </div>
+
+            <div style="margin-top: 6px; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
+              * 75% of statistical raw anomalies are classified as structural/execution traps and shielded from trader capital.
+            </div>
+          </div>
+
+          <!-- Detailed Trap Rejection Audit -->
+          <div class="traps-list-box">
+            <div class="funnel-title">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #FF7685;"></i> Why The 9 Phantom Signals Were Rejected (Trap Audit)
+            </div>
+
+            <div class="trap-item-row">
+              <i class="fa-solid fa-ban trap-item-icon"></i>
+              <div class="trap-item-details">
+                <div class="t-title">Illiquidity Illusion (4 Pairs Filtered)</div>
+                <div class="t-desc">GOLDPETAL far-month contracts displayed ₹85+ spread, but top bid-ask depth was &lt; 2 lots with 45 bps execution slippage.</div>
+              </div>
+              <span class="trap-tag-eliminated">Stage 2 Reject</span>
+            </div>
+
+            <div class="trap-item-row">
+              <i class="fa-solid fa-calendar-xmark trap-item-icon"></i>
+              <div class="trap-item-details">
+                <div class="t-title">Physical Delivery Tender Squeeze (2 Pairs Filtered)</div>
+                <div class="t-desc">GOLDGUINEA near contract inside 5-day delivery window; MCX staggered delivery margin ramped from 10% to 50%.</div>
+              </div>
+              <span class="trap-tag-eliminated">Stage 3 Reject</span>
+            </div>
+
+            <div class="trap-item-row">
+              <i class="fa-solid fa-receipt trap-item-icon"></i>
+              <div class="trap-item-details">
+                <div class="t-title">Fee Friction Erosion (2 Pairs Filtered)</div>
+                <div class="t-desc">Nominal spread of ₹34.50 entirely consumed by mandatory roundtrip STT, exchange turnover fees, and clearing costs.</div>
+              </div>
+              <span class="trap-tag-eliminated">Stage 4 Reject</span>
+            </div>
+
+            <div class="trap-item-row marginal">
+              <i class="fa-solid fa-clock-rotate-left" style="color: var(--high-amber);"></i>
+              <div class="trap-item-details">
+                <div class="t-title">Regime Basis Shift (1 Pair Filtered)</div>
+                <div class="t-desc">Permanent MCX lot specification realignment caused permanent spread shift rather than mean-reverting dislocation.</div>
+              </div>
+              <span class="trap-tag-eliminated" style="color: var(--high-amber); background: rgba(255, 165, 2, 0.15);">Stage 5 Reject</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           5. HISTORICAL SPREAD DISTRIBUTION (BOTTOM PANEL)
+           ========================================================================== -->
+      <section class="glass-panel distribution-panel">
+        <div class="dist-header-row">
+          <div class="dist-title">
+            <h3>
+              <i class="fa-solid fa-chart-area" style="color: var(--gold-light);"></i>
+              Historical Spread Distribution &amp; Z-Score Zones
+            </h3>
+            <p>Empirical pairwise spread frequency (365 sessions) with Gaussian normal curve overlay</p>
+          </div>
+
+          <!-- Interactive Pair Selection Tabs -->
+          <div class="dist-pair-tabs">
+            <button class="dist-tab-btn active" id="tab-goldm-petal" onclick="switchDistributionPair('GOLDM-GOLDPETAL')">
+              GOLDM vs GOLDPETAL (₹122.62)
+            </button>
+            <button class="dist-tab-btn" id="tab-guinea-ten" onclick="switchDistributionPair('GOLDGUINEA-GOLDTEN')">
+              GOLDGUINEA vs GOLDTEN (₹141.34)
+            </button>
+            <button class="dist-tab-btn" id="tab-goldm-ten" onclick="switchDistributionPair('GOLDM-GOLDTEN')">
+              GOLDM vs GOLDTEN (₹70.35)
+            </button>
+          </div>
+        </div>
+
+        <!-- Combined Histogram & Bell Curve Chart -->
+        <div class="distribution-chart-container">
+          <canvas id="distributionChartCanvas"></canvas>
+        </div>
+
+        <!-- Statistical Parameters Bar (6 claymorphic chips) -->
+        <div class="stats-parameter-strip" id="statsParameterStrip">
+          <div class="param-chip">
+            <div class="p-name">Historical Mean (μ) <i class="fa-solid fa-calculator"></i></div>
+            <div class="p-val" id="stat-mean">₹18.40</div>
+          </div>
+          <div class="param-chip">
+            <div class="p-name">Std Deviation (1σ) <i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+            <div class="p-val" id="stat-sigma">₹42.19</div>
+          </div>
+          <div class="param-chip">
+            <div class="p-name">Median Spread <i class="fa-solid fa-grip-lines"></i></div>
+            <div class="p-val" id="stat-median">₹17.85</div>
+          </div>
+          <div class="param-chip">
+            <div class="p-name">Kurtosis (Fat Tails) <i class="fa-solid fa-mountain"></i></div>
+            <div class="p-val" id="stat-kurtosis">3.14 <span style="font-size: 0.65rem; color: var(--text-muted);">leptokurtic</span></div>
+          </div>
+          <div class="param-chip">
+            <div class="p-name">Skewness <i class="fa-solid fa-bezier-curve"></i></div>
+            <div class="p-val" id="stat-skewness">+0.41 <span style="font-size: 0.65rem; color: var(--text-muted);">right-skewed</span></div>
+          </div>
+          <div class="param-chip highlight-gold">
+            <div class="p-name">Current Z-Score <i class="fa-solid fa-flag"></i></div>
+            <div class="p-val" id="stat-current-z">+2.47σ (97.3%)</div>
+          </div>
+        </div>
+
+        <!-- Statistical Zones Visual Legend -->
+        <div class="dist-zones-legend">
+          <div class="zone-indicator-pill">
+            <span class="zone-color-swatch" style="background: rgba(56, 189, 248, 0.4); border: 1px solid var(--cyan-accent);"></span>
+            <span>Normal Equilibrium Zone (±1σ | 68.2%)</span>
+          </div>
+          <div class="zone-indicator-pill">
+            <span class="zone-color-swatch" style="background: rgba(255, 165, 2, 0.45); border: 1px solid var(--high-amber);"></span>
+            <span>Attention Zone (±1σ to ±2σ | 27.2%)</span>
+          </div>
+          <div class="zone-indicator-pill">
+            <span class="zone-color-swatch" style="background: rgba(255, 71, 87, 0.55); border: 1px solid var(--critical-red);"></span>
+            <span>Statistical Anomaly Zone (&gt; ±2σ | 4.2%)</span>
+          </div>
+          <div class="zone-indicator-pill">
+            <span class="zone-color-swatch" style="background: var(--gold-bright); border: 1px solid #FFF; box-shadow: 0 0 8px var(--gold-glow);"></span>
+            <span>Current Real-Time Spread Position</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       INVESTIGATION MODAL
+       ========================================================================== -->
+  <div class="modal-backdrop" id="investigationModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h3 id="modalPairTitle">
+            <i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i>
+            Deep-Dive Investigation: GOLDM vs GOLDPETAL
+          </h3>
+          <p id="modalSubtitle">Automated Quantitative Evidence Dossier &amp; Execution Feasibility</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeInvestigationModal()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Fine Gold Normalization Math Formula -->
+        <div class="modal-math-box">
+          <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
+            Fine-Gold Normalization Formula (MCX Specifications):
+          </div>
+          <div class="formula">
+            Normalized_Price = Quoted_Price × [ 10 / (Contract_Grams × (Purity_Per_Thousand / 999.0)) ]
+          </div>
+          <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">
+            Spread = Normalized_Price(Leg B) − Normalized_Price(Leg A) = ₹74,920.00 − ₹74,797.38 = <strong style="color: var(--gold-bright);">+₹122.62 / 10g fine</strong>
+          </div>
+        </div>
+
+        <!-- Breakdown Grid -->
+        <div class="modal-details-grid">
+          
+          <!-- Leg 1 Specs & Depth -->
+          <div class="modal-breakdown-card">
+            <h4><i class="fa-solid fa-cube"></i> Leg 1: GOLDM APR26 (100g 995 Fine)</h4>
+            <div class="modal-kv-row"><span class="k">Last Traded Price</span><span class="v">₹74,920 / 10g</span></div>
+            <div class="modal-kv-row"><span class="k">Effective Fine Rate</span><span class="v">₹74,920.00 / 10g (999 eq.)</span></div>
+            <div class="modal-kv-row"><span class="k">Best Bid / Ask</span><span class="v">₹74,918 / ₹74,920 (Spread: ₹2)</span></div>
+            <div class="modal-kv-row"><span class="k">Top-5 Depth</span><span class="v" style="color: var(--success-green);">420 Lots (High Liquidity)</span></div>
+            <div class="modal-kv-row"><span class="k">Open Interest</span><span class="v">18,450 Lots</span></div>
+          </div>
+
+          <!-- Leg 2 Specs & Depth -->
+          <div class="modal-breakdown-card">
+            <h4><i class="fa-solid fa-cube"></i> Leg 2: GOLDPETAL APR26 (1g 999 Fine)</h4>
+            <div class="modal-kv-row"><span class="k">Last Traded Price</span><span class="v">₹7,607.62 / 1g</span></div>
+            <div class="modal-kv-row"><span class="k">Effective Fine Rate</span><span class="v" style="color: var(--gold-bright);">₹76,076.20 / 10g (Rich)</span></div>
+            <div class="modal-kv-row"><span class="k">Best Bid / Ask</span><span class="v">₹7,605 / ₹7,608 (Spread: ₹3)</span></div>
+            <div class="modal-kv-row"><span class="k">Top-5 Depth</span><span class="v" style="color: var(--high-amber);">68 Lots (Moderate)</span></div>
+            <div class="modal-kv-row"><span class="k">Open Interest</span><span class="v">4,910 Lots</span></div>
+          </div>
+
+        </div>
+
+        <!-- Friction & Net EV Breakdown -->
+        <div class="modal-breakdown-card" style="background: rgba(12, 22, 48, 0.75);">
+          <h4><i class="fa-solid fa-receipt"></i> Execution Drag &amp; Net Expected Value (EV) Analysis</h4>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+            <div class="stat-claycell">
+              <div class="stat-lbl">Gross Spread</div>
+              <div class="stat-num" style="color: var(--gold-bright);">₹122.62</div>
+            </div>
+            <div class="stat-claycell">
+              <div class="stat-lbl">STT + MCX Charges</div>
+              <div class="stat-num" style="color: #FF7685;">-₹21.40</div>
+            </div>
+            <div class="stat-claycell">
+              <div class="stat-lbl">Est. Bid-Ask Slippage</div>
+              <div class="stat-num" style="color: #FF7685;">-₹22.70</div>
+            </div>
+            <div class="stat-claycell highlight-cell">
+              <div class="stat-lbl">Net Actionable EV</div>
+              <div class="stat-num" style="color: var(--success-green);">+₹78.52</div>
+            </div>
+          </div>
+          <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 10px;">
+            <i class="fa-solid fa-circle-check" style="color: var(--success-green);"></i> 
+            <strong>Recommendation:</strong> Feasible Mean-Reversion Spread Trade. Sell 100 GOLDPETAL vs Buy 1 GOLDM when spread exceeds ₹115. Expected reversion within 3.4 trading days.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="clay-btn-outline" onclick="closeInvestigationModal()">
+          Close Dossier
+        </button>
+        <button class="clay-btn-outline" onclick="triggerToast('Simulation parameters copied to Simulator workspace')">
+          <i class="fa-solid fa-sliders"></i> Test in Simulator
+        </button>
+        <button class="clay-btn" onclick="triggerToast('Investigation case exported as PDF dossier')">
+          <i class="fa-solid fa-file-export"></i> Export Investigation Packet
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Pill -->
+  <div id="toast-notification">
+    <i class="fa-solid fa-circle-info" style="color: var(--gold-bright);"></i>
+    <span id="toast-message">Notification</span>
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT: RADAR VISUALIZATION, CHARTS, 3D TILT & INTERACTION
+       ========================================================================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. GLOBAL STATE & SOUND EFFECTS
+       -------------------------------------------------------------------------- */
+    let sfxEnabled = true;
+    const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+
+    function playBeep(freq = 600, type = 'sine', duration = 0.08) {
+      if (!sfxEnabled || !audioCtx) return;
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Audio not allowed yet
+      }
+    }
+
+    function triggerToast(msg) {
+      playBeep(880, 'sine', 0.12);
+      const toast = document.getElementById('toast-notification');
+      const text = document.getElementById('toast-message');
+      text.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    /* Sound Toggle */
+    document.getElementById('sfx-toggle-btn').addEventListener('click', function() {
+      sfxEnabled = !sfxEnabled;
+      this.innerHTML = sfxEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+      triggerToast(sfxEnabled ? 'Audio feedback enabled' : 'Audio feedback muted');
+    });
+
+    /* Live Clock update */
+    function updateClock() {
+      const now = new Date();
+      const hrs = String(now.getHours()).padStart(2, '0');
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const secs = String(now.getSeconds()).padStart(2, '0');
+      const timeStr = `${hrs}:${mins}:${secs} IST`;
+      const el1 = document.getElementById('live-header-clock');
+      const el2 = document.getElementById('live-sidebar-time');
+      if (el1) el1.innerText = timeStr;
+      if (el2) el2.innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* --------------------------------------------------------------------------
+       2. RADAR / POLAR VISUALIZATION (Chart.js)
+       -------------------------------------------------------------------------- */
+    const radarCtx = document.getElementById('radarChartCanvas').getContext('2d');
+    
+    // The 6 Pairwise Contracts
+    const radarLabels = [
+      'GOLDM-GOLDTEN',
+      'GOLDM-GOLDGUINEA',
+      'GOLDM-GOLDPETAL',
+      'GOLDTEN-GOLDGUINEA',
+      'GOLDTEN-GOLDPETAL',
+      'GOLDGUINEA-GOLDPETAL'
+    ];
+
+    // Deviation intensity (0-100 scale)
+    const currentDeviationData = [62, 38, 92, 79, 45, 54];
+    const historicalNormData   = [28, 25, 30, 26, 24, 27];
+    const frictionBoundaryData = [40, 40, 40, 40, 40, 40];
+
+    const radarChart = new Chart(radarCtx, {
+      type: 'radar',
+      data: {
+        labels: radarLabels,
+        datasets: [
+          {
+            label: 'Current Spread Deviation',
+            data: currentDeviationData,
+            fill: true,
+            backgroundColor: 'rgba(212, 175, 55, 0.22)',
+            borderColor: '#FEE180',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#FEE180',
+            pointBorderColor: '#070c18',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 9,
+            pointHoverBackgroundColor: '#FFF',
+            pointHoverBorderColor: '#D4AF37'
+          },
+          {
+            label: '30-Day Historical Norm',
+            data: historicalNormData,
+            fill: false,
+            borderColor: 'rgba(56, 189, 248, 0.65)',
+            borderWidth: 1.8,
+            borderDash: [4, 4],
+            pointRadius: 3,
+            pointBackgroundColor: '#38BDF8'
+          },
+          {
+            label: 'Friction Boundary (Noise)',
+            data: frictionBoundaryData,
+            fill: false,
+            borderColor: 'rgba(255, 71, 87, 0.45)',
+            borderWidth: 1.2,
+            borderDash: [2, 4],
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(10, 18, 38, 0.95)',
+            borderColor: 'rgba(212, 175, 55, 0.5)',
+            borderWidth: 1.5,
+            titleFont: { family: 'Orbitron', size: 12 },
+            bodyFont: { family: 'JetBrains Mono', size: 12 },
+            padding: 12,
+            callbacks: {
+              label: function(ctx) {
+                return ` ${ctx.dataset.label}: ${ctx.raw}/100`;
+              }
+            }
+          }
+        },
+        scales: {
+          r: {
+            angleLines: {
+              color: 'rgba(212, 175, 55, 0.2)',
+              lineWidth: 1
+            },
+            grid: {
+              color: 'rgba(212, 175, 55, 0.15)',
+              circular: true
+            },
+            pointLabels: {
+              color: '#F8FAFC',
+              font: {
+                family: 'Orbitron',
+                size: 10,
+                weight: '600'
+              },
+              callback: function(label) {
+                return label;
+              }
+            },
+            ticks: {
+              display: false,
+              stepSize: 25,
+              max: 100,
+              min: 0
+            },
+            suggestedMin: 0,
+            suggestedMax: 100
+          }
+        }
+      }
+    });
+
+    /* Interactive click on radar to switch view */
+    document.getElementById('radarChartCanvas').onclick = function(evt) {
+      const points = radarChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+      if (points.length) {
+        const firstPoint = points[0];
+        const label = radarChart.data.labels[firstPoint.index];
+        playBeep(720);
+        triggerToast(`Radar focused on pair: ${label}`);
+        selectPairFromMatrix(label);
+      }
+    };
+
+    /* --------------------------------------------------------------------------
+       3. SPARKLINE MINI CHARTS FOR THE 3 ACTIVE SIGNALS
+       -------------------------------------------------------------------------- */
+    function createSparkline(canvasId, dataPoints, strokeColor, fillColor) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      return new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'],
+          datasets: [{
+            data: dataPoints,
+            borderColor: strokeColor,
+            backgroundColor: fillColor,
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2,
+            pointRadius: 0,
+            pointHoverRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(7, 13, 28, 0.9)',
+              bodyFont: { family: 'JetBrains Mono', size: 10 },
+              padding: 6,
+              callbacks: {
+                label: function(ctx) { return `Spread: ₹${ctx.raw}`; }
+              }
+            }
+          },
+          scales: {
+            x: { display: false },
+            y: { display: false }
+          }
+        }
+      });
+    }
+
+    // Signal 1 Sparkline (Critical - GOLDM vs GOLDPETAL)
+    createSparkline(
+      'sparkline-critical',
+      [22, 28, 35, 42, 38, 55, 68, 74, 82, 95, 108, 114, 119, 122.62],
+      '#FF4757',
+      'rgba(255, 71, 87, 0.15)'
+    );
+
+    // Signal 2 Sparkline (High - GOLDGUINEA vs GOLDTEN)
+    createSparkline(
+      'sparkline-high',
+      [35, 40, 48, 52, 60, 58, 70, 85, 92, 110, 124, 135, 138, 141.34],
+      '#FFA502',
+      'rgba(255, 165, 2, 0.15)'
+    );
+
+    // Signal 3 Sparkline (Medium - GOLDM vs GOLDTEN)
+    createSparkline(
+      'sparkline-medium',
+      [18, 22, 20, 26, 32, 40, 45, 52, 58, 62, 65, 68, 69, 70.35],
+      '#38BDF8',
+      'rgba(56, 189, 248, 0.15)'
+    );
+
+    /* --------------------------------------------------------------------------
+       4. HISTORICAL SPREAD DISTRIBUTION & GAUSSIAN BELL CURVE
+       -------------------------------------------------------------------------- */
+    const distData = {
+      'GOLDM-GOLDPETAL': {
+        mean: 18.40,
+        sigma: 42.19,
+        median: 17.85,
+        kurtosis: '3.14 (Fat Tails)',
+        skewness: '+0.41',
+        currentSpread: 122.62,
+        currentZ: '+2.47σ (97.3%)',
+        bins: [-60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150],
+        freqs: [3, 8, 22, 48, 74, 85, 62, 36, 18, 6, 2, 1, 0, 0, 0]
+      },
+      'GOLDGUINEA-GOLDTEN': {
+        mean: 32.10,
+        sigma: 57.80,
+        median: 31.40,
+        kurtosis: '2.89 (Standard)',
+        skewness: '+0.28',
+        currentSpread: 141.34,
+        currentZ: '+1.89σ (93.1%)',
+        bins: [-60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150],
+        freqs: [2, 5, 14, 32, 58, 72, 80, 50, 31, 14, 5, 2, 2, 0, 0]
+      },
+      'GOLDM-GOLDTEN': {
+        mean: 12.50,
+        sigma: 40.74,
+        median: 12.10,
+        kurtosis: '3.42 (High Peak)',
+        skewness: '+0.15',
+        currentSpread: 70.35,
+        currentZ: '+1.42σ (84.7%)',
+        bins: [-60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150],
+        freqs: [4, 9, 28, 65, 92, 78, 48, 24, 11, 4, 0, 0, 0, 0, 0]
+      }
+    };
+
+    let currentSelectedPair = 'GOLDM-GOLDPETAL';
+    const distCtx = document.getElementById('distributionChartCanvas').getContext('2d');
+
+    // Create theoretical bell curve data
+    function generateBellCurve(mean, sigma, bins) {
+      return bins.map(x => {
+        const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(sigma, 2));
+        const y = (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+        return +(y * 365 * 15).toFixed(1); // Scaled for visual frequency overlay
+      });
+    }
+
+    let distributionChart = new Chart(distCtx, {
+      type: 'bar',
+      data: {
+        labels: distData[currentSelectedPair].bins.map(b => `₹${b}`),
+        datasets: [
+          {
+            type: 'bar',
+            label: 'Historical Frequency (Trading Days)',
+            data: distData[currentSelectedPair].freqs,
+            backgroundColor: function(context) {
+              const val = distData[currentSelectedPair].bins[context.dataIndex];
+              const cur = distData[currentSelectedPair].currentSpread;
+              if (Math.abs(val - cur) <= 15) {
+                return 'rgba(254, 225, 128, 0.85)'; // Current spread bar glowing gold
+              }
+              if (val > 100) return 'rgba(255, 71, 87, 0.45)'; // Critical tail
+              if (val > 60) return 'rgba(255, 165, 2, 0.35)'; // High tail
+              return 'rgba(56, 189, 248, 0.25)'; // Normal body
+            },
+            borderColor: function(context) {
+              const val = distData[currentSelectedPair].bins[context.dataIndex];
+              const cur = distData[currentSelectedPair].currentSpread;
+              if (Math.abs(val - cur) <= 15) return '#D4AF37';
+              return 'rgba(255, 255, 255, 0.1)';
+            },
+            borderWidth: 1.5,
+            borderRadius: 6,
+            barPercentage: 0.8
+          },
+          {
+            type: 'line',
+            label: 'Gaussian Theoretical Normal Fit (PDF)',
+            data: generateBellCurve(distData[currentSelectedPair].mean, distData[currentSelectedPair].sigma, distData[currentSelectedPair].bins),
+            borderColor: 'rgba(212, 175, 55, 0.85)',
+            borderWidth: 2.5,
+            tension: 0.4,
+            fill: false,
+            pointRadius: 3,
+            pointBackgroundColor: '#FEE180'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            labels: {
+              color: '#94A3B8',
+              font: { family: 'Inter', size: 11 },
+              boxWidth: 12
+            }
+          },
+          tooltip: {
+            backgroundColor: 'rgba(7, 13, 28, 0.95)',
+            borderColor: 'rgba(212, 175, 55, 0.4)',
+            borderWidth: 1,
+            titleFont: { family: 'Orbitron', size: 12 },
+            bodyFont: { family: 'JetBrains Mono', size: 11 },
+            callbacks: {
+              title: function(items) {
+                return `Spread Bin: ${items[0].label}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.04)' },
+            ticks: {
+              color: '#94A3B8',
+              font: { family: 'JetBrains Mono', size: 10 }
+            }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.04)' },
+            ticks: {
+              color: '#94A3B8',
+              font: { family: 'JetBrains Mono', size: 10 }
+            },
+            title: {
+              display: true,
+              text: 'Trading Sessions (365d Window)',
+              color: '#64748B',
+              font: { size: 10 }
+            }
+          }
+        }
+      }
+    });
+
+    function switchDistributionPair(pairKey) {
+      if (!distData[pairKey]) return;
+      currentSelectedPair = pairKey;
+      playBeep(640);
+
+      // Update Tab Styles
+      document.querySelectorAll('.dist-tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (pairKey === 'GOLDM-GOLDPETAL') document.getElementById('tab-goldm-petal').classList.add('active');
+      if (pairKey === 'GOLDGUINEA-GOLDTEN') document.getElementById('tab-guinea-ten').classList.add('active');
+      if (pairKey === 'GOLDM-GOLDTEN') document.getElementById('tab-goldm-ten').classList.add('active');
+
+      const d = distData[pairKey];
+      // Update parameter chips
+      document.getElementById('stat-mean').innerText = `₹${d.mean.toFixed(2)}`;
+      document.getElementById('stat-sigma').innerText = `₹${d.sigma.toFixed(2)}`;
+      document.getElementById('stat-median').innerText = `₹${d.median.toFixed(2)}`;
+      document.getElementById('stat-kurtosis').innerHTML = `${d.kurtosis}`;
+      document.getElementById('stat-skewness').innerHTML = `${d.skewness}`;
+      document.getElementById('stat-current-z').innerText = `${d.currentZ}`;
+
+      // Update chart
+      distributionChart.data.labels = d.bins.map(b => `₹${b}`);
+      distributionChart.data.datasets[0].data = d.freqs;
+      distributionChart.data.datasets[1].data = generateBellCurve(d.mean, d.sigma, d.bins);
+      distributionChart.update();
+      triggerToast(`Loaded distribution dataset for ${pairKey}`);
+    }
+
+    function selectPairFromMatrix(pairName) {
+      let normalizedKey = pairName;
+      if (pairName.includes('GOLDPETAL') && pairName.includes('GOLDM')) normalizedKey = 'GOLDM-GOLDPETAL';
+      if (pairName.includes('GUINEA') && pairName.includes('GOLDTEN')) normalizedKey = 'GOLDGUINEA-GOLDTEN';
+      if (pairName.includes('GOLDM') && pairName.includes('GOLDTEN')) normalizedKey = 'GOLDM-GOLDTEN';
+
+      if (distData[normalizedKey]) {
+        switchDistributionPair(normalizedKey);
+      }
+      
+      // Scroll to signal card or highlight
+      const targetCard = document.querySelector(`.signal-card[data-pair="${normalizedKey}"]`);
+      if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        targetCard.style.transform = 'scale(1.03)';
+        setTimeout(() => { targetCard.style.transform = ''; }, 800);
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       5. 3D TILT EFFECT ON CARDS (Perspective hover)
+       -------------------------------------------------------------------------- */
+    const tiltCards = document.querySelectorAll('.tilt-card');
+    tiltCards.forEach(card => {
+      card.addEventListener('mousemove', function(e) {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const rotateX = ((y - centerY) / centerY) * -6; // Max 6 deg
+        const rotateY = ((x - centerX) / centerX) * 6;
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+      });
+
+      card.addEventListener('mouseleave', function() {
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+      });
+    });
+
+    /* --------------------------------------------------------------------------
+       6. PARTICLES BACKGROUND CANVAS
+       -------------------------------------------------------------------------- */
+    const pCanvas = document.getElementById('particles-canvas');
+    const pCtx = pCanvas.getContext('2d');
+    let particles = [];
+    const particleCount = 45;
+
+    function resizeParticleCanvas() {
+      pCanvas.width = window.innerWidth;
+      pCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeParticleCanvas);
+    resizeParticleCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * pCanvas.width;
+        this.y = Math.random() * pCanvas.height;
+        this.vx = (Math.random() - 0.5) * 0.4;
+        this.vy = (Math.random() - 0.5) * 0.4;
+        this.radius = Math.random() * 2 + 1;
+        this.color = Math.random() > 0.4 ? 'rgba(212, 175, 55, 0.4)' : 'rgba(56, 189, 248, 0.3)';
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        if (this.x < 0 || this.x > pCanvas.width) this.vx *= -1;
+        if (this.y < 0 || this.y > pCanvas.height) this.vy *= -1;
+      }
+      draw() {
+        pCtx.beginPath();
+        pCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        pCtx.fillStyle = this.color;
+        pCtx.fill();
+      }
+    }
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+
+    function animateParticles() {
+      pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 110) {
+            pCtx.beginPath();
+            pCtx.moveTo(particles[i].x, particles[i].y);
+            pCtx.lineTo(particles[j].x, particles[j].y);
+            pCtx.strokeStyle = `rgba(212, 175, 55, ${0.15 * (1 - dist / 110)})`;
+            pCtx.lineWidth = 0.6;
+            pCtx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    /* --------------------------------------------------------------------------
+       7. PIPELINE INTERACTIVE STEP INSPECTION
+       -------------------------------------------------------------------------- */
+    function inspectPipelineStep(stepNumber) {
+      playBeep(520 + stepNumber * 60);
+      const stepNames = [
+        "",
+        "Stage 1: Raw Anomaly Signal Generator (|Z| > 1.2σ)",
+        "Stage 2: Liquidity Proxy & Order Depth Screener",
+        "Stage 3: Staggered Expiry & Delivery Risk Checker",
+        "Stage 4: Institutional Trading Friction & STT Hurdle",
+        "Stage 5: Final Confirmed Relative-Value Investigations"
+      ];
+      triggerToast(stepNames[stepNumber]);
+    }
+
+    /* --------------------------------------------------------------------------
+       8. FILTER CONTROLS FUNCTIONALITY
+       -------------------------------------------------------------------------- */
+    const statusFilter = document.getElementById('statusFilter');
+    const severityFilter = document.getElementById('severityFilter');
+    const dateRangeFilter = document.getElementById('dateRangeFilter');
+
+    function applySignalFilters() {
+      const selectedSeverity = severityFilter.value;
+      const cards = document.querySelectorAll('.signal-card');
+
+      cards.forEach(card => {
+        const sev = card.getAttribute('data-severity');
+        let show = true;
+        if (selectedSeverity !== 'all' && sev !== selectedSeverity) {
+          show = false;
+        }
+        card.style.display = show ? 'flex' : 'none';
+      });
+
+      triggerToast(`Filters applied: Severity [${selectedSeverity}]`);
+    }
+
+    statusFilter.addEventListener('change', applySignalFilters);
+    severityFilter.addEventListener('change', applySignalFilters);
+    dateRangeFilter.addEventListener('change', () => {
+      triggerToast(`Window updated to: ${dateRangeFilter.options[dateRangeFilter.selectedIndex].text}`);
+    });
+
+    document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+      statusFilter.value = 'active';
+      severityFilter.value = 'all';
+      dateRangeFilter.value = 'today';
+      applySignalFilters();
+      triggerToast('All radar filters reset to default');
+    });
+
+    document.getElementById('refresh-radar-btn').addEventListener('click', function() {
+      this.querySelector('i').classList.add('fa-spin');
+      playBeep(800, 'sine', 0.2);
+      setTimeout(() => {
+        this.querySelector('i').classList.remove('fa-spin');
+        triggerToast('MCX real-time relative-value feeds re-synchronized (0 latency)');
+      }, 700);
+    });
+
+    /* --------------------------------------------------------------------------
+       9. INVESTIGATION MODAL LOGIC
+       -------------------------------------------------------------------------- */
+    function openInvestigationModal(pairKey) {
+      playBeep(750, 'triangle', 0.15);
+      const modal = document.getElementById('investigationModal');
+      const title = document.getElementById('modalPairTitle');
+      const sub = document.getElementById('modalSubtitle');
+
+      if (pairKey === 'GOLDM-GOLDPETAL') {
+        title.innerHTML = '<i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i> Deep-Dive Investigation: GOLDM vs GOLDPETAL';
+        sub.innerText = 'Critical Spread Anomaly (+₹122.62 / 10g | Z = 2.47σ | 97.3th Percentile)';
+      } else if (pairKey === 'GOLDGUINEA-GOLDTEN') {
+        title.innerHTML = '<i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i> Deep-Dive Investigation: GOLDGUINEA vs GOLDTEN';
+        sub.innerText = 'High Dislocation with Liquidity Trap Flag (+₹141.34 / 10g | Z = 1.89σ)';
+      } else {
+        title.innerHTML = '<i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i> Deep-Dive Investigation: GOLDM vs GOLDTEN';
+        sub.innerText = 'Medium Spread Equilibrium (+₹70.35 / 10g | Z = 1.42σ | Clean Execution)';
+      }
+
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeInvestigationModal() {
+      playBeep(450);
+      const modal = document.getElementById('investigationModal');
+      modal.classList.remove('open');
+      document.body.style.overflow = 'auto';
+    }
+
+    // Close on backdrop click
+    document.getElementById('investigationModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeInvestigationModal();
+      }
+    });
+
+    // Close on Escape key
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeInvestigationModal();
+      }
+    });
+
+    console.log("AURORA Opportunity Radar initialized with full telemetry.");
+  </script>
+</body>
+</html>
+'''
+
+target_path = r"c:\Users\ASUS\OneDrive\Desktop\hacknHills\opportunity-radar.html"
+with open(target_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print(f"File created successfully at {target_path} ({len(html_content)} bytes)")

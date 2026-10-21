@@ -1,0 +1,3598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURORA — Commodity Intelligence & Relative-Value Platform | MCX Gold</title>
+  
+  <!-- Google Fonts: Inter & Orbitron -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome 6.5.1 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Chart.js 4.4.1 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       AURORA DESIGN SYSTEM — Claymorphism + Glassmorphism + 3D Fintech
+       Palette: Deep Navy (#070a1e, #0a0e27, #141852) with Gold/Amber Accents
+       ========================================================================== */
+    :root {
+      /* Backgrounds */
+      --bg-deep: #060919;
+      --bg-primary: #0a0e27;
+      --bg-secondary: #101538;
+      --bg-tertiary: #161c48;
+      
+      /* Glassmorphism */
+      --glass-bg: rgba(16, 22, 60, 0.52);
+      --glass-bg-hover: rgba(22, 30, 78, 0.65);
+      --glass-border: rgba(240, 185, 11, 0.16);
+      --glass-border-bright: rgba(240, 185, 11, 0.4);
+      --glass-blur: blur(18px);
+      
+      /* Claymorphism */
+      --clay-bg: linear-gradient(135deg, rgba(20, 27, 72, 0.78) 0%, rgba(13, 18, 52, 0.88) 100%);
+      --clay-shadow: 
+        10px 10px 24px rgba(3, 5, 15, 0.7),
+        -6px -6px 18px rgba(35, 48, 120, 0.22),
+        inset 1.5px 1.5px 3px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 4px rgba(0, 0, 0, 0.45);
+      --clay-shadow-hover: 
+        14px 18px 32px rgba(2, 4, 12, 0.85),
+        -8px -8px 24px rgba(45, 60, 150, 0.32),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.5);
+      --clay-shadow-inset: 
+        inset 4px 4px 8px rgba(0, 0, 0, 0.5),
+        inset -2px -2px 6px rgba(45, 60, 150, 0.2);
+      
+      /* Gold & Amber Palette */
+      --gold-primary: #f0b90b;
+      --gold-light: #ffd700;
+      --gold-dark: #d4a017;
+      --gold-glow: rgba(240, 185, 11, 0.35);
+      --amber-accent: #f59e0b;
+      --copper-accent: #ff7849;
+      --bronze-accent: #b45309;
+      
+      /* Status & Accents */
+      --status-green: #10b981;
+      --status-green-glow: rgba(16, 185, 129, 0.3);
+      --status-amber: #f59e0b;
+      --status-red: #ef4444;
+      --status-red-glow: rgba(239, 68, 68, 0.3);
+      --status-blue: #38bdf8;
+      
+      /* Typography Colors */
+      --text-white: #ffffff;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-gold: #fbbf24;
+      
+      /* Dimensions */
+      --sidebar-width: 270px;
+      --sidebar-collapsed-width: 82px;
+      --header-height: 74px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 8px;
+      
+      /* Transitions */
+      --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-fast: all 0.2s ease;
+    }
+
+    /* ==========================================================================
+       BASE & RESET
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 14px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      background: radial-gradient(circle at 15% 15%, rgba(20, 28, 85, 0.4) 0%, transparent 45%),
+                  radial-gradient(circle at 85% 25%, rgba(240, 185, 11, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 50% 85%, rgba(16, 22, 60, 0.6) 0%, transparent 60%),
+                  var(--bg-deep);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(10, 14, 39, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(240, 185, 11, 0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-primary);
+    }
+
+    /* Particle Canvas Background */
+    #particleCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.7;
+    }
+
+    /* ==========================================================================
+       PAGE LOADER (Golden HUD Spinner)
+       ========================================================================== */
+    #pageLoader {
+      position: fixed;
+      inset: 0;
+      background: #060919;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      transition: opacity 0.6s ease, visibility 0.6s ease;
+    }
+    #pageLoader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    .loader-ring-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loader-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: var(--gold-primary);
+      border-right-color: var(--amber-accent);
+      animation: spin 1.4s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+    }
+    .loader-ring.outer {
+      inset: -12px;
+      border-top-color: transparent;
+      border-bottom-color: rgba(240, 185, 11, 0.4);
+      animation: spinReverse 2.2s linear infinite;
+    }
+    .loader-ring.inner {
+      inset: 14px;
+      border: 2px dashed rgba(255, 215, 0, 0.6);
+      animation: spin 3s linear infinite;
+    }
+    .loader-logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--gold-primary);
+      text-shadow: 0 0 16px var(--gold-glow);
+    }
+    .loader-text {
+      margin-top: 24px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--text-gold);
+      text-transform: uppercase;
+      animation: pulseText 1.6s ease-in-out infinite alternate;
+    }
+    .loader-subtext {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes spinReverse {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes pulseText {
+      0% { opacity: 0.6; }
+      100% { opacity: 1; text-shadow: 0 0 12px var(--gold-glow); }
+    }
+
+    /* ==========================================================================
+       APP LAYOUT WRAPPER
+       ========================================================================== */
+    .app-layout {
+      position: relative;
+      display: flex;
+      min-height: 100vh;
+      z-index: 1;
+    }
+
+    /* ==========================================================================
+       SIDEBAR (Fixed, Glassmorphic + Golden Accent)
+       ========================================================================== */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      z-index: 1000;
+      transition: var(--transition-smooth);
+      box-shadow: 6px 0 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .sidebar.collapsed {
+      width: var(--sidebar-collapsed-width);
+    }
+
+    /* Brand Header */
+    .sidebar-brand {
+      height: var(--header-height);
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(240, 185, 11, 0.12);
+      position: relative;
+    }
+    .brand-content {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      overflow: hidden;
+    }
+    .brand-icon-box {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #f0b90b 0%, #b45309 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0a0e27;
+      font-size: 20px;
+      box-shadow: 0 0 18px var(--gold-glow), var(--clay-shadow);
+      transition: var(--transition-fast);
+      transform: perspective(400px) rotateY(-8deg);
+    }
+    .brand-icon-box:hover {
+      transform: perspective(400px) rotateY(0deg) scale(1.06);
+    }
+    .brand-titles {
+      display: flex;
+      flex-direction: column;
+      white-space: nowrap;
+      transition: opacity 0.25s ease;
+    }
+    .sidebar.collapsed .brand-titles {
+      opacity: 0;
+      pointer-events: none;
+      display: none;
+    }
+    .brand-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: 2.5px;
+      background: linear-gradient(90deg, #ffffff 10%, #f0b90b 50%, #ffd700 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(240, 185, 11, 0.35);
+    }
+    .brand-subtitle {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-gold);
+      font-weight: 500;
+    }
+
+    .sidebar-collapse-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(240, 185, 11, 0.2);
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .sidebar-collapse-btn:hover {
+      background: var(--gold-primary);
+      color: #0a0e27;
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    /* Sidebar Navigation Menu */
+    .sidebar-nav {
+      flex: 1;
+      padding: 18px 12px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .nav-section-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      color: var(--text-muted);
+      padding: 10px 14px 4px;
+      font-weight: 700;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .sidebar.collapsed .nav-section-label {
+      opacity: 0;
+      display: none;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 11px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: var(--transition-fast);
+      position: relative;
+      white-space: nowrap;
+    }
+    .nav-item:hover {
+      color: var(--text-white);
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(4px);
+    }
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(240, 185, 11, 0.2) 0%, rgba(240, 185, 11, 0.03) 100%);
+      color: #fff;
+      font-weight: 600;
+      border-left: 3px solid var(--gold-primary);
+      box-shadow: inset 1px 0 12px rgba(240, 185, 11, 0.15);
+    }
+    .nav-item.active .nav-icon {
+      color: var(--gold-primary);
+      text-shadow: 0 0 10px var(--gold-glow);
+    }
+    .nav-icon {
+      width: 22px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: var(--transition-fast);
+    }
+    .nav-item:hover .nav-icon {
+      color: var(--gold-light);
+    }
+    .nav-text {
+      flex: 1;
+      transition: opacity 0.25s ease;
+    }
+    .sidebar.collapsed .nav-text {
+      display: none;
+    }
+    .nav-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 700;
+      background: rgba(240, 185, 11, 0.18);
+      color: var(--gold-primary);
+      border: 1px solid rgba(240, 185, 11, 0.3);
+    }
+    .nav-badge.pulse {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.4);
+      animation: badgePulse 2s infinite;
+    }
+    @keyframes badgePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.08); box-shadow: 0 0 8px rgba(239, 68, 68, 0.6); }
+      100% { transform: scale(1); }
+    }
+    .sidebar.collapsed .nav-badge {
+      display: none;
+    }
+
+    /* Sidebar Footer / User Profile (Claymorphism Card) */
+    .sidebar-footer {
+      padding: 14px 12px;
+      border-top: 1px solid rgba(240, 185, 11, 0.12);
+      background: rgba(8, 11, 32, 0.4);
+    }
+    .user-profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      background: var(--clay-bg);
+      box-shadow: var(--clay-shadow);
+      border: 1px solid rgba(240, 185, 11, 0.15);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .user-profile-card:hover {
+      box-shadow: var(--clay-shadow-hover);
+      border-color: rgba(240, 185, 11, 0.35);
+      transform: translateY(-2px);
+    }
+    .user-avatar-wrap {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+    }
+    .user-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 2px solid var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-primary);
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+    .user-status-dot {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 10px;
+      height: 10px;
+      background: var(--status-green);
+      border-radius: 50%;
+      border: 2px solid #0a0e27;
+      box-shadow: 0 0 6px var(--status-green);
+    }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .sidebar.collapsed .user-info {
+      display: none;
+    }
+    .user-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .user-role {
+      font-size: 10px;
+      color: var(--text-gold);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ==========================================================================
+       MAIN VIEWPORT CONTAINER
+       ========================================================================== */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+    .sidebar.collapsed ~ .main-wrapper {
+      margin-left: var(--sidebar-collapsed-width);
+    }
+
+    /* ==========================================================================
+       TOP HEADER (Glassmorphic Bar)
+       ========================================================================== */
+    .top-header {
+      height: var(--header-height);
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      background: rgba(10, 14, 39, 0.75);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Left Header: Mobile Toggle & Search */
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex: 1;
+      max-width: 520px;
+    }
+    .mobile-menu-btn {
+      display: none;
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--clay-bg);
+      border: 1px solid var(--glass-border);
+      color: var(--text-primary);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .search-box-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .search-input {
+      width: 100%;
+      height: 42px;
+      background: rgba(16, 22, 60, 0.6);
+      border: 1px solid rgba(240, 185, 11, 0.2);
+      border-radius: var(--radius-md);
+      padding: 0 80px 0 42px;
+      color: #fff;
+      font-size: 13.5px;
+      outline: none;
+      box-shadow: var(--clay-shadow-inset);
+      transition: var(--transition-fast);
+    }
+    .search-input:focus {
+      border-color: var(--gold-primary);
+      background: rgba(22, 30, 80, 0.85);
+      box-shadow: 0 0 15px var(--gold-glow), var(--clay-shadow-inset);
+    }
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gold-primary);
+      font-size: 14px;
+    }
+    .search-shortcut-badge {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 3px 7px;
+      border-radius: 6px;
+      font-size: 10px;
+      color: var(--text-muted);
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    /* Right Header: Status Chips & Actions */
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    /* Market Live Chip */
+    .market-status-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
+    }
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--status-green);
+      box-shadow: 0 0 8px var(--status-green);
+      animation: greenPulse 1.8s infinite;
+    }
+    @keyframes greenPulse {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px #10b981; }
+      100% { transform: scale(0.9); opacity: 0.8; }
+    }
+
+    /* Freshness Chip */
+    .data-freshness-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      background: rgba(240, 185, 11, 0.08);
+      border: 1px solid rgba(240, 185, 11, 0.25);
+      color: var(--text-gold);
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .data-freshness-chip i {
+      color: var(--gold-primary);
+      animation: spinSlow 8s linear infinite;
+    }
+    @keyframes spinSlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Realtime Clock */
+    .header-clock-widget {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      padding: 0 6px;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 0 4px;
+    }
+    .clock-time {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .clock-date {
+      font-size: 10px;
+      color: var(--text-secondary);
+    }
+
+    /* Notification Bell & Dropdown */
+    .header-action-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: var(--clay-bg);
+      box-shadow: var(--clay-shadow);
+      border: 1px solid var(--glass-border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: var(--transition-fast);
+    }
+    .header-action-btn:hover {
+      color: var(--gold-primary);
+      border-color: var(--gold-primary);
+      box-shadow: var(--clay-shadow-hover), 0 0 12px var(--gold-glow);
+      transform: translateY(-2px);
+    }
+    .notif-badge-pill {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 10px;
+      border: 2px solid #0a0e27;
+      animation: badgePulse 2s infinite;
+    }
+
+    /* Notification Dropdown Panel */
+    .notif-dropdown {
+      position: absolute;
+      top: calc(var(--header-height) + 8px);
+      right: 32px;
+      width: 360px;
+      background: rgba(14, 18, 52, 0.94);
+      backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border-bright);
+      border-radius: var(--radius-md);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+      padding: 18px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 2000;
+      animation: dropDownAnim 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .notif-dropdown.show {
+      display: flex;
+    }
+    @keyframes dropDownAnim {
+      0% { opacity: 0; transform: translateY(-10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .notif-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .notif-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold-primary);
+    }
+    .notif-mark-read {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .notif-mark-read:hover {
+      color: var(--gold-light);
+    }
+    .notif-list-item {
+      display: flex;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--gold-primary);
+      font-size: 12px;
+    }
+    .notif-list-item.urgent {
+      border-left-color: var(--status-red);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT CONTAINER
+       ========================================================================== */
+    .main-content {
+      padding: 30px 32px 50px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      position: relative;
+    }
+
+    /* Subtle Animated Golden Border glow for Executive Desk */
+    .desk-hero-banner {
+      background: linear-gradient(135deg, rgba(20, 26, 74, 0.7) 0%, rgba(10, 14, 40, 0.9) 100%);
+      border-radius: var(--radius-lg);
+      padding: 24px 28px;
+      border: 1px solid rgba(240, 185, 11, 0.25);
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--clay-shadow);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .desk-hero-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(240, 185, 11, 0.07) 0%, transparent 60%);
+      pointer-events: none;
+      animation: rotateGlow 25s linear infinite;
+    }
+    @keyframes rotateGlow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .banner-text-group {
+      position: relative;
+      z-index: 2;
+    }
+    .banner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(240, 185, 11, 0.15);
+      border: 1px solid rgba(240, 185, 11, 0.35);
+      color: var(--gold-primary);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .banner-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .banner-title span {
+      background: linear-gradient(90deg, #f0b90b, #ffd700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .banner-description {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      max-width: 650px;
+      line-height: 1.5;
+    }
+    .banner-controls {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .ctrl-pill-btn {
+      padding: 9px 18px;
+      border-radius: 30px;
+      background: rgba(16, 22, 60, 0.85);
+      border: 1px solid rgba(240, 185, 11, 0.28);
+      color: var(--text-primary);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--clay-shadow);
+      transition: var(--transition-fast);
+    }
+    .ctrl-pill-btn:hover, .ctrl-pill-btn.active {
+      background: linear-gradient(135deg, #f0b90b 0%, #d4a017 100%);
+      color: #070a1e;
+      border-color: #ffd700;
+      box-shadow: 0 0 16px var(--gold-glow);
+      transform: translateY(-2px);
+    }
+    .ctrl-pill-btn i {
+      font-size: 13px;
+    }
+
+    /* ==========================================================================
+       ROW 1: SUMMARY KPI CARDS (Claymorphism with 3D Hover & Tooltips)
+       ========================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+      perspective: 1200px;
+    }
+
+    .kpi-card {
+      background: var(--clay-bg);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      position: relative;
+      box-shadow: var(--clay-shadow);
+      border: 1px solid var(--glass-border);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.3s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+      overflow: hidden;
+    }
+    .kpi-card:hover {
+      transform: translateY(-8px) rotateX(4deg) scale(1.02);
+      box-shadow: var(--clay-shadow-hover), 0 0 24px rgba(240, 185, 11, 0.2);
+      border-color: rgba(240, 185, 11, 0.45);
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+      opacity: 0.6;
+    }
+    .kpi-card.card-amber::after {
+      background: linear-gradient(90deg, transparent, var(--amber-accent), transparent);
+    }
+    .kpi-card.card-green::after {
+      background: linear-gradient(90deg, transparent, var(--status-green), transparent);
+    }
+
+    .kpi-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .kpi-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .kpi-icon-bubble {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(240, 185, 11, 0.12);
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      color: var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.1), inset -2px -2px 4px rgba(0, 0, 0, 0.3);
+      transition: var(--transition-fast);
+    }
+    .kpi-card:hover .kpi-icon-bubble {
+      transform: scale(1.1) rotate(5deg);
+      background: var(--gold-primary);
+      color: #070a1e;
+      box-shadow: 0 0 16px var(--gold-glow);
+    }
+    .kpi-card.card-amber .kpi-icon-bubble {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.4);
+      color: var(--amber-accent);
+    }
+    .kpi-card.card-green .kpi-icon-bubble {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: var(--status-green);
+    }
+
+    .kpi-value {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .kpi-value-unit {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-gold);
+    }
+    .kpi-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+    .kpi-subtitle {
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .kpi-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .kpi-tag.tag-gold {
+      color: var(--gold-primary);
+      background: rgba(240, 185, 11, 0.15);
+    }
+    .kpi-tag.tag-amber {
+      color: var(--amber-accent);
+      background: rgba(245, 158, 11, 0.15);
+    }
+    .kpi-tag.tag-green {
+      color: var(--status-green);
+      background: rgba(16, 185, 129, 0.15);
+    }
+
+    /* KPI Tooltip on Hover */
+    .kpi-tooltip {
+      position: absolute;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(6, 9, 25, 0.95);
+      border: 1px solid var(--gold-primary);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s, bottom 0.2s;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    }
+    .kpi-card:hover .kpi-tooltip {
+      opacity: 1;
+      bottom: 8px;
+    }
+
+    /* ==========================================================================
+       PANEL BASE STYLES (Glassmorphic + Claymorphic Fusion)
+       ========================================================================== */
+    .panel {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--clay-shadow);
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+    .panel:hover {
+      box-shadow: var(--clay-shadow-hover);
+      border-color: rgba(240, 185, 11, 0.3);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .panel-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .panel-title-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(240, 185, 11, 0.12);
+      border: 1px solid rgba(240, 185, 11, 0.25);
+      color: var(--gold-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .panel-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.5px;
+    }
+    .panel-subtitle {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Date Range Switcher Pills */
+    .time-pills-group {
+      display: flex;
+      background: rgba(8, 11, 32, 0.65);
+      padding: 3px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .time-pill-btn {
+      padding: 5px 12px;
+      border-radius: 8px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .time-pill-btn:hover {
+      color: #fff;
+    }
+    .time-pill-btn.active {
+      background: var(--gold-primary);
+      color: #070a1e;
+      font-weight: 700;
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+
+    /* ==========================================================================
+       ROW 2: TWO PANELS (60% / 40%)
+       ========================================================================== */
+    .row-2-grid {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 24px;
+    }
+
+    /* Chart Container */
+    .chart-box-relative {
+      position: relative;
+      height: 310px;
+      width: 100%;
+    }
+
+    /* Contract Legend Badges */
+    .contract-legend-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .legend-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: var(--transition-fast);
+    }
+    .legend-badge:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* Contract Health Status Table (Right Panel - 40%) */
+    .health-table-wrap {
+      overflow-x: auto;
+      margin-top: 6px;
+    }
+    .health-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+    .health-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 6px 12px;
+      text-align: left;
+    }
+    .health-table td {
+      padding: 12px 14px;
+      background: rgba(18, 25, 68, 0.5);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 12.5px;
+      transition: var(--transition-fast);
+    }
+    .health-table tr td:first-child {
+      border-left: 1px solid rgba(255, 255, 255, 0.05);
+      border-top-left-radius: 10px;
+      border-bottom-left-radius: 10px;
+    }
+    .health-table tr td:last-child {
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+      border-top-right-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+    .health-table tr:hover td {
+      background: rgba(26, 36, 96, 0.7);
+      border-color: rgba(240, 185, 11, 0.3);
+      transform: scale(1.008);
+    }
+
+    .contract-tag-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .contract-sym {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      color: #fff;
+    }
+    .contract-lot {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.06);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+    .price-norm-val {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+    .price-norm-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .status-badge.active {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .status-badge.warning {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.35);
+    }
+    .status-badge.watch {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    /* ==========================================================================
+       ROW 3: THREE PANELS (35% / 35% / 30%)
+       ========================================================================== */
+    .row-3-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1.15fr 1fr;
+      gap: 24px;
+    }
+
+    /* Opportunity Radar Doughnut Container */
+    .radar-donut-container {
+      position: relative;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .radar-donut-center {
+      position: absolute;
+      text-align: center;
+      pointer-events: none;
+    }
+    .donut-center-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--gold-primary);
+    }
+    .donut-center-lbl {
+      font-size: 10.5px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .radar-breakdown-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .radar-stat-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      background: rgba(12, 16, 48, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+    }
+    .radar-item-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .radar-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .radar-val-pill {
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Spread Analysis Bar Chart Container */
+    .spread-bar-container {
+      position: relative;
+      height: 220px;
+      width: 100%;
+    }
+    .spread-summary-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: rgba(240, 185, 11, 0.08);
+      border: 1px solid rgba(240, 185, 11, 0.2);
+      font-size: 11.5px;
+    }
+    .spread-threshold-tag {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* Recent Alerts Feed (Right Panel - 30%) */
+    .alerts-scroll-feed {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 275px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .alert-card-item {
+      padding: 11px 13px;
+      border-radius: var(--radius-md);
+      background: var(--clay-bg);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: var(--clay-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      position: relative;
+    }
+    .alert-card-item:hover {
+      background: rgba(24, 32, 85, 0.7);
+      border-color: rgba(240, 185, 11, 0.35);
+      transform: translateX(4px);
+    }
+    .alert-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .alert-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+    .alert-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .alert-time {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .alert-text {
+      font-size: 12px;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    /* Severity Styling */
+    .alert-dot.sev-red {
+      background: var(--status-red);
+      box-shadow: 0 0 8px var(--status-red-glow);
+    }
+    .alert-dot.sev-amber {
+      background: var(--status-amber);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+    }
+    .alert-dot.sev-green {
+      background: var(--status-green);
+      box-shadow: 0 0 8px var(--status-green-glow);
+    }
+    .alert-dot.sev-blue {
+      background: var(--status-blue);
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+    }
+
+    /* ==========================================================================
+       ROW 4: TWO PANELS (50% / 50%)
+       ========================================================================== */
+    .row-4-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    /* Expiry Calendar (Left Panel - 50%) */
+    .calendar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .calendar-month-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .calendar-month-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+    .calendar-grid-box {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+    .cal-day-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 6px 0;
+      text-transform: uppercase;
+    }
+    .cal-day-cell {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(16, 22, 60, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition-fast);
+    }
+    .cal-day-cell:hover:not(.empty) {
+      background: rgba(240, 185, 11, 0.15);
+      border-color: var(--gold-primary);
+      color: #fff;
+      transform: scale(1.08);
+      z-index: 5;
+    }
+    .cal-day-cell.empty {
+      background: transparent;
+      border: none;
+      cursor: default;
+    }
+    .cal-day-cell.today {
+      background: rgba(240, 185, 11, 0.2);
+      border: 1px solid var(--gold-primary);
+      color: var(--gold-light);
+      font-weight: 700;
+    }
+
+    /* Expiry Highlight Badges on Calendar */
+    .cal-day-cell.expiry-goldm {
+      background: linear-gradient(135deg, rgba(240, 185, 11, 0.35), rgba(212, 160, 23, 0.2));
+      border: 1.5px solid var(--gold-primary);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 10px var(--gold-glow);
+    }
+    .cal-day-cell.expiry-goldten {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(180, 83, 9, 0.2));
+      border: 1.5px solid var(--amber-accent);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+    }
+    .cal-day-cell.expiry-guinea {
+      background: linear-gradient(135deg, rgba(255, 120, 73, 0.35), rgba(194, 65, 12, 0.2));
+      border: 1.5px solid var(--copper-accent);
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(255, 120, 73, 0.3);
+    }
+    .cal-day-cell.expiry-petal {
+      background: linear-gradient(135deg, rgba(234, 179, 8, 0.35), rgba(161, 98, 7, 0.2));
+      border: 1.5px solid #eab308;
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
+    }
+
+    .cal-dot-mark {
+      position: absolute;
+      bottom: 3px;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--gold-primary);
+    }
+
+    /* Calendar Legend Strip */
+    .cal-legend-strip {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .cal-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 11px;
+    }
+    .cal-item-sym {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+    }
+
+    /* Market Intelligence Feed (Right Panel - 50%) */
+    .intel-feed-timeline {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 310px;
+      overflow-y: auto;
+      padding-left: 24px;
+      padding-right: 6px;
+    }
+    .intel-feed-timeline::before {
+      content: '';
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--gold-primary), rgba(240, 185, 11, 0.05));
+    }
+    .intel-item {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(14, 20, 56, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      box-shadow: var(--clay-shadow);
+      transition: var(--transition-fast);
+      cursor: pointer;
+    }
+    .intel-item:hover {
+      background: rgba(20, 28, 76, 0.7);
+      border-color: rgba(240, 185, 11, 0.3);
+      transform: translateX(4px);
+    }
+    .intel-item::before {
+      content: '';
+      position: absolute;
+      left: -21px;
+      top: 16px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold-primary);
+      border: 2px solid #070a1e;
+      box-shadow: 0 0 8px var(--gold-glow);
+    }
+    .intel-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .intel-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .intel-title i {
+      color: var(--gold-primary);
+      font-size: 12px;
+    }
+    .intel-time {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+    .intel-desc {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .intel-tags {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .intel-chip {
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(240, 185, 11, 0.12);
+      color: var(--gold-light);
+    }
+
+    /* ==========================================================================
+       MODALS & SLIDE-OUT DRAWERS (For Deep Interactivity)
+       ========================================================================== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 20, 0.85);
+      backdrop-filter: blur(10px);
+      z-index: 5000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: modalFadeIn 0.25s ease;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .modal-content {
+      background: linear-gradient(135deg, #0e143b 0%, #070a20 100%);
+      border: 1px solid var(--gold-primary);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px var(--gold-glow);
+      width: 100%;
+      max-width: 620px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 26px;
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: var(--text-secondary);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition-fast);
+    }
+    .modal-close-btn:hover {
+      background: var(--gold-primary);
+      color: #070a1e;
+    }
+
+    /* ==========================================================================
+       RESPONSIVE BREAKPOINTS
+       ========================================================================== */
+    @media (max-width: 1300px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .row-3-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .row-3-grid > .panel:last-child {
+        grid-column: span 2;
+      }
+    }
+
+    @media (max-width: 1080px) {
+      .row-2-grid, .row-4-grid {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .main-wrapper {
+        margin-left: 0 !important;
+      }
+      .mobile-menu-btn {
+        display: flex;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
+      .row-3-grid {
+        grid-template-columns: 1fr;
+      }
+      .row-3-grid > .panel:last-child {
+        grid-column: span 1;
+      }
+      .top-header {
+        padding: 0 16px;
+      }
+      .main-content {
+        padding: 20px 16px 40px;
+      }
+      .header-clock-widget, .data-freshness-chip {
+        display: none;
+      }
+      .desk-hero-banner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+  <script src="auth.js"></script>
+  <script src="aurora-pipeline.js"></script>
+  <script src="aurora-nav.js"></script>
+</head>
+<body>
+
+  <!-- Floating Particle Canvas Background -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- Golden HUD Radar Page Loader (Auto-hides in 1.4s) -->
+  <div id="pageLoader">
+    <div class="loader-ring-wrapper">
+      <div class="loader-ring outer"></div>
+      <div class="loader-ring"></div>
+      <div class="loader-ring inner"></div>
+      <div class="loader-logo">A</div>
+    </div>
+    <div class="loader-text">AURORA ENGINE INITIALIZING</div>
+    <div class="loader-subtext">Normalizing MCX Gold Contracts (₹/g Fine Basis)...</div>
+  </div>
+
+  <!-- App Layout Wrapper -->
+  <div class="app-layout">
+
+    <!-- ======================================================================
+         1. LEFT SIDEBAR (Fixed, Glassmorphism, Collapsible)
+         ====================================================================== -->
+    <aside class="sidebar" id="sidebar">
+      
+      <!-- Brand Logo / Header -->
+      <div class="sidebar-brand">
+        <a href="#" class="brand-content">
+          <div class="brand-icon-box">
+            <i class="fa-solid fa-gem"></i>
+          </div>
+          <div class="brand-titles">
+            <span class="brand-name">AURORA</span>
+            <span class="brand-subtitle">Commodity Intelligence</span>
+          </div>
+        </a>
+        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle Sidebar">
+          <i class="fa-solid fa-chevron-left" id="collapseIcon"></i>
+        </button>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Executive Desk</div>
+        
+        <a href="dashboard.html" class="nav-item active" title="Dashboard">
+          <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span>
+          <span class="nav-text">Dashboard</span>
+        </a>
+
+        <a href="contract-explorer.html" class="nav-item" title="Contract Explorer">
+          <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
+          <span class="nav-text">Contract Explorer</span>
+          <span class="nav-badge">4 Lots</span>
+        </a>
+
+        <a href="opportunity-radar.html" class="nav-item" title="Opportunity Radar">
+          <span class="nav-icon"><i class="fa-solid fa-bullseye"></i></span>
+          <span class="nav-text">Opportunity Radar</span>
+          <span class="nav-badge pulse">3 New</span>
+        </a>
+
+        <a href="market-detective.html" class="nav-item" title="Market Detective">
+          <span class="nav-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></span>
+          <span class="nav-text">Market Detective</span>
+          <span class="nav-badge">Audit</span>
+        </a>
+
+        <div class="nav-section-label">Quantitative Labs</div>
+
+        <a href="javascript:void(0)" class="nav-item" title="Relationship Network" onclick="AuroraNav.openNetwork()">
+          <span class="nav-icon"><i class="fa-solid fa-network-wired"></i></span>
+          <span class="nav-text">Relationship Network</span>
+        </a>
+
+        <a href="javascript:void(0)" class="nav-item" title="Historical Memory" onclick="AuroraNav.openMemory()">
+          <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+          <span class="nav-text">Historical Memory</span>
+        </a>
+
+        <a href="backtesting-lab.html" class="nav-item" title="Backtesting Lab">
+          <span class="nav-icon"><i class="fa-solid fa-flask-vial"></i></span>
+          <span class="nav-text">Backtesting Lab</span>
+        </a>
+
+        <a href="backtesting-lab.html" class="nav-item" title="Market Simulator" onclick="AuroraNav.openSimulator()">
+          <span class="nav-icon"><i class="fa-solid fa-sliders"></i></span>
+          <span class="nav-text">Market Simulator</span>
+        </a>
+
+        <div class="nav-section-label">Operations</div>
+
+        <a href="#expiry-calendar-section" class="nav-item" title="Contract Calendar" onclick="AuroraNav.openCalendar()">
+          <span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+          <span class="nav-text">Contract Calendar</span>
+        </a>
+
+        <a href="javascript:void(0)" class="nav-item" title="Settings" onclick="AuroraNav.openSettings()">
+          <span class="nav-icon"><i class="fa-solid fa-gear"></i></span>
+          <span class="nav-text">Settings & Keys</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar User Profile (Claymorphism) -->
+      <div class="sidebar-footer">
+        <div class="user-profile-card" onclick="openProfileModal()">
+          <div class="user-avatar-wrap">
+            <div class="user-avatar">AV</div>
+            <div class="user-status-dot" title="Terminal Connected"></div>
+          </div>
+          <div class="user-info">
+            <div class="user-name">Dr. Aris Vance</div>
+            <div class="user-role">
+              <i class="fa-solid fa-crown" style="font-size: 9px; color: var(--gold-primary);"></i>
+              Head Quant Arbitrage
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ======================================================================
+         2. MAIN VIEWPORT & HEADER
+         ====================================================================== -->
+    <div class="main-wrapper">
+      
+      <!-- Top Header Bar (Glassmorphic) -->
+      <header class="top-header">
+        
+        <div class="header-left">
+          <!-- Mobile Menu Hamburger -->
+          <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+
+          <!-- Search Box with Shortcut Badge -->
+          <div class="search-box-wrap">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" class="search-input" id="globalSearchInput" placeholder="Search contracts, spread anomalies, or historical events...">
+            <span class="search-shortcut-badge">Ctrl K</span>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Live Market Status Indicator -->
+          <div class="market-status-chip">
+            <div class="live-pulse-dot"></div>
+            <span>MCX LIVE • Market Open</span>
+          </div>
+
+          <!-- Data Freshness Indicator -->
+          <div class="data-freshness-chip">
+            <i class="fa-solid fa-arrows-rotate"></i>
+            <span>Bhavcopy: Real-Time (<1.2s)</span>
+          </div>
+
+          <!-- Live IST/UTC Time Widget -->
+          <div class="header-clock-widget">
+            <span class="clock-time" id="liveClockDisplay">12:30:45 IST</span>
+            <span class="clock-date" id="liveDateDisplay">Thu, 15 Oct 2026</span>
+          </div>
+
+          <!-- Notification Bell with Dropdown Trigger -->
+          <button class="header-action-btn" id="notifBellBtn" title="Alerts & Notifications">
+            <i class="fa-regular fa-bell"></i>
+            <span class="notif-badge-pill">3</span>
+          </button>
+
+          <!-- Notification Dropdown Panel -->
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span class="notif-title"><i class="fa-solid fa-bell"></i> System Alerts</span>
+              <span class="notif-mark-read" onclick="clearNotifications()">Mark all read</span>
+            </div>
+            <div class="notif-list-item urgent">
+              <i class="fa-solid fa-triangle-exclamation" style="color: var(--status-red); margin-top: 2px;"></i>
+              <div>
+                <strong>GOLDM-GOLDPETAL Disparity</strong>
+                <p style="color: var(--text-secondary); margin-top: 2px;">Spread deviation passes 2.45σ threshold (₹25.70/g gap).</p>
+                <span style="font-size: 10px; color: var(--text-muted);">2m ago</span>
+              </div>
+            </div>
+            <div class="notif-list-item">
+              <i class="fa-solid fa-chart-line" style="color: var(--gold-primary); margin-top: 2px;"></i>
+              <div>
+                <strong>GOLDTEN Volume Spike</strong>
+                <p style="color: var(--text-secondary); margin-top: 2px;">+142% volume expansion detected in 10g contracts.</p>
+                <span style="font-size: 10px; color: var(--text-muted);">14m ago</span>
+              </div>
+            </div>
+            <div class="notif-list-item">
+              <i class="fa-solid fa-circle-check" style="color: var(--status-green); margin-top: 2px;"></i>
+              <div>
+                <strong>Walk-Forward Backtest Done</strong>
+                <p style="color: var(--text-secondary); margin-top: 2px;">94.2% hit rate validated on 2025-2026 OOS dataset.</p>
+                <span style="font-size: 10px; color: var(--text-muted);">45m ago</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action: Fullscreen Toggle -->
+          <button class="header-action-btn" id="fullscreenBtn" title="Toggle Fullscreen" onclick="toggleFullScreen()">
+            <i class="fa-solid fa-expand"></i>
+          </button>
+        </div>
+
+      </header>
+
+      <!-- ======================================================================
+           3. MAIN CONTENT AREA — Executive Dashboard
+           ====================================================================== -->
+      <main class="main-content">
+        
+        <!-- Hero Desk Banner / Normalization Control Strip -->
+        <section class="desk-hero-banner">
+          <div class="banner-text-group">
+            <div class="banner-badge">
+              <i class="fa-solid fa-shield-halved"></i>
+              MCX Gold Relative-Value Intelligence • Hack in Hills '26
+            </div>
+            <h1 class="banner-title">AURORA <span>Executive Dashboard</span></h1>
+            <p class="banner-description">
+              Unified cross-contract normalization layer for MCX gold derivatives. Tracking real-time basis disparities, statistical spread anomalies (σ), and walk-forward evidence across <strong>GOLDM</strong>, <strong>GOLDTEN</strong>, <strong>GOLDGUINEA</strong>, and <strong>GOLDPETAL</strong>.
+            </p>
+          </div>
+          <div class="banner-controls">
+            <button class="ctrl-pill-btn active" id="btnNormPure" onclick="toggleBasis('pure')">
+              <i class="fa-solid fa-coins"></i> 995 Fine Gold (₹/g)
+            </button>
+            <button class="ctrl-pill-btn" id="btnSlippageFilter" onclick="toggleSlippage()">
+              <i class="fa-solid fa-filter"></i> Cost Filter: Active (₹1.5/g)
+            </button>
+            <button class="ctrl-pill-btn" onclick="exportBhavcopyReport()">
+              <i class="fa-solid fa-cloud-arrow-down"></i> Export Report
+            </button>
+          </div>
+        </section>
+
+        <!-- ====================================================================
+             ROW 1: SUMMARY KPI CARDS (4 Cards, Claymorphism Style with 3D Hover)
+             ==================================================================== -->
+        <section class="kpi-grid">
+          
+          <!-- Card 1: Active Contracts -->
+          <div class="kpi-card" onclick="showContractDetailModal('ALL')">
+            <div class="kpi-card-header">
+              <span class="kpi-title">Active Contracts</span>
+              <div class="kpi-icon-bubble">
+                <i class="fa-solid fa-cubes-stacked"></i>
+              </div>
+            </div>
+            <div class="kpi-value">
+              4 <span class="kpi-value-unit">MCX Lots</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span class="kpi-subtitle">MCX Gold Futures</span>
+              <span class="kpi-tag tag-gold"><i class="fa-solid fa-check"></i> 100% Parsed</span>
+            </div>
+            <div class="kpi-tooltip">GOLDM (100g), GOLDTEN (10g), GUINEA (8g), PETAL (1g)</div>
+          </div>
+
+          <!-- Card 2: Price Anomalies -->
+          <div class="kpi-card card-amber" onclick="filterByAnomalies()">
+            <div class="kpi-card-header">
+              <span class="kpi-title">Price Anomalies</span>
+              <div class="kpi-icon-bubble">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+            </div>
+            <div class="kpi-value">
+              3 <span class="kpi-value-unit">Flagged</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span class="kpi-subtitle">2 High Priority (>2σ)</span>
+              <span class="kpi-tag tag-amber"><i class="fa-solid fa-arrow-trend-up"></i> +1 vs 1h</span>
+            </div>
+            <div class="kpi-tooltip">Active: GOLDM-GOLDPETAL (2.45σ), GOLDTEN-GUINEA (1.82σ)</div>
+          </div>
+
+          <!-- Card 3: Avg Spread -->
+          <div class="kpi-card card-green" onclick="showSpreadDetailsModal()">
+            <div class="kpi-card-header">
+              <span class="kpi-title">Avg Spread</span>
+              <div class="kpi-icon-bubble">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+              </div>
+            </div>
+            <div class="kpi-value">
+              ₹127.45 <span class="kpi-value-unit">/lot</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span class="kpi-subtitle">+2.3% from yesterday</span>
+              <span class="kpi-tag tag-green"><i class="fa-solid fa-bolt"></i> Mean ₹124.58</span>
+            </div>
+            <div class="kpi-tooltip">Weighted Pairwise Basis across 6 active cross-contract spreads</div>
+          </div>
+
+          <!-- Card 4: Signal Confidence -->
+          <div class="kpi-card" onclick="showBacktestSummary()">
+            <div class="kpi-card-header">
+              <span class="kpi-title">Signal Confidence</span>
+              <div class="kpi-icon-bubble">
+                <i class="fa-solid fa-bullseye"></i>
+              </div>
+            </div>
+            <div class="kpi-value">
+              87% <span class="kpi-value-unit">Strong</span>
+            </div>
+            <div class="kpi-meta-row">
+              <span class="kpi-subtitle">Walk-Forward Validated</span>
+              <span class="kpi-tag tag-gold"><i class="fa-solid fa-shield"></i> Sharpe: 2.14</span>
+            </div>
+            <div class="kpi-tooltip">Robustness score computed across 30D rolling liquidity & historical analogues</div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================================
+             ROW 2: TWO PANELS (60% / 40%)
+             LEFT (60%): Normalized Price Comparison (Line Chart)
+             RIGHT (40%): Contract Health Status (Claymorphic Table)
+             ==================================================================== -->
+        <section class="row-2-grid">
+          
+          <!-- LEFT (60%): Normalized Price Comparison Chart -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <div class="panel-title-icon">
+                  <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                  <h2 class="panel-title">Normalized Price Comparison</h2>
+                  <div class="panel-subtitle">MCX Gold Futures standardized to ₹/g (995 Pure Basis) over time</div>
+                </div>
+              </div>
+              <div class="panel-actions">
+                <div class="time-pills-group" id="chartTimePills">
+                  <button class="time-pill-btn" onclick="updateChartTimeframe('1D')">1D</button>
+                  <button class="time-pill-btn" onclick="updateChartTimeframe('7D')">7D</button>
+                  <button class="time-pill-btn active" onclick="updateChartTimeframe('30D')">30D</button>
+                  <button class="time-pill-btn" onclick="updateChartTimeframe('90D')">90D</button>
+                  <button class="time-pill-btn" onclick="updateChartTimeframe('1Y')">1Y</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chart Canvas -->
+            <div class="chart-box-relative">
+              <canvas id="priceComparisonChart"></canvas>
+            </div>
+
+            <!-- Interactive Legend Badges -->
+            <div class="contract-legend-strip">
+              <div class="legend-badge" onclick="toggleDataset(0)">
+                <span class="legend-dot" style="background: #f0b90b; box-shadow: 0 0 8px #f0b90b;"></span>
+                <span>GOLDM (100g)</span>
+              </div>
+              <div class="legend-badge" onclick="toggleDataset(1)">
+                <span class="legend-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
+                <span>GOLDTEN (10g)</span>
+              </div>
+              <div class="legend-badge" onclick="toggleDataset(2)">
+                <span class="legend-dot" style="background: #ff7849; box-shadow: 0 0 8px #ff7849;"></span>
+                <span>GOLDGUINEA (8g)</span>
+              </div>
+              <div class="legend-badge" onclick="toggleDataset(3)">
+                <span class="legend-dot" style="background: #eab308; box-shadow: 0 0 8px #eab308;"></span>
+                <span>GOLDPETAL (1g)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT (40%): Contract Health Status Table -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <div class="panel-title-icon">
+                  <i class="fa-solid fa-heart-pulse"></i>
+                </div>
+                <div>
+                  <h2 class="panel-title">Contract Health Status</h2>
+                  <div class="panel-subtitle">Lot convention, normalized quote & data integrity check</div>
+                </div>
+              </div>
+              <div class="panel-actions">
+                <span class="nav-badge" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border-color: rgba(16, 185, 129, 0.3);">
+                  Bhavcopy Synced
+                </span>
+              </div>
+            </div>
+
+            <!-- Health Table -->
+            <div class="health-table-wrap">
+              <table class="health-table">
+                <thead>
+                  <tr>
+                    <th>Contract</th>
+                    <th>Normalized Price</th>
+                    <th>24h Volume</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Row 1: GOLDM -->
+                  <tr onclick="showContractDetailModal('GOLDM')">
+                    <td>
+                      <div class="contract-tag-cell">
+                        <i class="fa-solid fa-cubes" style="color: #f0b90b;"></i>
+                        <div>
+                          <div class="contract-sym">GOLDM</div>
+                          <span class="contract-lot">100g • Q:10g</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="price-norm-val">₹7,482.50</div>
+                      <div class="price-norm-sub">Quoted: ₹74,825</div>
+                    </td>
+                    <td>
+                      <div style="font-weight: 600; color: #fff;">18,420</div>
+                      <div style="font-size: 10px; color: var(--text-secondary);">₹1,378 Cr</div>
+                    </td>
+                    <td>
+                      <span class="status-badge active">
+                        <i class="fa-solid fa-circle-check"></i> Active
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Row 2: GOLDTEN -->
+                  <tr onclick="showContractDetailModal('GOLDTEN')">
+                    <td>
+                      <div class="contract-tag-cell">
+                        <i class="fa-solid fa-box" style="color: #f59e0b;"></i>
+                        <div>
+                          <div class="contract-sym">GOLDTEN</div>
+                          <span class="contract-lot">10g • Listed '25</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="price-norm-val">₹7,484.10</div>
+                      <div class="price-norm-sub">Quoted: ₹74,841</div>
+                    </td>
+                    <td>
+                      <div style="font-weight: 600; color: #fff;">6,140</div>
+                      <div style="font-size: 10px; color: var(--text-secondary);">₹459 Cr</div>
+                    </td>
+                    <td>
+                      <span class="status-badge active">
+                        <i class="fa-solid fa-circle-check"></i> Active
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Row 3: GOLDGUINEA -->
+                  <tr onclick="showContractDetailModal('GOLDGUINEA')">
+                    <td>
+                      <div class="contract-tag-cell">
+                        <i class="fa-solid fa-circle-dot" style="color: #ff7849;"></i>
+                        <div>
+                          <div class="contract-sym">GOLDGUINEA</div>
+                          <span class="contract-lot">8g • Sovereign</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="price-norm-val">₹7,476.80</div>
+                      <div class="price-norm-sub">Quoted: ₹59,814</div>
+                    </td>
+                    <td>
+                      <div style="font-weight: 600; color: #fff;">2,850</div>
+                      <div style="font-size: 10px; color: var(--text-secondary);">₹170 Cr</div>
+                    </td>
+                    <td>
+                      <span class="status-badge watch">
+                        <i class="fa-solid fa-eye"></i> Watch
+                      </span>
+                    </td>
+                  </tr>
+
+                  <!-- Row 4: GOLDPETAL -->
+                  <tr onclick="showContractDetailModal('GOLDPETAL')">
+                    <td>
+                      <div class="contract-tag-cell">
+                        <i class="fa-solid fa-coins" style="color: #eab308;"></i>
+                        <div>
+                          <div class="contract-sym">GOLDPETAL</div>
+                          <span class="contract-lot">1g • Micro</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="price-norm-val" style="color: #f87171;">₹7,508.20</div>
+                      <div class="price-norm-sub">Quoted: ₹7,508</div>
+                    </td>
+                    <td>
+                      <div style="font-weight: 600; color: #fff;">42,910</div>
+                      <div style="font-size: 10px; color: var(--text-secondary);">₹322 Cr</div>
+                    </td>
+                    <td>
+                      <span class="status-badge warning">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Warning
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Note Footer on Normalization Standard -->
+            <div style="margin-top: 10px; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-info-circle" style="color: var(--gold-primary);"></i>
+              Formula: Normalized ₹/g = (Quoted Price ÷ Quoted Grams) × Purity (0.995)
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================================
+             ROW 3: THREE PANELS (35% / 35% / 30%)
+             LEFT (35%): Opportunity Radar (Doughnut Chart)
+             CENTER (35%): Spread Analysis (Bar Chart)
+             RIGHT (30%): Recent Alerts (Scrollable Feed)
+             ==================================================================== -->
+        <section class="row-3-grid">
+          
+          <!-- LEFT (35%): Opportunity Radar -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <div class="panel-title-icon">
+                  <i class="fa-solid fa-radar"></i>
+                </div>
+                <div>
+                  <h2 class="panel-title">Opportunity Radar</h2>
+                  <div class="panel-subtitle">Signal pipeline across 6 pairwise relations</div>
+                </div>
+              </div>
+              <div class="panel-actions">
+                <span class="nav-badge" style="color: var(--gold-primary);">6 Pairs Total</span>
+              </div>
+            </div>
+
+            <!-- Doughnut Chart Container -->
+            <div class="radar-donut-container">
+              <canvas id="opportunityDonutChart"></canvas>
+              <div class="radar-donut-center">
+                <div class="donut-center-num">3</div>
+                <div class="donut-center-lbl">Active Signals</div>
+              </div>
+            </div>
+
+            <!-- Breakdown Summary Cards -->
+            <div class="radar-breakdown-list">
+              <div class="radar-stat-item">
+                <div class="radar-item-left">
+                  <span class="radar-dot" style="background: #f0b90b; box-shadow: 0 0 8px #f0b90b;"></span>
+                  <span>Confirmed Edge</span>
+                </div>
+                <span class="radar-val-pill">1 Pair (16.7%)</span>
+              </div>
+              <div class="radar-stat-item">
+                <div class="radar-item-left">
+                  <span class="radar-dot" style="background: #f59e0b; box-shadow: 0 0 8px #f59e0b;"></span>
+                  <span>Under Investigation</span>
+                </div>
+                <span class="radar-val-pill">2 Pairs (33.3%)</span>
+              </div>
+              <div class="radar-stat-item">
+                <div class="radar-item-left">
+                  <span class="radar-dot" style="background: #475569;"></span>
+                  <span>Filtered Out (Cost/Expiry)</span>
+                </div>
+                <span class="radar-val-pill" style="color: var(--text-muted);">3 Pairs (50.0%)</span>
+              </div>
+            </div>
+
+            <div style="margin-top: 10px; font-size: 11px; color: var(--text-secondary); text-align: center;">
+              Cost threshold filter: Gross edge must exceed ₹1.80/g slippage + tax drag.
+            </div>
+          </div>
+
+          <!-- CENTER (35%): Spread Analysis -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <div class="panel-title-icon">
+                  <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+                <div>
+                  <h2 class="panel-title">Spread Analysis</h2>
+                  <div class="panel-subtitle">Pairwise normalized price difference (₹/g)</div>
+                </div>
+              </div>
+              <div class="panel-actions">
+                <span class="nav-badge" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">2σ Breach</span>
+              </div>
+            </div>
+
+            <!-- Spread Bar Chart -->
+            <div class="spread-bar-container">
+              <canvas id="spreadBarChart"></canvas>
+            </div>
+
+            <!-- Spread Summary Pill -->
+            <div class="spread-summary-bar">
+              <div>
+                <span style="color: var(--text-secondary);">Highest Deviation:</span>
+                <strong style="color: #fff; margin-left: 4px;">GOLDM vs GOLDPETAL</strong>
+              </div>
+              <span class="spread-threshold-tag">Spread: -₹25.70/g (2.45σ)</span>
+            </div>
+          </div>
+
+          <!-- RIGHT (30%): Recent Alerts Feed -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <div class="panel-title-icon">
+                  <i class="fa-solid fa-bell"></i>
+                </div>
+                <div>
+                  <h2 class="panel-title">Recent Alerts</h2>
+                  <div class="panel-subtitle">Statistically significant anomalies & triggers</div>
+                </div>
+              </div>
+              <div class="panel-actions">
+                <button class="time-pill-btn active" style="font-size: 10.5px; padding: 3px 8px;" onclick="refreshAlerts()">
+                  <i class="fa-solid fa-rotate"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Scrollable Alerts Feed (5 Items) -->
+            <div class="alerts-scroll-feed" id="alertsFeed">
+              
+              <!-- Alert 1 -->
+              <div class="alert-card-item" onclick="openAlertModal('GOLDM-GOLDPETAL spread exceeds 2.45σ threshold (+₹25.70/g basis gap). Statistically rare (>98th percentile). Estimated net edge after execution costs: +₹19.40/g.')">
+                <div class="alert-top-row">
+                  <div class="alert-indicator" style="color: #f87171;">
+                    <span class="alert-dot sev-red"></span>
+                    <span>HIGH PRIORITY</span>
+                  </div>
+                  <span class="alert-time">2m ago</span>
+                </div>
+                <div class="alert-text">
+                  <strong>GOLDM - GOLDPETAL</strong> spread exceeds <strong>2.45σ</strong> threshold (+₹25.70/g divergence).
+                </div>
+              </div>
+
+              <!-- Alert 2 -->
+              <div class="alert-card-item" onclick="openAlertModal('GOLDTEN volume spike detected (+142% vs 20-day rolling average). Retail participation shifting into 10g standardized contract.')">
+                <div class="alert-top-row">
+                  <div class="alert-indicator" style="color: #fbbf24;">
+                    <span class="alert-dot sev-amber"></span>
+                    <span>VOLUME SPIKE</span>
+                  </div>
+                  <span class="alert-time">14m ago</span>
+                </div>
+                <div class="alert-text">
+                  <strong>GOLDTEN</strong> volume surge: +142% vs 20-day average. 6,140 lots traded in morning session.
+                </div>
+              </div>
+
+              <!-- Alert 3 -->
+              <div class="alert-card-item" onclick="openAlertModal('GOLDGUINEA-GOLDPETAL mean-reversion trigger primed. Historic 7-day half-life detected in basis convergence.')">
+                <div class="alert-top-row">
+                  <div class="alert-indicator" style="color: #fbbf24;">
+                    <span class="alert-dot sev-amber"></span>
+                    <span>CONVERGENCE</span>
+                  </div>
+                  <span class="alert-time">48m ago</span>
+                </div>
+                <div class="alert-text">
+                  <strong>GUINEA - PETAL</strong> mean-reversion trigger primed. Spread deviation: ₹31.40/g (1.92σ).
+                </div>
+              </div>
+
+              <!-- Alert 4 -->
+              <div class="alert-card-item" onclick="openAlertModal('Historical analogue matched: Current cross-contract basis pattern matches Event #247 (Diwali 2023 pre-expiry volatility pattern) with 89% structural similarity.')">
+                <div class="alert-top-row">
+                  <div class="alert-indicator" style="color: #34d399;">
+                    <span class="alert-dot sev-green"></span>
+                    <span>ANALOGUE MATCH</span>
+                  </div>
+                  <span class="alert-time">1h ago</span>
+                </div>
+                <div class="alert-text">
+                  Historical memory match: Current spread matrix matches <strong>Event #247</strong> (Diwali '23 pattern).
+                </div>
+              </div>
+
+              <!-- Alert 5 -->
+              <div class="alert-card-item" onclick="openAlertModal('Normalization engine checksum complete: MCX Bhavcopy parsed successfully with 0 dropped ticks across all 4 gold derivatives.')">
+                <div class="alert-top-row">
+                  <div class="alert-indicator" style="color: #38bdf8;">
+                    <span class="alert-dot sev-blue"></span>
+                    <span>SYSTEM INTEL</span>
+                  </div>
+                  <span class="alert-time">3h ago</span>
+                </div>
+                <div class="alert-text">
+                  Normalization engine updated: Basis adjustment algorithm v2.4 applied across all 4 lots.
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ====================================================================
+             ROW 4: TWO PANELS (50% / 50%)
+             LEFT (50%): Expiry Calendar (October 2026 Visual Mini-Calendar)
+             RIGHT (50%): Market Intelligence Feed (Timeline / Events)
+             ==================================================================== -->
+        <section class="row-4-grid">
+          
+          <!-- LEFT (50%): Expiry Calendar -->
+          <div class="panel" id="expiry-calendar-section">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <div class="panel-title-icon">
+                  <i class="fa-solid fa-calendar-days"></i>
+                </div>
+                <div>
+                  <h2 class="panel-title">Expiry Calendar</h2>
+                  <div class="panel-subtitle">MCX Gold Futures lifecycle & delivery roll windows</div>
+                </div>
+              </div>
+              <div class="panel-actions">
+                <span class="nav-badge" style="background: rgba(240, 185, 11, 0.15); color: var(--gold-light);">
+                  Active Roll Cycle
+                </span>
+              </div>
+            </div>
+
+            <!-- Mini Calendar Widget -->
+            <div class="calendar-container">
+              <div class="calendar-month-header">
+                <span class="calendar-month-name">OCTOBER 2026</span>
+                <span style="font-size: 11px; color: var(--text-secondary);">
+                  <i class="fa-solid fa-circle-info" style="color: var(--gold-primary);"></i> Click dates to inspect roll risk
+                </span>
+              </div>
+
+              <div class="calendar-grid-box">
+                <!-- Day Names -->
+                <div class="cal-day-name">Sun</div>
+                <div class="cal-day-name">Mon</div>
+                <div class="cal-day-name">Tue</div>
+                <div class="cal-day-name">Wed</div>
+                <div class="cal-day-name">Thu</div>
+                <div class="cal-day-name">Fri</div>
+                <div class="cal-day-name">Sat</div>
+
+                <!-- Week 1: Oct 1-3 (Starts on Thursday) -->
+                <div class="cal-day-cell empty"></div>
+                <div class="cal-day-cell empty"></div>
+                <div class="cal-day-cell empty"></div>
+                <div class="cal-day-cell empty"></div>
+                <div class="cal-day-cell" onclick="selectCalDate(1)">1</div>
+                <div class="cal-day-cell" onclick="selectCalDate(2)">2</div>
+                <div class="cal-day-cell" onclick="selectCalDate(3)">3</div>
+
+                <!-- Week 2: Oct 4-10 -->
+                <div class="cal-day-cell" onclick="selectCalDate(4)">4</div>
+                <!-- Oct 5: GOLDM Expiry -->
+                <div class="cal-day-cell expiry-goldm" onclick="selectCalDate(5, 'GOLDM Expiry Date • Tender Period Active')">
+                  5
+                  <span class="cal-dot-mark"></span>
+                </div>
+                <div class="cal-day-cell" onclick="selectCalDate(6)">6</div>
+                <div class="cal-day-cell" onclick="selectCalDate(7)">7</div>
+                <div class="cal-day-cell" onclick="selectCalDate(8)">8</div>
+                <div class="cal-day-cell" onclick="selectCalDate(9)">9</div>
+                <div class="cal-day-cell" onclick="selectCalDate(10)">10</div>
+
+                <!-- Week 3: Oct 11-17 -->
+                <div class="cal-day-cell" onclick="selectCalDate(11)">11</div>
+                <div class="cal-day-cell" onclick="selectCalDate(12)">12</div>
+                <div class="cal-day-cell" onclick="selectCalDate(13)">13</div>
+                <div class="cal-day-cell" onclick="selectCalDate(14)">14</div>
+                <!-- Oct 15: Today -->
+                <div class="cal-day-cell today" onclick="selectCalDate(15, 'TODAY • MCX Gold Trading Session Open')">
+                  15
+                </div>
+                <!-- Oct 16: GOLDTEN Expiry -->
+                <div class="cal-day-cell expiry-goldten" onclick="selectCalDate(16, 'GOLDTEN Expiry Date • 10g Contract Roll')">
+                  16
+                  <span class="cal-dot-mark" style="background: var(--amber-accent);"></span>
+                </div>
+                <div class="cal-day-cell" onclick="selectCalDate(17)">17</div>
+
+                <!-- Week 4: Oct 18-24 -->
+                <div class="cal-day-cell" onclick="selectCalDate(18)">18</div>
+                <div class="cal-day-cell" onclick="selectCalDate(19)">19</div>
+                <div class="cal-day-cell" onclick="selectCalDate(20)">20</div>
+                <div class="cal-day-cell" onclick="selectCalDate(21)">21</div>
+                <div class="cal-day-cell" onclick="selectCalDate(22)">22</div>
+                <div class="cal-day-cell" onclick="selectCalDate(23)">23</div>
+                <div class="cal-day-cell" onclick="selectCalDate(24)">24</div>
+
+                <!-- Week 5: Oct 25-31 -->
+                <div class="cal-day-cell" onclick="selectCalDate(25)">25</div>
+                <div class="cal-day-cell" onclick="selectCalDate(26)">26</div>
+                <div class="cal-day-cell" onclick="selectCalDate(27)">27</div>
+                <!-- Oct 28: GOLDGUINEA Expiry -->
+                <div class="cal-day-cell expiry-guinea" onclick="selectCalDate(28, 'GOLDGUINEA Expiry Date • 8g Sovereign Sovereign Contract')">
+                  28
+                  <span class="cal-dot-mark" style="background: var(--copper-accent);"></span>
+                </div>
+                <div class="cal-day-cell" onclick="selectCalDate(29)">29</div>
+                <!-- Oct 30: GOLDPETAL Expiry -->
+                <div class="cal-day-cell expiry-petal" onclick="selectCalDate(30, 'GOLDPETAL Expiry Date • 1g Micro Contract Settlement')">
+                  30
+                  <span class="cal-dot-mark" style="background: #eab308;"></span>
+                </div>
+                <div class="cal-day-cell" onclick="selectCalDate(31)">31</div>
+              </div>
+
+              <!-- Calendar Legend Strip -->
+              <div class="cal-legend-strip">
+                <div class="cal-legend-item">
+                  <span class="legend-dot" style="background: #f0b90b;"></span>
+                  <span><strong class="cal-item-sym" style="color: #f0b90b;">Oct 05:</strong> GOLDM (100g)</span>
+                </div>
+                <div class="cal-legend-item">
+                  <span class="legend-dot" style="background: #f59e0b;"></span>
+                  <span><strong class="cal-item-sym" style="color: #f59e0b;">Oct 16:</strong> GOLDTEN (10g)</span>
+                </div>
+                <div class="cal-legend-item">
+                  <span class="legend-dot" style="background: #ff7849;"></span>
+                  <span><strong class="cal-item-sym" style="color: #ff7849;">Oct 28:</strong> GOLDGUINEA (8g)</span>
+                </div>
+                <div class="cal-legend-item">
+                  <span class="legend-dot" style="background: #eab308;"></span>
+                  <span><strong class="cal-item-sym" style="color: #eab308;">Oct 30:</strong> GOLDPETAL (1g)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT (50%): Market Intelligence Feed -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title-wrap">
+                <div class="panel-title-icon">
+                  <i class="fa-solid fa-brain"></i>
+                </div>
+                <div>
+                  <h2 class="panel-title">Market Intelligence Feed</h2>
+                  <div class="panel-subtitle">Audited events, walk-forward results & research logs</div>
+                </div>
+              </div>
+              <div class="panel-actions">
+                <span class="nav-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;">
+                  Live Stream
+                </span>
+              </div>
+            </div>
+
+            <!-- Timeline Feed -->
+            <div class="intel-feed-timeline">
+              
+              <!-- Feed Item 1 -->
+              <div class="intel-item" onclick="openEventDetailModal(1)">
+                <div class="intel-header-row">
+                  <div class="intel-title">
+                    <i class="fa-solid fa-gears"></i> Normalization Engine Synchronized
+                  </div>
+                  <span class="intel-time">10m ago</span>
+                </div>
+                <div class="intel-desc">
+                  Basis adjustment algorithm v2.4 applied across all 4 lots. Quoted gram conventions standardized to pure 0.995 fine gold.
+                </div>
+                <div class="intel-tags">
+                  <span class="intel-chip">DATA ENGINE</span>
+                  <span class="intel-chip">₹/g NORMALIZATION</span>
+                </div>
+              </div>
+
+              <!-- Feed Item 2 -->
+              <div class="intel-item" onclick="openEventDetailModal(2)">
+                <div class="intel-header-row">
+                  <div class="intel-title">
+                    <i class="fa-solid fa-chart-column"></i> Walk-Forward Backtest Completed
+                  </div>
+                  <span class="intel-time">32m ago</span>
+                </div>
+                <div class="intel-desc">
+                  Simulated 2025–2026 out-of-sample window: 94.2% hit rate on GOLDM-GOLDTEN pairs mean reversion after accounting for ₹1.5/g transaction friction.
+                </div>
+                <div class="intel-tags">
+                  <span class="intel-chip" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">SHARPE 2.14</span>
+                  <span class="intel-chip">OUT-OF-SAMPLE</span>
+                </div>
+              </div>
+
+              <!-- Feed Item 3 -->
+              <div class="intel-item" onclick="openEventDetailModal(3)">
+                <div class="intel-header-row">
+                  <div class="intel-title">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Historical Analogue Found for Event #247
+                  </div>
+                  <span class="intel-time">1h 15m ago</span>
+                </div>
+                <div class="intel-desc">
+                  Current spread wideness between GOLDM and GOLDPETAL resembles Dhanteras 2023 pre-expiry liquidity migration with 89% correlation.
+                </div>
+                <div class="intel-tags">
+                  <span class="intel-chip">EVENT #247</span>
+                  <span class="intel-chip">ANALOGUE MEMORY</span>
+                </div>
+              </div>
+
+              <!-- Feed Item 4 -->
+              <div class="intel-item" onclick="openEventDetailModal(4)">
+                <div class="intel-header-row">
+                  <div class="intel-title">
+                    <i class="fa-solid fa-filter-circle-dollar"></i> Cost-Drag Guard Triggered
+                  </div>
+                  <span class="intel-time">2h 40m ago</span>
+                </div>
+                <div class="intel-desc">
+                  Flagged apparent opportunity on GOLDTEN-GOLDGUINEA filtered out: Gross edge (₹1.40/g) does not clear estimated bid-ask spread and STT cost.
+                </div>
+                <div class="intel-tags">
+                  <span class="intel-chip" style="background: rgba(239, 68, 68, 0.15); color: #f87171;">COST BLOCKED</span>
+                  <span class="intel-chip">RESPONSIBLE AI</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ========================================================================
+       MODAL: Contract Specification & Normalization Detail
+       ======================================================================== -->
+  <div class="modal-overlay" id="contractModal">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="closeModal('contractModal')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div class="brand-icon-box" style="width: 36px; height: 36px; font-size: 16px;">
+          <i class="fa-solid fa-scale-balanced"></i>
+        </div>
+        <div>
+          <h3 style="font-family: 'Orbitron', sans-serif; font-size: 18px; color: var(--gold-primary);" id="modalContractTitle">MCX Gold Specifications</h3>
+          <p style="font-size: 11px; color: var(--text-secondary);">Normalization Layer Verification Checklist</p>
+        </div>
+      </div>
+      <div id="modalContractBody" style="font-size: 13px; line-height: 1.6; color: var(--text-secondary);">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL: Alert Evidence Inspection
+       ======================================================================== -->
+  <div class="modal-overlay" id="alertModal">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="closeModal('alertModal')">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div class="panel-title-icon" style="color: var(--status-red); background: rgba(239, 68, 68, 0.15);">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div>
+          <h3 style="font-family: 'Orbitron', sans-serif; font-size: 17px; color: #fff;">Relative-Value Evidence Audit</h3>
+          <p style="font-size: 11px; color: var(--text-gold);">Statistically Verified Spread Anomaly</p>
+        </div>
+      </div>
+      <div id="modalAlertBody" style="font-size: 13px; line-height: 1.6; color: var(--text-primary); margin-bottom: 18px;">
+        <!-- Injected via JS -->
+      </div>
+      <div style="background: rgba(10, 14, 40, 0.7); padding: 14px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); font-size: 12px;">
+        <strong style="color: var(--gold-light);"><i class="fa-solid fa-shield"></i> Research Verification Protocol:</strong>
+        <p style="margin-top: 4px; color: var(--text-secondary);">
+          AURORA classifies this event as an <strong>INVESTIGATION</strong>, not a guaranteed trade. Real-world execution requires simultaneous executable fills, order depth analysis, and settlement risk adjustment.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       JAVASCRIPT: Logic, Charts, Clock, Particles & Interactions
+       ======================================================================== -->
+  <script>
+    /* ==========================================================================
+       1. GLOBAL STATE & THEME SETTINGS
+       ========================================================================== */
+    const STATE = {
+      isNormalizedPure: true,
+      slippageEnabled: true,
+      timeframe: '30D',
+      contracts: {
+        GOLDM: { name: 'GOLD MINI', lot: 100, quoteBase: 10, purity: 0.995, rawPrice: 74825, normPrice: 7482.50, vol: '18,420' },
+        GOLDTEN: { name: 'GOLD TEN', lot: 10, quoteBase: 10, purity: 0.995, rawPrice: 74841, normPrice: 7484.10, vol: '6,140' },
+        GOLDGUINEA: { name: 'GOLD GUINEA', lot: 8, quoteBase: 8, purity: 0.995, rawPrice: 59814, normPrice: 7476.80, vol: '2,850' },
+        GOLDPETAL: { name: 'GOLD PETAL', lot: 1, quoteBase: 1, purity: 0.999, rawPrice: 7508, normPrice: 7508.20, vol: '42,910' }
+      }
+    };
+
+    /* ==========================================================================
+       2. INITIALIZATION & LOADER REMOVAL
+       ========================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initialize Canvas Particles
+      initParticles();
+
+      // Initialize Real-time Clocks
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // Initialize Charts
+      initPriceChart();
+      initOpportunityDonutChart();
+      initSpreadBarChart();
+
+      // Setup Sidebar Toggle
+      setupSidebar();
+
+      // Setup Global Keyboard Shortcuts
+      setupShortcuts();
+
+      // Setup Notification Toggle
+      setupNotifications();
+
+      // Hide Loader after 1.4s
+      setTimeout(() => {
+        const loader = document.getElementById('pageLoader');
+        if (loader) {
+          loader.classList.add('fade-out');
+        }
+      }, 1400);
+    });
+
+    /* ==========================================================================
+       3. BACKGROUND FLOATING GOLD PARTICLES CANVAS
+       ========================================================================== */
+    function initParticles() {
+      const canvas = document.getElementById('particleCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const particleCount = 42;
+      const particles = [];
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 2.2 + 0.6,
+          vx: (Math.random() - 0.5) * 0.4,
+          vy: -Math.random() * 0.6 - 0.15,
+          alpha: Math.random() * 0.6 + 0.2,
+          color: Math.random() > 0.4 ? '#f0b90b' : '#ffd700'
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.y < 0) {
+            p.y = height + 10;
+            p.x = Math.random() * width;
+          }
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = p.alpha;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = '#f0b90b';
+          ctx.fill();
+        }
+
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    }
+
+    /* ==========================================================================
+       4. LIVE CLOCK (IST & DATE)
+       ========================================================================== */
+    function updateClock() {
+      const now = new Date();
+      // Format IST Time
+      const timeStr = now.toLocaleTimeString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+      const dateStr = now.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      });
+
+      const clockEl = document.getElementById('liveClockDisplay');
+      const dateEl = document.getElementById('liveDateDisplay');
+      if (clockEl) clockEl.innerText = `${timeStr} IST`;
+      if (dateEl) dateEl.innerText = dateStr;
+    }
+
+    /* ==========================================================================
+       5. SIDEBAR & MOBILE NAVIGATION
+       ========================================================================== */
+    function setupSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const collapseBtn = document.getElementById('sidebarCollapseBtn');
+      const collapseIcon = document.getElementById('collapseIcon');
+      const mobileBtn = document.getElementById('mobileMenuBtn');
+
+      if (collapseBtn) {
+        collapseBtn.addEventListener('click', () => {
+          sidebar.classList.toggle('collapsed');
+          if (sidebar.classList.contains('collapsed')) {
+            collapseIcon.classList.remove('fa-chevron-left');
+            collapseIcon.classList.add('fa-chevron-right');
+          } else {
+            collapseIcon.classList.remove('fa-chevron-right');
+            collapseIcon.classList.add('fa-chevron-left');
+          }
+          // Resize charts
+          setTimeout(() => {
+            if (window.priceChart) window.priceChart.resize();
+            if (window.spreadChart) window.spreadChart.resize();
+          }, 350);
+        });
+      }
+
+      if (mobileBtn) {
+        mobileBtn.addEventListener('click', () => {
+          sidebar.classList.toggle('mobile-open');
+        });
+      }
+
+      // Close mobile sidebar on body click
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 1080 && 
+            !sidebar.contains(e.target) && 
+            !mobileBtn.contains(e.target) && 
+            sidebar.classList.contains('mobile-open')) {
+          sidebar.classList.remove('mobile-open');
+        }
+      });
+    }
+
+    /* ==========================================================================
+       6. SHORTCUTS & NOTIFICATIONS
+       ========================================================================== */
+    function setupShortcuts() {
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          const searchInput = document.getElementById('globalSearchInput');
+          if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+          }
+        }
+      });
+
+      const searchInput = document.getElementById('globalSearchInput');
+      if (searchInput) {
+        searchInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const query = searchInput.value.trim().toUpperCase();
+            if (['GOLDM', 'GOLDTEN', 'GOLDGUINEA', 'GOLDPETAL'].includes(query)) {
+              showContractDetailModal(query);
+            } else if (query) {
+              openAlertModal(`Query executed for "${query}": Found 3 active cross-spread entries in MCX memory table with 100% confidence.`);
+            }
+          }
+        });
+      }
+    }
+
+    function setupNotifications() {
+      const bell = document.getElementById('notifBellBtn');
+      const dropdown = document.getElementById('notifDropdown');
+      if (bell && dropdown) {
+        bell.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdown.classList.toggle('show');
+        });
+        document.addEventListener('click', (e) => {
+          if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
+            dropdown.classList.remove('show');
+          }
+        });
+      }
+    }
+
+    function clearNotifications() {
+      const badge = document.querySelector('.notif-badge-pill');
+      if (badge) badge.style.display = 'none';
+      const items = document.querySelectorAll('.notif-list-item');
+      items.forEach(item => {
+        item.style.opacity = '0.5';
+        item.classList.remove('urgent');
+      });
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    /* ==========================================================================
+       7. CHART.JS: NORMALIZED PRICE COMPARISON (ROW 2 - 60%)
+       ========================================================================== */
+    function generateDateLabels(days) {
+      const labels = [];
+      const baseDate = new Date(2026, 9, 15); // Oct 15, 2026
+      for (let i = days; i >= 0; i--) {
+        const d = new Date(baseDate);
+        d.setDate(baseDate.getDate() - i);
+        labels.push(d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }));
+      }
+      return labels;
+    }
+
+    function generateSimulatedSeries(basePrice, days, volatility, drift) {
+      const points = [];
+      let current = basePrice;
+      for (let i = 0; i <= days; i++) {
+        const change = (Math.random() - 0.48) * volatility + drift;
+        current += change;
+        points.push(parseFloat(current.toFixed(2)));
+      }
+      return points;
+    }
+
+    let priceChart;
+    function initPriceChart() {
+      const ctx = document.getElementById('priceComparisonChart').getContext('2d');
+      const days = 30;
+      const labels = generateDateLabels(days);
+
+      // Gradient Fills
+      const gradGold = ctx.createLinearGradient(0, 0, 0, 300);
+      gradGold.addColorStop(0, 'rgba(240, 185, 11, 0.28)');
+      gradGold.addColorStop(1, 'rgba(240, 185, 11, 0.0)');
+
+      const gradAmber = ctx.createLinearGradient(0, 0, 0, 300);
+      gradAmber.addColorStop(0, 'rgba(245, 158, 11, 0.18)');
+      gradAmber.addColorStop(1, 'rgba(245, 158, 11, 0.0)');
+
+      const goldmData = generateSimulatedSeries(7420, days, 22, 1.8);
+      const goldtenData = generateSimulatedSeries(7421, days, 21, 1.8);
+      const guineaData = generateSimulatedSeries(7416, days, 20, 1.7);
+      const petalData = generateSimulatedSeries(7432, days, 26, 2.2);
+
+      priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'GOLDM (100g)',
+              data: goldmData,
+              borderColor: '#f0b90b',
+              backgroundColor: gradGold,
+              fill: true,
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#f0b90b',
+              pointHoverBorderColor: '#fff',
+              pointHoverBorderWidth: 2
+            },
+            {
+              label: 'GOLDTEN (10g)',
+              data: goldtenData,
+              borderColor: '#f59e0b',
+              backgroundColor: gradAmber,
+              fill: false,
+              tension: 0.35,
+              borderWidth: 2,
+              borderDash: [4, 4],
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#f59e0b'
+            },
+            {
+              label: 'GOLDGUINEA (8g)',
+              data: guineaData,
+              borderColor: '#ff7849',
+              fill: false,
+              tension: 0.35,
+              borderWidth: 2,
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#ff7849'
+            },
+            {
+              label: 'GOLDPETAL (1g)',
+              data: petalData,
+              borderColor: '#eab308',
+              fill: false,
+              tension: 0.35,
+              borderWidth: 2.2,
+              pointRadius: 0,
+              pointHoverRadius: 6,
+              pointHoverBackgroundColor: '#eab308'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: {
+              display: false // Using custom claymorphic badges below chart
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 14, 40, 0.94)',
+              titleColor: '#f0b90b',
+              titleFont: { family: 'Orbitron', size: 12 },
+              bodyFont: { family: 'Inter', size: 12 },
+              borderColor: 'rgba(240, 185, 11, 0.35)',
+              borderWidth: 1,
+              padding: 12,
+              boxPadding: 6,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.dataset.label}: ₹${context.parsed.y.toFixed(2)}/g`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.04)',
+                drawBorder: false
+              },
+              ticks: {
+                color: '#64748b',
+                font: { size: 10.5 },
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 8
+              }
+            },
+            y: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)',
+                drawBorder: false
+              },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'Orbitron', size: 10 },
+                callback: function(val) {
+                  return '₹' + val;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      window.priceChart = priceChart;
+    }
+
+    function toggleDataset(index) {
+      if (!window.priceChart) return;
+      const isVisible = window.priceChart.isDatasetVisible(index);
+      window.priceChart.setDatasetVisibility(index, !isVisible);
+      window.priceChart.update();
+    }
+
+    function updateChartTimeframe(tf) {
+      STATE.timeframe = tf;
+      const pills = document.querySelectorAll('#chartTimePills .time-pill-btn');
+      pills.forEach(p => p.classList.remove('active'));
+      event.target.classList.add('active');
+
+      let days = 30;
+      if (tf === '1D') days = 1;
+      else if (tf === '7D') days = 7;
+      else if (tf === '30D') days = 30;
+      else if (tf === '90D') days = 90;
+      else if (tf === '1Y') days = 180;
+
+      const labels = generateDateLabels(days);
+      const goldmData = generateSimulatedSeries(7420, days, 22, 1.8);
+      const goldtenData = generateSimulatedSeries(7421, days, 21, 1.8);
+      const guineaData = generateSimulatedSeries(7416, days, 20, 1.7);
+      const petalData = generateSimulatedSeries(7432, days, 26, 2.2);
+
+      priceChart.data.labels = labels;
+      priceChart.data.datasets[0].data = goldmData;
+      priceChart.data.datasets[1].data = goldtenData;
+      priceChart.data.datasets[2].data = guineaData;
+      priceChart.data.datasets[3].data = petalData;
+      priceChart.update();
+    }
+
+    /* ==========================================================================
+       8. CHART.JS: OPPORTUNITY RADAR (ROW 3 - LEFT 35%)
+       ========================================================================== */
+    function initOpportunityDonutChart() {
+      const ctx = document.getElementById('opportunityDonutChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Confirmed', 'Under Investigation', 'Filtered Out'],
+          datasets: [{
+            data: [1, 2, 3],
+            backgroundColor: [
+              '#f0b90b', // Confirmed (Gold)
+              '#f59e0b', // Under Investigation (Amber)
+              '#334155'  // Filtered Out (Muted)
+            ],
+            borderColor: '#0b0f2d',
+            borderWidth: 3,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '76%',
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 14, 40, 0.95)',
+              titleColor: '#f0b90b',
+              titleFont: { family: 'Orbitron', size: 12 },
+              bodyFont: { family: 'Inter', size: 12 },
+              borderColor: 'rgba(240, 185, 11, 0.3)',
+              borderWidth: 1,
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.label}: ${context.parsed} Pair(s)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    /* ==========================================================================
+       9. CHART.JS: SPREAD ANALYSIS BAR CHART (ROW 3 - CENTER 35%)
+       ========================================================================== */
+    function initSpreadBarChart() {
+      const ctx = document.getElementById('spreadBarChart').getContext('2d');
+
+      // Gradients for bars
+      const gradBar1 = ctx.createLinearGradient(0, 0, 0, 200);
+      gradBar1.addColorStop(0, '#f0b90b');
+      gradBar1.addColorStop(1, '#b45309');
+
+      const gradAlert = ctx.createLinearGradient(0, 0, 0, 200);
+      gradAlert.addColorStop(0, '#ef4444');
+      gradAlert.addColorStop(1, '#7f1d1d');
+
+      const spreadChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['M-TEN', 'M-GUI', 'M-PETAL', 'TEN-GUI', 'TEN-PET', 'GUI-PET'],
+          datasets: [{
+            label: 'Pairwise Basis Spread (₹/g)',
+            data: [1.60, 5.70, -25.70, 7.30, -24.10, -31.40],
+            backgroundColor: [
+              '#f0b90b',
+              '#f59e0b',
+              '#ef4444', // Highlighted breach
+              '#f59e0b',
+              '#f87171',
+              '#ef4444'  // Highlighted breach
+            ],
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: 'rgba(255, 255, 255, 0.1)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(10, 14, 40, 0.95)',
+              titleColor: '#f0b90b',
+              titleFont: { family: 'Orbitron', size: 12 },
+              bodyFont: { family: 'Inter', size: 12 },
+              borderColor: 'rgba(240, 185, 11, 0.3)',
+              borderWidth: 1,
+              callbacks: {
+                label: function(context) {
+                  const zScores = ['0.32σ', '0.78σ', '-2.45σ (ALERT)', '0.94σ', '-2.18σ (ALERT)', '-2.88σ (ALERT)'];
+                  return [
+                    ` Spread: ₹${context.parsed.y.toFixed(2)}/g`,
+                    ` Statistical Dev: ${zScores[context.dataIndex]}`
+                  ];
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: {
+                color: '#94a3b8',
+                font: { family: 'Orbitron', size: 10 }
+              }
+            },
+            y: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)',
+                drawBorder: false
+              },
+              ticks: {
+                color: '#64748b',
+                font: { size: 10 },
+                callback: function(val) {
+                  return val + ' ₹/g';
+                }
+              }
+            }
+          }
+        }
+      });
+
+      window.spreadChart = spreadChart;
+    }
+
+    /* ==========================================================================
+       10. INTERACTIVE ACTIONS & MODALS
+       ========================================================================== */
+    function showContractDetailModal(symbol) {
+      const modal = document.getElementById('contractModal');
+      const title = document.getElementById('modalContractTitle');
+      const body = document.getElementById('modalContractBody');
+
+      if (symbol === 'ALL') {
+        title.innerHTML = 'MCX Gold Contracts Matrix';
+        body.innerHTML = `
+          <div style="display: grid; gap: 12px; margin-bottom: 12px;">
+            <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+              <strong style="color: #f0b90b;">GOLDM (Gold Mini):</strong> Lot Size 100g | Quoted Base: 10g | Purity: 0.995 | Delivery: Compulsory.
+            </div>
+            <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+              <strong style="color: #f59e0b;">GOLDTEN:</strong> Lot Size 10g | Quoted Base: 10g | Purity: 0.995 | Shorter history (Listed 2025).
+            </div>
+            <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+              <strong style="color: #ff7849;">GOLDGUINEA:</strong> Lot Size 8g | Quoted Base: 8g (1 Guinea) | Purity: 0.995.
+            </div>
+            <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px;">
+              <strong style="color: #eab308;">GOLDPETAL:</strong> Lot Size 1g | Quoted Base: 1g | Purity: 0.999 (Purest retail lot).
+            </div>
+          </div>
+          <p style="font-size: 11.5px; color: var(--text-muted);">
+            Normalization Formula applied across Bhavcopy daily close: <br>
+            <code>Normalized ₹/g = (Quoted Price ÷ Quoted Grams) × Purity Fraction</code>
+          </p>
+        `;
+      } else {
+        const c = STATE.contracts[symbol];
+        title.innerHTML = `${symbol} Specification & Normalization`;
+        body.innerHTML = `
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+            <div style="padding: 12px; background: rgba(240, 185, 11, 0.08); border-radius: 8px; border: 1px solid rgba(240, 185, 11, 0.2);">
+              <div style="font-size: 11px; color: var(--text-gold);">LOT SIZE</div>
+              <div style="font-size: 18px; font-weight: 700; color: #fff;">${c.lot} Grams</div>
+            </div>
+            <div style="padding: 12px; background: rgba(240, 185, 11, 0.08); border-radius: 8px; border: 1px solid rgba(240, 185, 11, 0.2);">
+              <div style="font-size: 11px; color: var(--text-gold);">QUOTATION BASE</div>
+              <div style="font-size: 18px; font-weight: 700; color: #fff;">Per ${c.quoteBase} Grams</div>
+            </div>
+            <div style="padding: 12px; background: rgba(255, 255, 255, 0.04); border-radius: 8px;">
+              <div style="font-size: 11px; color: var(--text-secondary);">OFFICIAL PURITY</div>
+              <div style="font-size: 16px; font-weight: 700; color: #fff;">${c.purity * 1000} Fineness</div>
+            </div>
+            <div style="padding: 12px; background: rgba(255, 255, 255, 0.04); border-radius: 8px;">
+              <div style="font-size: 11px; color: var(--text-secondary);">NORMALIZED VALUE</div>
+              <div style="font-size: 16px; font-weight: 700; color: var(--gold-light);">₹${c.normPrice.toFixed(2)} / g</div>
+            </div>
+          </div>
+          <p>
+            <strong>Evidence Trail:</strong> Quoted Bhavcopy settlement of ₹${c.rawPrice.toLocaleString()} converted to standardized fine gold representation. Tested against boundary conditions and contract transition roll dates.
+          </p>
+        `;
+      }
+
+      modal.classList.add('active');
+    }
+
+    function openAlertModal(text) {
+      const modal = document.getElementById('alertModal');
+      const body = document.getElementById('modalAlertBody');
+      body.innerHTML = `
+        <div style="padding: 14px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--status-red); border-radius: 6px; margin-bottom: 14px;">
+          ${text}
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 12px;">
+          <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;">
+            <span style="color: var(--text-muted);">Z-Score Deviation:</span><br>
+            <strong style="color: #f87171; font-size: 14px;">2.45σ (Critical)</strong>
+          </div>
+          <div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;">
+            <span style="color: var(--text-muted);">Liquidity Proxy (Depth):</span><br>
+            <strong style="color: #34d399; font-size: 14px;">Adequate (18.4k Lots)</strong>
+          </div>
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    function openEventDetailModal(id) {
+      const modal = document.getElementById('alertModal');
+      const body = document.getElementById('modalAlertBody');
+      const events = {
+        1: {
+          title: 'Normalization Engine Sync Log',
+          detail: 'All active MCX Gold bhavcopy quotes mapped to pure ₹/g. Unit tests verified 0 quotation basis errors.'
+        },
+        2: {
+          title: 'Walk-Forward Out-Of-Sample Validation',
+          detail: 'Time-ordered walk-forward testing: Parameters fitted strictly on 2024–2025 train data, tested on 2025–2026 unseen periods. No lookahead bias.'
+        },
+        3: {
+          title: 'Event #247 Analogue Audit',
+          detail: 'Nearest historical analogue identified: Diwali 2023 pre-expiry retail squeeze in micro-lots. Half-life to mean reversion: 4.8 trading sessions.'
+        },
+        4: {
+          title: 'Cost Drag Guard Filter',
+          detail: 'Gross spread edge of ₹1.40/g eliminated by estimated slippage (₹0.80/g) + brokerage & STT (₹0.70/g). Status: COST-BLOCKED.'
+        }
+      };
+      const ev = events[id] || events[1];
+      body.innerHTML = `
+        <h4 style="color: var(--gold-primary); font-family: 'Orbitron'; margin-bottom: 8px;">${ev.title}</h4>
+        <p style="margin-bottom: 12px;">${ev.detail}</p>
+        <div style="font-size: 11.5px; color: var(--text-muted);">
+          Audited by AURORA Quantitative Pipeline • Deterministic Rules Architecture.
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    function selectCalDate(day, info) {
+      const modal = document.getElementById('alertModal');
+      const body = document.getElementById('modalAlertBody');
+      body.innerHTML = `
+        <h4 style="color: var(--gold-light); font-family: 'Orbitron'; margin-bottom: 6px;">
+          <i class="fa-solid fa-calendar-check"></i> Contract Calendar: October ${day}, 2026
+        </h4>
+        <p style="margin-top: 8px; font-size: 13.5px; color: #fff;">
+          ${info || `Trading session day. No contract expiry scheduled for October ${day}, 2026.`}
+        </p>
+        <div style="margin-top: 14px; font-size: 12px; color: var(--text-secondary); background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px;">
+          <strong>Lifecycle Rule:</strong> During the 5-day tender period prior to expiry, open interest and spread deviation are flagged with <em>EXPIRY-RISK</em> to prevent artificial roll jumps.
+        </div>
+      `;
+      modal.classList.add('active');
+    }
+
+    function closeModal(id) {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove('active');
+    }
+
+    // Close modal on background click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+
+    function toggleBasis(mode) {
+      const btn = document.getElementById('btnNormPure');
+      if (mode === 'pure') {
+        STATE.isNormalizedPure = !STATE.isNormalizedPure;
+        if (STATE.isNormalizedPure) {
+          btn.innerHTML = '<i class="fa-solid fa-coins"></i> 995 Fine Gold (₹/g)';
+          btn.classList.add('active');
+        } else {
+          btn.innerHTML = '<i class="fa-solid fa-coins"></i> Raw Quoted Basis';
+          btn.classList.remove('active');
+        }
+      }
+    }
+
+    function toggleSlippage() {
+      const btn = document.getElementById('btnSlippageFilter');
+      STATE.slippageEnabled = !STATE.slippageEnabled;
+      if (STATE.slippageEnabled) {
+        btn.innerHTML = '<i class="fa-solid fa-filter"></i> Cost Filter: Active (₹1.5/g)';
+        btn.classList.add('active');
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-filter"></i> Cost Filter: Disabled';
+        btn.classList.remove('active');
+      }
+    }
+
+    function exportBhavcopyReport() {
+      alert('AURORA Market Intelligence Summary Report (PDF/CSV) exported successfully.\n\nIncluded: 4 Contracts Normalized Basis, 6 Pairwise Spreads, Out-of-Sample Walk-Forward Metrics, and Expiry Lifecycle Audit.');
+    }
+
+    function filterByAnomalies() {
+      openAlertModal('Filter applied: Displaying 2 Active Statistical Price Anomalies (GOLDM-GOLDPETAL at 2.45σ and GOLDTEN-GUINEA at 1.82σ). Both pass liquidity and cost filters.');
+    }
+
+    function showSpreadDetailsModal() {
+      openAlertModal('Weighted Pairwise Basis across 6 active contracts: Current average is ₹127.45/lot (+2.3% day-over-day). Historical 30-day mean: ₹124.58/lot.');
+    }
+
+    function showBacktestSummary() {
+      openEventDetailModal(2);
+    }
+
+    function openProfileModal() {
+      openAlertModal('User Profile: Dr. Aris Vance\nRole: Head Quantitative Arbitrage & Bullion Desk\nTerminal ID: AURORA-PRO-MCX-01\nData Permissions: MCX Bhavcopy Real-time L2, Historic Analogue Engine v2.4');
+    }
+
+    function refreshAlerts() {
+      const feed = document.getElementById('alertsFeed');
+      if (feed) {
+        feed.style.opacity = '0.4';
+        setTimeout(() => {
+          feed.style.opacity = '1';
+        }, 300);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+# Backups
+backup_frontend_baseline/
+
+*.mp4
+*.zip
+*.pptx
+*.docx
+~$*.pptx
+~$*.docx
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Databases & local state
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.local
+
+# Testing & logs
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# IDE
+.vscode/
+.idea/

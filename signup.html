@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create account — AURORA Commodity Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="site.css">
+  <link rel="stylesheet" href="site3d.css">
+  <script src="auth.js"></script>
+</head>
+<body>
+  <div class="auth">
+    <aside class="auth-side">
+      <a href="landing.html" class="brand"><span class="brand-box"><i class="fa-solid fa-gem"></i></span><span class="brand-name">AURORA</span></a>
+      <div>
+        <div class="scene scene-sm" data-gold-stack="2,1" role="img" aria-label="Stack of gold bars"></div>
+        <h2>See MCX Gold contracts side by side.</h2>
+        <p class="lead">Create an account to open the full platform: dashboard, contract explorer, opportunity radar, market detective and backtesting lab.</p>
+        <ul class="auth-points">
+          <li><i class="fa-solid fa-layer-group"></i><span><b>Every contract, one view</b>Prices, spreads and health for each active lot.</span></li>
+          <li><i class="fa-solid fa-clock-rotate-left"></i><span><b>History on every signal</b>See how similar setups played out before.</span></li>
+          <li><i class="fa-solid fa-shield-halved"></i><span><b>Nothing to install</b>Runs in your browser. No card needed.</span></li>
+        </ul>
+      </div>
+      <p class="auth-foot">AURORA is a research tool, not investment advice.</p>
+    </aside>
+
+    <main class="auth-main">
+      <a href="landing.html" class="back-home"><i class="fa-solid fa-arrow-left"></i> Back to website</a>
+      <section class="auth-card panel" aria-labelledby="t">
+        <h1 id="t">Create your account</h1>
+        <p class="sub">It takes under a minute.</p>
+
+        <div class="error-box" id="err" role="alert"><i class="fa-solid fa-circle-exclamation" style="margin-top:3px"></i><span id="errMsg"></span></div>
+
+        <div id="activeSessionNotice" style="display:none;margin-bottom:16px;padding:12px 14px;border-radius:12px;background:rgba(240,185,11,0.08);border:1px solid rgba(240,185,11,0.25);font-size:12px;color:var(--text-dim);">
+          <i class="fa-solid fa-circle-info" style="color:var(--gold-light);margin-right:6px;"></i>
+          Signed in as <strong id="activeUser" style="color:#FFF;"></strong>.
+          <a href="dashboard.html" style="color:var(--gold-light);text-decoration:underline;margin-left:6px;font-weight:600;">Open Dashboard &rarr;</a>
+        </div>
+
+        <form id="form" novalidate>
+          <div class="field" id="fName">
+            <label for="name">Full name</label>
+            <div class="input-wrap"><i class="fa-regular fa-user lead"></i>
+              <input class="input" id="name" autocomplete="name" placeholder="Priya Sharma" required></div>
+            <span class="err">Enter your full name.</span>
+          </div>
+          <div class="field" id="fEmail">
+            <label for="email">Work email</label>
+            <div class="input-wrap"><i class="fa-regular fa-envelope lead"></i>
+              <input class="input" id="email" type="email" autocomplete="email" placeholder="you@company.com" required></div>
+            <span class="err">Enter a valid email address.</span>
+          </div>
+          <div class="field">
+            <label for="role">Your role</label>
+            <div class="input-wrap"><i class="fa-solid fa-briefcase lead"></i>
+              <select class="input" id="role">
+                <option>Quant Analyst</option><option>Commodity Trader</option><option>Risk Manager</option><option>Researcher / Student</option><option>Other</option>
+              </select>
+              <i class="fa-solid fa-chevron-down" style="position:absolute;right:15px;top:50%;transform:translateY(-50%);color:var(--text-mute);font-size:12px;pointer-events:none"></i></div>
+          </div>
+          <div class="field" id="fPw">
+            <label for="pw">Password</label>
+            <div class="input-wrap"><i class="fa-solid fa-lock lead"></i>
+              <input class="input" id="pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" required>
+              <button type="button" class="toggle-pw" id="tpw" aria-label="Show password"><i class="fa-regular fa-eye"></i></button></div>
+            <div class="strength" id="strength" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+            <span class="hint" id="pwHint">Use 8+ characters with a mix of letters and numbers.</span>
+            <span class="err">Password must be at least 8 characters.</span>
+          </div>
+          <div class="field" id="fPw2">
+            <label for="pw2">Confirm password</label>
+            <div class="input-wrap"><i class="fa-solid fa-lock lead"></i>
+              <input class="input" id="pw2" type="password" autocomplete="new-password" placeholder="Re-enter password" required></div>
+            <span class="err">Passwords do not match.</span>
+          </div>
+          <label class="check"><input type="checkbox" id="terms"><span>I understand AURORA is for research and is not investment advice.</span></label>
+          <button class="btn btn-gold btn-lg" style="width:100%" id="submit" type="submit"><i class="fa-solid fa-user-plus"></i> Create account</button>
+        </form>
+
+        <div class="divider">or</div>
+        <button class="btn btn-ghost btn-lg" style="width:100%" id="demo" type="button"><i class="fa-solid fa-bolt" style="color:var(--gold-light)"></i> Skip sign-up with Demo login</button>
+
+        <p class="switch">Already have an account? <a href="login.html">Log in</a></p>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    function showErr(m) { $('errMsg').textContent = m; $('err').classList.add('show'); }
+
+    var curSess = Aurora.session();
+    if (curSess && curSess.name) {
+      $('activeUser').textContent = curSess.name + (curSess.demo ? ' (Demo)' : '');
+      $('activeSessionNotice').style.display = 'block';
+    }
+
+    $('tpw').addEventListener('click', function () {
+      var p = $('pw'), show = p.type === 'password';
+      p.type = show ? 'text' : 'password';
+      this.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+      this.innerHTML = '<i class="fa-regular fa-eye' + (show ? '-slash' : '') + '"></i>';
+    });
+
+    $('pw').addEventListener('input', function () {
+      var v = this.value, s = 0;
+      if (v.length >= 8) s++; if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++; if (/\d/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++;
+      var colors = ['#ef4444', '#f59e0b', '#38bdf8', '#10b981'], labels = ['Weak', 'Fair', 'Good', 'Strong'];
+      document.querySelectorAll('#strength span').forEach(function (el, i) { el.style.background = i < s ? colors[s - 1] : ''; });
+      $('pwHint').textContent = v ? 'Strength: ' + (labels[s - 1] || 'Too short') : 'Use 8+ characters with a mix of letters and numbers.';
+    });
+
+    $('demo').addEventListener('click', function () { Aurora.demoLogin(); location.href = 'dashboard.html'; });
+
+    $('form').addEventListener('submit', function (e) {
+      e.preventDefault(); $('err').classList.remove('show');
+      var name = $('name').value.trim(), email = $('email').value, pw = $('pw').value, pw2 = $('pw2').value;
+      var ok = {
+        fName: name.length > 1,
+        fEmail: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()),
+        fPw: pw.length >= 8,
+        fPw2: pw === pw2 && pw2.length > 0
+      };
+      Object.keys(ok).forEach(function (k) { $(k).classList.toggle('invalid', !ok[k]); });
+      if (!(ok.fName && ok.fEmail && ok.fPw && ok.fPw2)) return;
+      if (!$('terms').checked) { showErr('Tick the box to confirm you understand AURORA is for research.'); return; }
+      var b = $('submit'); b.disabled = true;
+      Aurora.signup(name, email, pw, $('role').value).then(function () { location.href = 'dashboard.html'; })
+        .catch(function (x) { showErr(x.message); b.disabled = false; });
+    });
+  </script>
+  <script src="scene3d.js"></script>
+</body>
+</html>

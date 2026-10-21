@@ -1,0 +1,108 @@
+/* AURORA 3D layer — CSS 3D gold bars, tilt cards, scroll-driven deck */
+#dust { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
+/* ---------- Scene + gold bars ---------- */
+.scene { position: relative; height: 500px; perspective: 1500px; perspective-origin: 50% 35%; --mx: 0; --my: 0; }
+.scene .rig {
+  position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; will-change: transform;
+  transform: translateY(10px) rotateX(calc(-18deg + var(--my) * -9deg)) rotateY(calc(var(--mx) * 20deg));
+}
+.scene .sway { transform-style: preserve-3d; animation: sway 11s ease-in-out infinite alternate; }
+.scene .bob { transform-style: preserve-3d; animation: bob 5.5s ease-in-out infinite; }
+@keyframes sway { from { transform: rotateY(-34deg); } to { transform: rotateY(34deg); } }
+@keyframes bob { 50% { transform: translateY(-14px); } }
+
+.bar { --w: 150px; --h: 42px; --d: 72px; position: absolute; left: 0; top: 0; width: 0; height: 0; transform-style: preserve-3d; transform: translate3d(var(--x), var(--y), var(--z, 0px)); }
+.bar .f { position: absolute; left: 50%; top: 50%; backface-visibility: hidden; display: grid; place-items: center; overflow: hidden; font-family: 'Orbitron', sans-serif; }
+.bar .front, .bar .back { width: var(--w); height: var(--h); margin: calc(var(--h) / -2) 0 0 calc(var(--w) / -2); }
+.bar .left, .bar .right { width: var(--d); height: var(--h); margin: calc(var(--h) / -2) 0 0 calc(var(--d) / -2); }
+.bar .top, .bar .bottom { width: var(--w); height: var(--d); margin: calc(var(--d) / -2) 0 0 calc(var(--w) / -2); }
+.bar .front  { transform: translateZ(calc(var(--d) / 2)); background: linear-gradient(180deg, #f2c11b 0%, #c98f0a 62%, #8c5c04 100%); }
+.bar .back   { transform: rotateY(180deg) translateZ(calc(var(--d) / 2)); background: linear-gradient(180deg, #b9830a, #6b4503); }
+.bar .right  { transform: rotateY(90deg) translateZ(calc(var(--w) / 2)); background: linear-gradient(180deg, #d19a0e, #7a4e04); }
+.bar .left   { transform: rotateY(-90deg) translateZ(calc(var(--w) / 2)); background: linear-gradient(180deg, #e7ae14, #94650a); }
+.bar .top    { transform: rotateX(90deg) translateZ(calc(var(--h) / 2)); background: linear-gradient(135deg, #fff3b0 0%, #ffd84d 34%, #f0b90b 62%, #ffe685 100%); }
+.bar .bottom { transform: rotateX(-90deg) translateZ(calc(var(--h) / 2)); background: #5a3a02; }
+/* bevel */
+.bar .front::before, .bar .top::before { content: ''; position: absolute; inset: 0; box-shadow: inset 0 0 0 2px rgba(255, 244, 190, .55), inset 0 -10px 14px rgba(120, 70, 0, .35); }
+.bar .top::after { content: ''; position: absolute; inset: 12%; border-radius: 6px; background: linear-gradient(135deg, rgba(255,255,255,.28), rgba(150,95,0,.18)); box-shadow: inset 1px 1px 3px rgba(255,255,255,.55), inset -2px -2px 4px rgba(120,70,0,.4); }
+.bar .top span, .bar .front span { position: relative; z-index: 1; color: #6a4300; text-shadow: 0 1px 0 rgba(255, 244, 190, .8); letter-spacing: .16em; font-weight: 800; }
+.bar .top span { font-size: 11px; transform: rotate(0deg); }
+.bar .front span { font-size: 8.5px; opacity: .85; }
+/* slow shine across the top faces */
+.bar .shine { position: absolute; inset: 0; z-index: 2; background: linear-gradient(115deg, transparent 38%, rgba(255,255,255,.85) 50%, transparent 62%); background-size: 260% 100%; background-position: 160% 0; animation: shine 6.5s ease-in-out infinite; animation-delay: var(--sd, 0s); mix-blend-mode: soft-light; }
+@keyframes shine { 0%, 55% { background-position: 160% 0; } 100% { background-position: -60% 0; } }
+
+.scene .glow { position: absolute; left: 50%; top: 52%; width: 520px; height: 520px; margin: -260px 0 0 -260px; border-radius: 50%; background: radial-gradient(circle, rgba(240,185,11,.30), rgba(240,185,11,.08) 45%, transparent 68%); filter: blur(10px); pointer-events: none; }
+.scene .ground { position: absolute; left: 50%; bottom: 36px; width: 460px; height: 70px; margin-left: -230px; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,0,0,.65), transparent 70%); filter: blur(6px); pointer-events: none; }
+
+/* floating glass chips living at different depths */
+.chip3d { position: absolute; left: 0; top: 0; transform-style: preserve-3d; transform: translate3d(var(--x), var(--y), var(--z)); }
+.chip3d > div {
+  white-space: nowrap; padding: 11px 16px; border-radius: 16px; font-size: 12.5px; color: var(--text-dim); display: flex; gap: 12px; align-items: center;
+  background: rgba(18, 25, 70, .68); border: 1px solid var(--glass-border-bright); backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px rgba(0,0,0,.5), inset 1px 1px 2px rgba(255,255,255,.14); animation: bob 5s ease-in-out infinite; animation-delay: var(--fd, 0s);
+}
+.chip3d i { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; color: #1a1300; background: linear-gradient(135deg, var(--gold-light), var(--gold-dark)); }
+.chip3d b { display: block; color: var(--text); font-family: 'Orbitron', sans-serif; font-size: 14px; }
+.chip3d small { display: block; font-size: 11px; color: var(--text-mute); }
+.chip3d .up { color: var(--green); }
+
+.scene-sm { height: 250px; margin: 14px 0 0; }
+.scene-sm .rig { scale: .85; }
+.scene-sm .glow { width: 380px; height: 380px; margin: -190px 0 0 -190px; }
+.scene-sm .ground { width: 300px; margin-left: -150px; bottom: 8px; }
+
+/* ---------- Scroll-driven dashboard deck ---------- */
+.stage { perspective: 1700px; perspective-origin: 50% 20%; padding: 10px 0 30px; }
+.deck-rig { position: relative; max-width: 880px; margin: 0 auto; transform-style: preserve-3d; transform-origin: 50% 90%; will-change: transform;
+  transform: rotateX(var(--drx, 24deg)) rotateY(var(--dry, -10deg)) translateY(var(--dty, 30px)); }
+.deck-rig .preview { transform-style: preserve-3d; box-shadow: 0 50px 90px rgba(0,0,0,.65), 0 0 70px rgba(240,185,11,.12), var(--clay-shadow); }
+.deck-rig .fl { position: absolute; transform-style: preserve-3d; }
+.deck-rig .fl > div { padding: 14px 18px; border-radius: 18px; display: flex; gap: 13px; align-items: center; font-size: 13px; color: var(--text-dim); white-space: nowrap;
+  background: rgba(18, 25, 70, .78); border: 1px solid var(--glass-border-bright); backdrop-filter: blur(14px); box-shadow: 0 26px 50px rgba(0,0,0,.55), inset 1px 1px 2px rgba(255,255,255,.14); animation: bob 6s ease-in-out infinite; }
+.deck-rig .fl i { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; color: #1a1300; background: linear-gradient(135deg, var(--gold-light), var(--gold-dark)); }
+.deck-rig .fl b { display: block; color: var(--text); font-size: 14px; }
+.fl-a { right: -44px; top: -30px; transform: translateZ(110px); }
+.fl-b { left: -44px; bottom: -34px; transform: translateZ(80px); }
+.fl-b > div { animation-delay: -2.4s; }
+
+/* ---------- Tilt cards with glare ---------- */
+.t3 { position: relative; transform-style: preserve-3d; transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform .18s ease-out, border-color .25s, box-shadow .25s; }
+.t3.t3-on { transition: transform .06s linear, border-color .25s, box-shadow .25s; }
+.module.t3:hover, .audience .t3:hover, .compare .t3:hover { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-6px); box-shadow: 0 30px 60px rgba(0,0,0,.55), 0 0 40px rgba(240,185,11,.1), var(--clay-shadow); }
+.t3::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .25s; background: radial-gradient(340px circle at var(--gx, 50%) var(--gy, 0%), rgba(255, 215, 0, .16), transparent 62%); }
+.t3:hover::after { opacity: 1; }
+.t3 .ic, .t3 h3 { transform: translateZ(34px); }
+.module .ic { background: linear-gradient(145deg, rgba(240,185,11,.2), rgba(240,185,11,.05)); box-shadow: 6px 8px 16px rgba(0,0,0,.5), -3px -3px 8px rgba(255,255,255,.05), inset 1px 1px 2px rgba(255,255,255,.2); }
+.auth-card.t3 { --max: 5deg; }
+
+/* ---------- Coin steps ---------- */
+.steps .step .n { position: relative; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2,.7,.2,1);
+  background: radial-gradient(circle at 32% 28%, #fff3b0 0%, #ffd84d 28%, #f0b90b 58%, #b8860b 100%);
+  box-shadow: 0 1px 0 #b8860b, 0 2px 0 #a87608, 0 3px 0 #986a06, 0 4px 0 #885d05, 0 5px 0 #785004, 0 14px 22px rgba(0,0,0,.55), 0 0 28px var(--gold-glow), inset 0 0 0 4px rgba(255, 244, 190, .45), inset 0 0 0 7px rgba(150,95,0,.25); text-shadow: 0 1px 0 rgba(255,244,190,.7); }
+.steps .step:hover .n { transform: rotateY(360deg); }
+
+/* hero accent: depth on primary buttons */
+.btn-gold { box-shadow: 0 6px 0 #9a6f05, 0 16px 28px rgba(240,185,11,.3), inset 1px 1px 2px rgba(255,255,255,.55); transform: translateY(-2px); }
+.btn-gold:hover { transform: translateY(-3px); box-shadow: 0 7px 0 #9a6f05, 0 20px 34px rgba(240,185,11,.45), inset 1px 1px 2px rgba(255,255,255,.6); }
+.btn-gold:active { transform: translateY(3px); box-shadow: 0 1px 0 #9a6f05, 0 6px 12px rgba(240,185,11,.3), inset 1px 1px 2px rgba(255,255,255,.55); }
+.brand-box { box-shadow: 0 3px 0 #9a6f05, 0 8px 20px var(--gold-glow), inset 1px 1px 2px rgba(255,255,255,.55); }
+
+@media (max-width: 960px) {
+  .scene { height: 420px; }
+  .deck-rig { --drx: 12deg !important; --dry: 0deg !important; }
+  .fl-a { right: -6px; } .fl-b { left: -6px; }
+}
+@media (max-width: 600px) {
+  .scene { height: 340px; } .scene .rig { scale: .6; }
+  .scene .chip3d { display: none; }
+  .deck-rig .fl { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene .sway, .scene .bob, .bar .shine, .chip3d > div, .deck-rig .fl > div { animation: none !important; }
+  .scene .sway { transform: rotateY(-22deg); }
+}
+/* keep 3D overflow from creating sideways scroll */
+html, body { overflow-x: clip; }
+.hero, #preview { overflow-x: clip; }

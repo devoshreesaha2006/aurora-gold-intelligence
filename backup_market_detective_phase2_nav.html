@@ -1,0 +1,3033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Market Detective â€” AURORA MCX Gold Intelligence</title>
+  
+  <!-- Google Fonts: Inter & Orbitron & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js 4.4.1 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       AURORA DESIGN SYSTEM - CLAYMORPHISM + GLASSMORPHISM + 3D LUXURY NAVY/GOLD
+       ========================================================================== */
+    :root {
+      /* Background Hierarchy */
+      --bg-deep: #060913;
+      --bg-space: #0A0F1D;
+      --bg-surface: #0E162B;
+      --bg-card: rgba(14, 23, 44, 0.72);
+      --bg-card-hover: rgba(20, 32, 60, 0.85);
+
+      /* Claymorphic Surface & Shadows */
+      --clay-surface: #131E38;
+      --clay-surface-raised: #182647;
+      --clay-shadow-dark: rgba(2, 5, 12, 0.85);
+      --clay-shadow-light: rgba(45, 68, 120, 0.28);
+      --clay-inset-highlight: rgba(255, 255, 255, 0.08);
+      --clay-inset-shadow: rgba(0, 0, 0, 0.45);
+
+      /* Aurora Gold Palette */
+      --gold-primary: #F5B041;
+      --gold-bright: #FCD34D;
+      --gold-light: #FDE68A;
+      --gold-dark: #C68A1B;
+      --gold-glow: rgba(245, 176, 65, 0.35);
+      --gold-gradient: linear-gradient(135deg, #FFE082 0%, #F5B041 50%, #D97706 100%);
+      --gold-gradient-soft: linear-gradient(135deg, rgba(245, 176, 65, 0.22) 0%, rgba(217, 119, 6, 0.08) 100%);
+      --gold-border: rgba(245, 176, 65, 0.25);
+      --gold-border-intense: rgba(245, 176, 65, 0.6);
+
+      /* Status Colors */
+      --amber-warning: #F59E0B;
+      --amber-bg: rgba(245, 158, 11, 0.14);
+      --amber-border: rgba(245, 158, 11, 0.4);
+      --amber-glow: rgba(245, 158, 11, 0.35);
+
+      --emerald-success: #10B981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --emerald-border: rgba(16, 185, 129, 0.35);
+      --emerald-glow: rgba(16, 185, 129, 0.3);
+
+      --cyan-accent: #06B6D4;
+      --cyan-bg: rgba(6, 182, 212, 0.12);
+      --cyan-border: rgba(6, 182, 212, 0.35);
+
+      --rose-danger: #EF4444;
+      --purple-accent: #8B5CF6;
+
+      /* Typography */
+      --text-main: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --text-gold: #FCD34D;
+
+      /* Borders & Glass */
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-shine: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.01) 100%);
+      
+      /* Layout Dimensions */
+      --sidebar-width: 270px;
+      --header-height: 74px;
+      --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background-color: var(--bg-deep);
+      background-image: 
+        radial-gradient(circle at 18% 12%, rgba(245, 176, 65, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(6, 182, 212, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(13, 22, 45, 0.8) 0%, transparent 100%);
+      color: var(--text-main);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(10, 15, 29, 0.8);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(245, 176, 65, 0.25);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-primary);
+    }
+
+    /* Orbitron font class for numbers and sci-fi tags */
+    .orbitron {
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.5px;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ==========================================================================
+       SIDEBAR (AURORA PLATFORM NAVIGATION)
+       ========================================================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: linear-gradient(180deg, #090E1D 0%, #070B16 100%);
+      border-right: 1px solid var(--border-glass, rgba(245, 176, 65, 0.15));
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6);
+      transition: var(--transition-smooth);
+    }
+
+    .brand-section {
+      padding: 24px 22px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .brand-logo-3d {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(145deg, #1C2B4F, #0E162B);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-primary);
+      font-size: 20px;
+      box-shadow: 
+        5px 5px 12px var(--clay-shadow-dark),
+        -3px -3px 8px var(--clay-shadow-light),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.15);
+      border: 1px solid var(--gold-border);
+      position: relative;
+    }
+    .brand-logo-3d::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 14px;
+      background: var(--gold-gradient);
+      z-index: -1;
+      opacity: 0.3;
+      filter: blur(4px);
+    }
+
+    .brand-text h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+    .brand-text span {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      display: block;
+      margin-top: 3px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      padding: 10px 14px 4px;
+      font-weight: 700;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+    .nav-item i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      color: var(--text-muted);
+      transition: var(--transition-smooth);
+    }
+    .nav-item:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+      transform: translateX(3px);
+    }
+    .nav-item:hover i {
+      color: var(--gold-primary);
+    }
+
+    /* Active Nav Item - Claymorphic Gold Inset Glow */
+    .nav-item.active {
+      color: #FFF;
+      background: linear-gradient(135deg, rgba(245, 176, 65, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%);
+      border: 1px solid rgba(245, 176, 65, 0.35);
+      box-shadow: 
+        inset 0 1px 1px rgba(255, 255, 255, 0.2),
+        0 4px 15px rgba(245, 176, 65, 0.15);
+      font-weight: 600;
+    }
+    .nav-item.active i {
+      color: var(--gold-bright);
+      filter: drop-shadow(0 0 6px var(--gold-glow));
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      bottom: 8px;
+      width: 3.5px;
+      border-radius: 0 4px 4px 0;
+      background: var(--gold-gradient);
+      box-shadow: 0 0 8px var(--gold-primary);
+    }
+    .nav-badge {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: rgba(245, 176, 65, 0.2);
+      color: var(--gold-bright);
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      border: 1px solid rgba(245, 176, 65, 0.3);
+    }
+
+    /* Sidebar Footer Card */
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .engine-status-box {
+      background: linear-gradient(145deg, #101931, #0B1123);
+      border-radius: 14px;
+      padding: 13px 14px;
+      box-shadow: 
+        4px 4px 10px rgba(0, 0, 0, 0.5),
+        -2px -2px 6px rgba(255, 255, 255, 0.03),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(245, 176, 65, 0.15);
+    }
+    .engine-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .engine-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald-success);
+      box-shadow: 0 0 8px var(--emerald-success);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .engine-metrics {
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .engine-row {
+      display: flex;
+      justify-content: space-between;
+    }
+    .engine-row span:last-child {
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       MAIN CONTENT CONTAINER
+       ========================================================================== */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      position: relative;
+      background: transparent;
+    }
+
+    /* ==========================================================================
+       TOP APP HEADER BAR
+       ========================================================================== */
+    .top-header {
+      height: var(--header-height);
+      background: rgba(10, 15, 29, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(245, 176, 65, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .header-breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .header-breadcrumb a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: var(--transition-smooth);
+    }
+    .header-breadcrumb a:hover {
+      color: var(--gold-primary);
+    }
+    .header-breadcrumb .separator {
+      color: rgba(255, 255, 255, 0.2);
+    }
+    .header-breadcrumb .current {
+      color: var(--gold-bright);
+      font-weight: 600;
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* Live Data Pill with Clay tactile feel */
+    .live-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 30px;
+      background: linear-gradient(145deg, #121C34, #0D1526);
+      border: 1px solid rgba(245, 176, 65, 0.2);
+      box-shadow: 
+        3px 3px 8px rgba(0,0,0,0.4),
+        -2px -2px 6px rgba(255,255,255,0.04),
+        inset 1px 1px 1px rgba(255,255,255,0.1);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .live-status-pill .indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald-success);
+      box-shadow: 0 0 8px var(--emerald-success);
+      animation: pulse 1.6s infinite;
+    }
+    .live-status-pill .tag {
+      font-family: 'Orbitron', monospace;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+    .live-status-pill .date {
+      color: var(--gold-bright);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+
+    /* Quick Action Buttons in Header */
+    .header-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      background: linear-gradient(145deg, #14203B, #0E162B);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 
+        3px 3px 7px rgba(0,0,0,0.35),
+        -2px -2px 5px rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+    .header-btn:hover {
+      color: var(--gold-primary);
+      border-color: rgba(245, 176, 65, 0.3);
+      transform: translateY(-2px);
+    }
+    .header-btn .badge-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--amber-warning);
+      box-shadow: 0 0 6px var(--amber-warning);
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 12px 5px 6px;
+      background: linear-gradient(145deg, #15223E, #0E162B);
+      border-radius: 30px;
+      border: 1px solid rgba(245, 176, 65, 0.2);
+      box-shadow: 
+        4px 4px 10px rgba(0,0,0,0.4),
+        -2px -2px 6px rgba(255,255,255,0.05);
+      cursor: pointer;
+    }
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--gold-gradient);
+      color: #0B1120;
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .user-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .user-role {
+      font-size: 10px;
+      color: var(--gold-primary);
+      font-family: 'Orbitron', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       CONTENT AREA
+       ========================================================================== */
+    .content-area {
+      padding: 28px 32px 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+      max-width: 1650px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* ==========================================================================
+       SECTION 1: PAGE HEADER & EVENT SELECTOR
+       ========================================================================== */
+    .page-header-card {
+      background: linear-gradient(135deg, rgba(19, 29, 56, 0.8) 0%, rgba(12, 18, 36, 0.9) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 24px 30px;
+      border: 1px solid var(--gold-border);
+      box-shadow: 
+        10px 10px 25px rgba(0, 0, 0, 0.5),
+        -6px -6px 18px rgba(255, 255, 255, 0.03),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-header-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: 80px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(245, 176, 65, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .title-group {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+    .detective-icon-3d {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, #1C2B52, #101932);
+      border: 1px solid var(--gold-border-intense);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      color: var(--gold-bright);
+      box-shadow: 
+        6px 6px 16px rgba(0, 0, 0, 0.6),
+        -4px -4px 12px rgba(255, 255, 255, 0.05),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.15),
+        0 0 20px var(--gold-glow);
+      position: relative;
+      transform: perspective(600px) rotateY(-8deg) rotateX(4deg);
+      transition: var(--transition-smooth);
+    }
+    .detective-icon-3d:hover {
+      transform: perspective(600px) rotateY(0deg) rotateX(0deg) scale(1.05);
+    }
+
+    .title-texts h2 {
+      font-family: 'Orbitron', monospace;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .title-texts p {
+      color: var(--text-secondary);
+      font-size: 13.5px;
+      margin-top: 5px;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title-texts p i {
+      color: var(--gold-primary);
+    }
+
+    .event-selector-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .selector-box-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* Claymorphic Interactive Dropdown */
+    .clay-select-wrapper {
+      position: relative;
+      min-width: 380px;
+    }
+    .clay-select-wrapper select {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      background: linear-gradient(145deg, #152241, #0E172C);
+      border: 1px solid rgba(245, 176, 65, 0.35);
+      border-radius: 14px;
+      padding: 13px 44px 13px 18px;
+      color: var(--gold-light);
+      font-family: 'Orbitron', monospace;
+      font-size: 13.5px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      box-shadow: 
+        5px 5px 14px rgba(0, 0, 0, 0.5),
+        -3px -3px 8px rgba(255, 255, 255, 0.05),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.15);
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+    .clay-select-wrapper select:hover,
+    .clay-select-wrapper select:focus {
+      border-color: var(--gold-bright);
+      box-shadow: 
+        0 0 15px rgba(245, 176, 65, 0.3),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.2);
+    }
+    .clay-select-wrapper select option {
+      background: #0D162B;
+      color: #FFF;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 10px;
+    }
+    .clay-select-icon {
+      position: absolute;
+      right: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--gold-primary);
+      font-size: 13px;
+    }
+
+    /* Claymorphic Action Buttons */
+    .btn-clay {
+      background: linear-gradient(145deg, #172547, #0F182E);
+      border: 1px solid rgba(245, 176, 65, 0.25);
+      border-radius: 12px;
+      padding: 12px 18px;
+      color: var(--text-main);
+      font-size: 12.5px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 
+        4px 4px 12px rgba(0, 0, 0, 0.45),
+        -2px -2px 6px rgba(255, 255, 255, 0.04),
+        inset 1px 1px 1px rgba(255, 255, 255, 0.1);
+      transition: var(--transition-smooth);
+    }
+    .btn-clay:hover {
+      background: linear-gradient(145deg, #1D2E57, #131E3A);
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      transform: translateY(-2px);
+      box-shadow: 
+        6px 6px 16px rgba(0, 0, 0, 0.55),
+        0 0 12px rgba(245, 176, 65, 0.25);
+    }
+    .btn-clay:active {
+      transform: translateY(1px);
+      box-shadow: 
+        inset 2px 2px 5px rgba(0,0,0,0.6),
+        inset -1px -1px 2px rgba(255,255,255,0.05);
+    }
+
+    .btn-clay-gold {
+      background: linear-gradient(145deg, #F5B041, #D97706);
+      color: #0A0F1D;
+      font-weight: 700;
+      border: 1px solid #FFE082;
+      box-shadow: 
+        4px 4px 14px rgba(245, 176, 65, 0.35),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.4);
+    }
+    .btn-clay-gold:hover {
+      background: linear-gradient(145deg, #FCD34D, #E5A93C);
+      color: #050811;
+      transform: translateY(-2px);
+      box-shadow: 
+        6px 6px 20px rgba(245, 176, 65, 0.5),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.6);
+    }
+
+    /* ==========================================================================
+       TWO-COLUMN SPLIT: TIMELINE (40%) + EVIDENCE DASHBOARD (60%)
+       ========================================================================== */
+    .investigation-grid {
+      display: grid;
+      grid-template-columns: 42% 58%;
+      gap: 26px;
+      align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+      .investigation-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       COLUMN 1: INVESTIGATION TIMELINE (VERTICAL STEPPER)
+       ========================================================================== */
+    .timeline-column {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-headline-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px 6px;
+    }
+    .section-headline-box h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-headline-box h3 i {
+      color: var(--gold-primary);
+    }
+    .badge-count {
+      font-size: 11px;
+      background: rgba(245, 176, 65, 0.15);
+      border: 1px solid rgba(245, 176, 65, 0.3);
+      color: var(--gold-bright);
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* Vertical Stepper Container */
+    .stepper-container {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding-left: 20px;
+    }
+
+    /* Connecting vertical beam */
+    .stepper-container::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      bottom: 45px;
+      left: 36px;
+      width: 3px;
+      background: linear-gradient(180deg, 
+        var(--emerald-success) 0%, 
+        var(--emerald-success) 45%, 
+        var(--amber-warning) 55%, 
+        var(--emerald-success) 70%, 
+        var(--amber-warning) 85%, 
+        var(--gold-primary) 100%
+      );
+      box-shadow: 0 0 10px rgba(245, 176, 65, 0.3);
+      z-index: 1;
+      border-radius: 2px;
+    }
+
+    /* Step Card - Glassmorphism + Clay Subtle Touch */
+    .step-card {
+      position: relative;
+      z-index: 2;
+      background: rgba(14, 22, 43, 0.85);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 20px 16px 56px;
+      box-shadow: 
+        6px 6px 18px rgba(0, 0, 0, 0.45),
+        -3px -3px 8px rgba(255, 255, 255, 0.02),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.06);
+      transition: var(--transition-smooth);
+      cursor: default;
+    }
+    .step-card:hover {
+      border-color: rgba(245, 176, 65, 0.35);
+      background: rgba(18, 28, 54, 0.92);
+      transform: translateX(4px);
+      box-shadow: 
+        8px 8px 22px rgba(0, 0, 0, 0.55),
+        0 0 15px rgba(245, 176, 65, 0.12);
+    }
+
+    /* Node Marker (Step Number / Icon Bubble) */
+    .step-node {
+      position: absolute;
+      left: -2px;
+      top: 16px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #172445, #0E162B);
+      border: 2px solid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 
+        3px 3px 8px rgba(0, 0, 0, 0.6),
+        -2px -2px 5px rgba(255, 255, 255, 0.08),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.15);
+      z-index: 3;
+      transition: var(--transition-smooth);
+    }
+    .step-card:hover .step-node {
+      transform: scale(1.1);
+    }
+
+    /* Node Variants */
+    .node-success {
+      border-color: var(--emerald-success);
+      color: var(--emerald-success);
+      box-shadow: 0 0 12px var(--emerald-glow);
+    }
+    .node-warning {
+      border-color: var(--amber-warning);
+      color: var(--amber-warning);
+      box-shadow: 0 0 12px var(--amber-glow);
+    }
+    .node-investigate {
+      border-color: var(--gold-bright);
+      color: var(--gold-bright);
+      box-shadow: 0 0 14px var(--gold-glow);
+    }
+
+    /* Step Header */
+    .step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .step-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    .step-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 14.5px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.3px;
+    }
+    .step-badge {
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Orbitron', monospace;
+    }
+    .badge-pass {
+      background: var(--emerald-bg);
+      color: var(--emerald-success);
+      border: 1px solid var(--emerald-border);
+    }
+    .badge-warn {
+      background: var(--amber-bg);
+      color: var(--amber-warning);
+      border: 1px solid var(--amber-border);
+    }
+    .badge-analogue {
+      background: rgba(245, 176, 65, 0.15);
+      color: var(--gold-bright);
+      border: 1px solid rgba(245, 176, 65, 0.4);
+    }
+
+    /* Step Details Grid */
+    .step-body-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px 14px;
+      font-size: 12.5px;
+    }
+    .step-detail-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      background: rgba(8, 14, 28, 0.4);
+      padding: 5px 9px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .step-detail-row.full-width {
+      grid-column: span 2;
+    }
+    .detail-label {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+    .detail-val {
+      color: var(--text-main);
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+    }
+    .detail-val.gold {
+      color: var(--gold-bright);
+    }
+    .detail-val.success {
+      color: var(--emerald-success);
+    }
+    .detail-val.warn {
+      color: var(--amber-warning);
+    }
+
+    /* Special Warning Banner inside Step 5 & 7 */
+    .warning-callout {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
+      border-left: 3px solid var(--amber-warning);
+      border-radius: 6px;
+      font-size: 11.5px;
+      color: #FDE68A;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .warning-callout i {
+      color: var(--amber-warning);
+      font-size: 13px;
+    }
+
+    /* Formula Pill in Step 2 */
+    .formula-tag {
+      margin-top: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #CBD5E1;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      border-radius: 6px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .formula-tag i {
+      color: var(--cyan-accent);
+    }
+
+    /* Step 4: Mini Z-Score Visual Meter */
+    .z-meter-wrap {
+      margin-top: 8px;
+      background: rgba(10, 16, 32, 0.6);
+      border-radius: 8px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .z-meter-bar {
+      position: relative;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin: 8px 0 4px;
+    }
+    .z-meter-fill {
+      position: absolute;
+      left: 50%;
+      height: 100%;
+      width: 41%; /* maps +2.47Ïƒ on a -3Ïƒ to +3Ïƒ span */
+      background: var(--gold-gradient);
+      border-radius: 4px;
+      box-shadow: 0 0 8px var(--gold-glow);
+    }
+    .z-meter-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 9.5px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .z-meter-labels .highlight {
+      color: var(--gold-bright);
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       COLUMN 2: EVIDENCE DASHBOARD (RIGHT SIDE 60%)
+       ========================================================================== */
+    .evidence-column {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Common Card Styling for Evidence Panels */
+    .evidence-panel {
+      background: rgba(13, 21, 41, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+      border: 1px solid rgba(245, 176, 65, 0.18);
+      padding: 22px 24px;
+      box-shadow: 
+        8px 8px 24px rgba(0, 0, 0, 0.5),
+        -4px -4px 14px rgba(255, 255, 255, 0.03),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.08);
+      position: relative;
+      transition: var(--transition-smooth);
+    }
+    .evidence-panel:hover {
+      border-color: rgba(245, 176, 65, 0.32);
+    }
+
+    .panel-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .panel-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .panel-icon-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(145deg, #172445, #0E172C);
+      border: 1px solid var(--gold-border);
+      color: var(--gold-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      box-shadow: 
+        3px 3px 8px rgba(0, 0, 0, 0.4),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+    }
+    .panel-top-bar h4 {
+      font-family: 'Orbitron', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.5px;
+    }
+    .panel-top-bar p {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .panel-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .chip-btn {
+      background: rgba(20, 31, 58, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 5px 11px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: 'Orbitron', monospace;
+      transition: var(--transition-smooth);
+    }
+    .chip-btn:hover {
+      color: #FFF;
+      border-color: rgba(245, 176, 65, 0.3);
+    }
+    .chip-btn.active {
+      background: rgba(245, 176, 65, 0.18);
+      color: var(--gold-bright);
+      border-color: var(--gold-primary);
+      font-weight: 700;
+      box-shadow: 0 0 8px rgba(245, 176, 65, 0.2);
+    }
+
+    .chart-container-wrapper {
+      position: relative;
+      height: 240px;
+      width: 100%;
+    }
+
+    /* Key chart metrics bar below chart */
+    .chart-footer-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .chart-metric-item {
+      background: rgba(9, 14, 27, 0.5);
+      border-radius: 10px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .chart-metric-label {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .chart-metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+       PANEL C: INVESTIGATION VERDICT (LARGE CLAYMORPHISM CARD)
+       ========================================================================== */
+    .verdict-clay-card {
+      background: linear-gradient(145deg, #142142, #0D162C);
+      border-radius: 22px;
+      padding: 26px 28px;
+      box-shadow: 
+        12px 12px 28px rgba(3, 7, 16, 0.85),
+        -8px -8px 22px rgba(32, 50, 92, 0.35),
+        inset 2px 2px 4px rgba(255, 255, 255, 0.12),
+        inset -2px -2px 4px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(245, 176, 65, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+    .verdict-clay-card::after {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -80px;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .verdict-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+
+    .verdict-left-meta {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* Circular Progress Score 78/100 */
+    .score-circle-wrapper {
+      position: relative;
+      width: 86px;
+      height: 86px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .score-circle-svg {
+      width: 86px;
+      height: 86px;
+      transform: rotate(-90deg);
+    }
+    .circle-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 7;
+    }
+    .circle-progress {
+      fill: none;
+      stroke: url(#goldGradientStroke);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-dasharray: 238; /* 2 * PI * 38 approx */
+      stroke-dashoffset: 52; /* 78% filled */
+      filter: drop-shadow(0 0 6px var(--gold-glow));
+      transition: stroke-dashoffset 1.5s ease-out;
+    }
+    .score-text-inner {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .score-number {
+      font-family: 'Orbitron', monospace;
+      font-size: 20px;
+      font-weight: 800;
+      color: #FFF;
+      line-height: 1;
+    }
+    .score-denom {
+      font-size: 9px;
+      color: var(--gold-primary);
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .verdict-badge-box {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .verdict-label-sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* Claymorphic Large Amber Badge */
+    .clay-verdict-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      border-radius: 30px;
+      background: linear-gradient(145deg, #2A1D0B, #1C1204);
+      border: 1px solid var(--amber-warning);
+      box-shadow: 
+        5px 5px 12px rgba(0,0,0,0.5),
+        -3px -3px 8px rgba(245, 158, 11, 0.15),
+        inset 1px 1px 3px rgba(255, 255, 255, 0.2),
+        0 0 16px rgba(245, 158, 11, 0.25);
+      color: #FCD34D;
+      font-family: 'Orbitron', monospace;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .badge-amber-glow-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--amber-warning);
+      box-shadow: 0 0 10px var(--amber-warning);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Key Finding Highlight Box */
+    .verdict-content-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .verdict-box {
+      border-radius: 14px;
+      padding: 14px 18px;
+      position: relative;
+    }
+
+    .key-finding-box {
+      background: rgba(9, 15, 30, 0.65);
+      border: 1px solid rgba(245, 176, 65, 0.2);
+      box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.05);
+    }
+    .finding-header {
+      font-family: 'Orbitron', monospace;
+      font-size: 11.5px;
+      color: var(--gold-bright);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+    .finding-body {
+      font-size: 13.5px;
+      color: #E2E8F0;
+      line-height: 1.55;
+    }
+    .finding-body strong {
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+
+    .recommendation-box {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 100%);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-left: 4px solid var(--amber-warning);
+    }
+    .recommendation-header {
+      font-family: 'Orbitron', monospace;
+      font-size: 11.5px;
+      color: #FCD34D;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+    }
+    .recommendation-body {
+      font-size: 13.5px;
+      color: #FFF;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+
+    .caveats-box {
+      background: rgba(8, 13, 25, 0.45);
+      border: 1px dashed rgba(255, 255, 255, 0.14);
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+    .caveats-text {
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .caveats-text i {
+      color: var(--amber-warning);
+      margin-top: 2px;
+    }
+
+    /* 4-Pillar Quantitative Score Gauges inside Verdict */
+    .verdict-subscores-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .subscore-pill {
+      background: rgba(9, 15, 30, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .subscore-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+    .subscore-val-wrap {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .subscore-val {
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .subscore-mini-track {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .subscore-mini-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    /* ==========================================================================
+       SECTION 4: AI EXPLANATION PANEL (BOTTOM FULL WIDTH GLASSMORPHISM)
+       ========================================================================== */
+    .ai-explanation-panel {
+      background: linear-gradient(135deg, rgba(16, 26, 50, 0.8) 0%, rgba(10, 16, 32, 0.88) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      border: 1px solid rgba(245, 176, 65, 0.25);
+      padding: 26px 30px;
+      box-shadow: 
+        10px 10px 30px rgba(0, 0, 0, 0.5),
+        -6px -6px 18px rgba(255, 255, 255, 0.02),
+        inset 1px 1px 2px rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-explanation-panel::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gold-gradient);
+    }
+
+    .ai-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .ai-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .ai-sparkle-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #1E2D54, #121A33);
+      border: 1px solid var(--gold-border);
+      color: var(--gold-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px var(--gold-glow);
+    }
+    .ai-title-wrap h3 {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.5px;
+    }
+
+    .ai-meta-pills {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ai-confidence-pill {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: var(--emerald-success);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 11.5px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+    }
+
+    .ai-paragraph-content {
+      background: rgba(9, 14, 27, 0.5);
+      border-radius: 14px;
+      padding: 20px 22px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 14px;
+      line-height: 1.75;
+      color: #E2E8F0;
+      margin-bottom: 20px;
+      box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.4);
+    }
+    .ai-paragraph-content p {
+      margin-bottom: 10px;
+    }
+    .ai-paragraph-content p:last-child {
+      margin-bottom: 0;
+    }
+    .ai-paragraph-content strong {
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+
+    .ai-footer-bar {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+      align-items: center;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    @media (max-width: 900px) {
+      .ai-footer-bar {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .ai-source-disclaimer {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ai-source-row {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .ai-source-row i {
+      color: var(--gold-primary);
+    }
+    .ai-disclaimer-row {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-interactive-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 14, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-box {
+      background: #0E162B;
+      border: 1px solid var(--gold-border-intense);
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      overflow: hidden;
+      animation: modalFadeIn 0.3s ease;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h3 {
+      font-family: 'Orbitron', monospace;
+      color: var(--gold-bright);
+      font-size: 16px;
+    }
+    .modal-body {
+      padding: 20px 24px;
+      max-height: 480px;
+      overflow-y: auto;
+    }
+    .raw-data-pre {
+      background: #070B14;
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #94A3B8;
+      overflow-x: auto;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Toast Notification */
+    .toast-notification {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: linear-gradient(145deg, #172445, #0E172C);
+      border: 1px solid var(--gold-primary);
+      color: #FFF;
+      padding: 12px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6), 0 0 15px var(--gold-glow);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .toast-notification.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  </style>
+  <script src="auth.js"></script>
+  <script src="aurora-pipeline.js"></script>
+</head>
+<body>
+
+  <!-- ==========================================================================
+       SIDEBAR NAVIGATION
+       ========================================================================== -->
+  <aside class="sidebar">
+    <!-- Brand -->
+    <div class="brand-section">
+      <div class="brand-logo-3d">
+        <i class="fa-solid fa-gem"></i>
+      </div>
+      <div class="brand-text">
+        <h1>AURORA</h1>
+        <span>MCX Gold Intelligence</span>
+      </div>
+    </div>
+
+    <!-- Navigation Menu Items -->
+    <nav class="sidebar-nav">
+      <div class="nav-label">Executive Desk</div>
+
+      <a href="dashboard.html" class="nav-item">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="contract-explorer.html" class="nav-item">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>Contract Explorer</span>
+      </a>
+
+      <a href="opportunity-radar.html" class="nav-item">
+        <i class="fa-solid fa-bullseye"></i>
+        <span>Opportunity Radar</span>
+      </a>
+
+      <!-- Market Detective ACTIVE -->
+      <a href="market-detective.html" class="nav-item active">
+        <i class="fa-solid fa-magnifying-glass-chart"></i>
+        <span>Market Detective</span>
+        <span class="nav-badge">LIVE</span>
+      </a>
+
+      <div class="nav-label" style="margin-top: 10px;">Quantitative Labs</div>
+
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-circle-nodes"></i>
+        <span>Relationship Network</span>
+      </a>
+
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-brain"></i>
+        <span>Historical Memory</span>
+      </a>
+
+      <a href="backtesting-lab.html" class="nav-item">
+        <i class="fa-solid fa-flask-vial"></i>
+        <span>Backtesting Lab</span>
+      </a>
+
+      <a href="#" class="nav-item">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Market Simulator</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Engine Status Card -->
+    <div class="sidebar-footer">
+      <div class="engine-status-box">
+        <div class="engine-header">
+          <div class="engine-title">
+            <span class="pulse-dot"></span>
+            <span class="orbitron">AURORA ENGINE</span>
+          </div>
+          <span style="font-size: 10px; color: var(--emerald-success); font-family: 'JetBrains Mono', monospace;">HEALTHY</span>
+        </div>
+        <div class="engine-metrics">
+          <div class="engine-row">
+            <span>Normalizer:</span>
+            <span>995 Pure Basis</span>
+          </div>
+          <div class="engine-row">
+            <span>Feed Sync:</span>
+            <span>T+0 MCX Bhav</span>
+          </div>
+          <div class="engine-row">
+            <span>Scan Cycle:</span>
+            <span>12ms / Complete</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==========================================================================
+       MAIN CONTENT WRAPPER
+       ========================================================================== -->
+  <div class="main-wrapper">
+    
+    <!-- TOP APP HEADER -->
+    <header class="top-header">
+      <div class="header-breadcrumb">
+        <a href="dashboard.html"><i class="fa-solid fa-house" style="margin-right: 6px;"></i>AURORA</a>
+        <span class="separator">/</span>
+        <span>Quantitative Analytics</span>
+        <span class="separator">/</span>
+        <span class="current">Market Detective</span>
+      </div>
+
+      <div class="header-right">
+        <!-- Live Status Pill -->
+        <div class="live-status-pill">
+          <span class="indicator"></span>
+          <span class="tag">MCX DATA:</span>
+          <span class="date">OCT 12, 2026 â€¢ 17:30 IST</span>
+        </div>
+
+        <!-- Audio Alert Feedback Toggle -->
+        <button class="header-btn" id="audioToggleBtn" title="Toggle Quant Audio Cues" onclick="toggleAudioCue()">
+          <i class="fa-solid fa-volume-high" id="audioIcon"></i>
+        </button>
+
+        <!-- Notifications -->
+        <button class="header-btn" title="Live Anomalies" onclick="showToast('Active surveillance: 3 pairs currently under statistical observation')">
+          <i class="fa-solid fa-bell"></i>
+          <span class="badge-dot"></span>
+        </button>
+
+        <!-- User Profile Pill -->
+        <div class="user-profile-badge" onclick="showToast('Logged in as Lead Commodity Arbitrage Desk Analyst')">
+          <div class="user-avatar">KM</div>
+          <div class="user-info">
+            <span class="user-name">K. Mehta</span>
+            <span class="user-role">AURORA QUANT</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT BODY -->
+    <main class="content-area">
+
+      <!-- ==========================================================================
+           1. PAGE HEADER & EVENT SELECTOR
+           ========================================================================== -->
+      <section class="page-header-card">
+        <div class="title-group">
+          <div class="detective-icon-3d">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+          <div class="title-texts">
+            <h2>Market Detective</h2>
+            <p>
+              <i class="fa-solid fa-shield-halved"></i>
+              Step-by-step evidence-based investigation of relative-value events
+            </p>
+          </div>
+        </div>
+
+        <div class="event-selector-cluster">
+          <div class="clay-select-wrapper">
+            <select id="eventSelector" onchange="handleEventSwitch(this.value)">
+              <option value="247" selected>Event #247 â€” GOLDM vs GOLDPETAL Spread Anomaly</option>
+              <option value="246">Event #246 â€” GOLD vs GOLDM Contango Inversion</option>
+              <option value="245">Event #245 â€” GOLDGUINEA Purity Basis Disparity</option>
+              <option value="248">Event #248 â€” GOLDPETAL Nov vs Dec Calendar Spread</option>
+            </select>
+            <i class="fa-solid fa-chevron-down clay-select-icon"></i>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <button class="btn-clay" onclick="openRawModal()" title="View Bhavcopy Payload">
+            <i class="fa-solid fa-code"></i>
+            <span>Raw Data</span>
+          </button>
+
+          <button class="btn-clay btn-clay-gold" onclick="exportDossier()" title="Download PDF Investigation Dossier">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Export Dossier</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ==========================================================================
+           INVESTIGATION GRID (42% TIMELINE | 58% EVIDENCE DASHBOARD)
+           ========================================================================== -->
+      <div class="investigation-grid">
+
+        <!-- ======================================================================
+             COLUMN 1: INVESTIGATION TIMELINE (8 VERTICAL GLASSMORPHISM STEPS)
+             ====================================================================== -->
+        <div class="timeline-column">
+          <div class="section-headline-box">
+            <h3><i class="fa-solid fa-list-check"></i> Investigation Timeline</h3>
+            <span class="badge-count" id="stepsCountBadge">8 STEPS VERIFIED</span>
+          </div>
+
+          <div class="stepper-container" id="stepperContainer">
+
+            <!-- STEP 1: Data Validation -->
+            <div class="step-card" id="step1Card">
+              <div class="step-node node-success">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 01</span>
+                  <span class="step-name">Data Validation</span>
+                </div>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-circle-check"></i> PASSED</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row">
+                  <span class="detail-label">Source:</span>
+                  <span class="detail-val">MCX Bhavcopy</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Date:</span>
+                  <span class="detail-val">Oct 12, 2026</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Records Validated:</span>
+                  <span class="detail-val success">4/4 contracts</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Missing Data:</span>
+                  <span class="detail-val success">None (0.0%)</span>
+                </div>
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">Data Freshness:</span>
+                  <span class="detail-val gold">T+0 (Same day, 17:30 IST settlement)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 2: Normalization -->
+            <div class="step-card" id="step2Card">
+              <div class="step-node node-success">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 02</span>
+                  <span class="step-name">Normalization</span>
+                </div>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-circle-check"></i> 995 BASIS</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">GOLDM (100g):</span>
+                  <span class="detail-val gold">â‚¹62,450 â†’ â‚¹62,892.46 / 10g</span>
+                </div>
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">GOLDPETAL (1g):</span>
+                  <span class="detail-val gold">â‚¹6,310 â†’ â‚¹63,015.08 / 10g</span>
+                </div>
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">Basis Purity:</span>
+                  <span class="detail-val">995 Fine Gold Benchmark</span>
+                </div>
+              </div>
+              <div class="formula-tag">
+                <i class="fa-solid fa-square-root-variable"></i>
+                <span>Formula: P_norm = (P_quoted / Lot_g) Ã— 10 Ã— (995 / Purity_std)</span>
+              </div>
+            </div>
+
+            <!-- STEP 3: Spread Calculation -->
+            <div class="step-card" id="step3Card">
+              <div class="step-node node-success">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 03</span>
+                  <span class="step-name">Spread Calculation</span>
+                </div>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-arrows-split-up-and-left"></i> COMPUTED</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row">
+                  <span class="detail-label">Raw Spread:</span>
+                  <span class="detail-val gold">â‚¹122.62 / 10g</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Percentage:</span>
+                  <span class="detail-val gold">0.195%</span>
+                </div>
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">Spread Direction:</span>
+                  <span class="detail-val warn"><i class="fa-solid fa-arrow-trend-up"></i> GOLDPETAL trading at premium</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 4: Statistical Analysis -->
+            <div class="step-card" id="step4Card">
+              <div class="step-node node-success">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 04</span>
+                  <span class="step-name">Statistical Analysis</span>
+                </div>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-chart-simple"></i> ANOMALOUS</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row">
+                  <span class="detail-label">Z-Score:</span>
+                  <span class="detail-val gold">2.47Ïƒ (60d window)</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Percentile:</span>
+                  <span class="detail-val gold">97.3%</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Mean Reversion:</span>
+                  <span class="detail-val success">73% Probable</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Market Regime:</span>
+                  <span class="detail-val">Normal Volatility</span>
+                </div>
+              </div>
+              <!-- Z-Score Visual Gauge -->
+              <div class="z-meter-wrap">
+                <div class="z-meter-labels">
+                  <span>-3.0Ïƒ</span>
+                  <span>-2.0Ïƒ</span>
+                  <span>0.0Ïƒ</span>
+                  <span>+2.0Ïƒ [Cutoff]</span>
+                  <span class="highlight">+2.47Ïƒ (Actual)</span>
+                </div>
+                <div class="z-meter-bar">
+                  <div class="z-meter-fill"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 5: Liquidity Assessment (WARNING) -->
+            <div class="step-card" id="step5Card" style="border-color: rgba(245, 158, 11, 0.35);">
+              <div class="step-node node-warning">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 05</span>
+                  <span class="step-name">Liquidity Assessment</span>
+                </div>
+                <span class="step-badge badge-warn"><i class="fa-solid fa-triangle-exclamation"></i> FRICTION</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row">
+                  <span class="detail-label">GOLDM Volume:</span>
+                  <span class="detail-val success">12,450 lots âœ“</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">GOLDPETAL Vol:</span>
+                  <span class="detail-val warn">890 lots âš ï¸ (Low)</span>
+                </div>
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">Combined Open Interest:</span>
+                  <span class="detail-val">36,907 contracts</span>
+                </div>
+              </div>
+              <div class="warning-callout">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span><strong>Warning:</strong> GOLDPETAL liquidity may restrict executable lot sizes and trigger adverse market impact.</span>
+              </div>
+            </div>
+
+            <!-- STEP 6: Expiry Check -->
+            <div class="step-card" id="step6Card">
+              <div class="step-node node-success">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 06</span>
+                  <span class="step-name">Expiry Check</span>
+                </div>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-calendar-check"></i> CLEAR</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row">
+                  <span class="detail-label">GOLDM Expiry:</span>
+                  <span class="detail-val success">15 days (Safe)</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">GOLDPETAL Expiry:</span>
+                  <span class="detail-val success">21 days (Safe)</span>
+                </div>
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">Calendar Roll Risk:</span>
+                  <span class="detail-val success">Low (No immediate delivery tender)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 7: Transaction Cost Analysis (WARNING) -->
+            <div class="step-card" id="step7Card" style="border-color: rgba(245, 158, 11, 0.35);">
+              <div class="step-node node-warning">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 07</span>
+                  <span class="step-name">Transaction Cost Analysis</span>
+                </div>
+                <span class="step-badge badge-warn"><i class="fa-solid fa-triangle-exclamation"></i> HIGH COST</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row">
+                  <span class="detail-label">Round-Trip Cost:</span>
+                  <span class="detail-val warn">â‚¹85 â€“ â‚¹110 / 10g</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Spread Post-Costs:</span>
+                  <span class="detail-val gold">â‚¹12.62 â€“ â‚¹37.62</span>
+                </div>
+                <div class="step-detail-row full-width">
+                  <span class="detail-label">Cost-to-Spread Ratio:</span>
+                  <span class="detail-val warn" style="font-weight: 800;">69% â€“ 90% consumed</span>
+                </div>
+              </div>
+              <div class="warning-callout">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span><strong>Friction Alert:</strong> Exchange fees, CTT, GST, and bid-ask slippage consume up to 90% of apparent edge.</span>
+              </div>
+            </div>
+
+            <!-- STEP 8: Historical Memory -->
+            <div class="step-card" id="step8Card">
+              <div class="step-node node-investigate">
+                <i class="fa-solid fa-brain"></i>
+              </div>
+              <div class="step-header">
+                <div class="step-title-wrap">
+                  <span class="step-number">Step 08</span>
+                  <span class="step-name">Historical Memory</span>
+                </div>
+                <span class="step-badge badge-analogue"><i class="fa-solid fa-clock-rotate-left"></i> 7 ANALOGUES</span>
+              </div>
+              <div class="step-body-grid">
+                <div class="step-detail-row">
+                  <span class="detail-label">Analogues Found:</span>
+                  <span class="detail-val gold">7 matching events</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Most Recent:</span>
+                  <span class="detail-val">Aug 03, 2026</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Avg Resolution:</span>
+                  <span class="detail-val success">4.2 trading days</span>
+                </div>
+                <div class="step-detail-row">
+                  <span class="detail-label">Mean Reversion:</span>
+                  <span class="detail-val success">5/7 cases (71.4%)</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ======================================================================
+             COLUMN 2: EVIDENCE DASHBOARD (RIGHT SIDE 60%)
+             ====================================================================== -->
+        <div class="evidence-column">
+
+          <!-- PANEL A: SPREAD CHART (60-DAY SPREAD WITH CURRENT ANOMALY & BANDS) -->
+          <div class="evidence-panel">
+            <div class="panel-top-bar">
+              <div class="panel-title-group">
+                <div class="panel-icon-circle">
+                  <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div>
+                  <h4>Panel A: Normalized Spread Chart</h4>
+                  <p>GOLDM vs GOLDPETAL spread (â‚¹/10g) over 60 rolling days with statistical Â±1Ïƒ / Â±2Ïƒ bands</p>
+                </div>
+              </div>
+              <div class="panel-controls">
+                <button class="chip-btn" onclick="updateSpreadTimeframe(30, this)">30D</button>
+                <button class="chip-btn active" onclick="updateSpreadTimeframe(60, this)">60D</button>
+                <button class="chip-btn" onclick="updateSpreadTimeframe(90, this)">90D</button>
+                <button class="chip-btn" id="toggleBandsBtn" onclick="toggleBands()">Â±2Ïƒ Bands</button>
+              </div>
+            </div>
+
+            <!-- Chart Canvas -->
+            <div class="chart-container-wrapper">
+              <canvas id="spreadChartCanvas"></canvas>
+            </div>
+
+            <!-- Footer Quick Stats -->
+            <div class="chart-footer-metrics">
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">Current Spread</span>
+                <span class="chart-metric-value" style="color: var(--gold-bright);">+â‚¹122.62</span>
+              </div>
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">60d Rolling Mean</span>
+                <span class="chart-metric-value">â‚¹14.18</span>
+              </div>
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">+2.0Ïƒ Threshold</span>
+                <span class="chart-metric-value" style="color: var(--amber-warning);">â‚¹99.30</span>
+              </div>
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">Current Deviation</span>
+                <span class="chart-metric-value" style="color: var(--gold-bright);">+2.47Ïƒ</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL B: VOLUME & OPEN INTEREST CONTEXT (DUAL-AXIS) -->
+          <div class="evidence-panel">
+            <div class="panel-top-bar">
+              <div class="panel-title-group">
+                <div class="panel-icon-circle">
+                  <i class="fa-solid fa-bars-staggered"></i>
+                </div>
+                <div>
+                  <h4>Panel B: Volume & Open Interest Context</h4>
+                  <p>Dual-axis liquidity structure: Contracts traded vs. Open Commitment</p>
+                </div>
+              </div>
+              <div class="panel-controls">
+                <span style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+                  <span style="color: #06B6D4;">â– </span> GOLDM &nbsp; 
+                  <span style="color: #F59E0B;">â– </span> GOLDPETAL &nbsp; 
+                  <span style="color: #FCD34D;">â€•</span> Total OI
+                </span>
+              </div>
+            </div>
+
+            <!-- Chart Canvas -->
+            <div class="chart-container-wrapper">
+              <canvas id="volumeOIChartCanvas"></canvas>
+            </div>
+
+            <!-- Footer Liquidity Context -->
+            <div class="chart-footer-metrics">
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">GOLDM Vol (Lots)</span>
+                <span class="chart-metric-value" style="color: #06B6D4;">12,450</span>
+              </div>
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">GOLDPETAL Vol (Lots)</span>
+                <span class="chart-metric-value" style="color: #F59E0B;">890</span>
+              </div>
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">Vol Ratio (PETAL/M)</span>
+                <span class="chart-metric-value" style="color: var(--amber-warning);">0.071 (Imbalanced)</span>
+              </div>
+              <div class="chart-metric-item">
+                <span class="chart-metric-label">Combined Open Interest</span>
+                <span class="chart-metric-value" style="color: var(--gold-bright);">36,907</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANEL C: INVESTIGATION VERDICT (LARGE CLAYMORPHISM CARD) -->
+          <div class="verdict-clay-card">
+            
+            <div class="verdict-header-row">
+              <div class="verdict-left-meta">
+                <!-- Circular SVG Progress Score -->
+                <div class="score-circle-wrapper">
+                  <svg class="score-circle-svg" viewBox="0 0 86 86">
+                    <defs>
+                      <linearGradient id="goldGradientStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#FFE082" />
+                        <stop offset="50%" stop-color="#F5B041" />
+                        <stop offset="100%" stop-color="#D97706" />
+                      </linearGradient>
+                    </defs>
+                    <circle class="circle-bg" cx="43" cy="43" r="38"></circle>
+                    <circle class="circle-progress" id="scoreProgressCircle" cx="43" cy="43" r="38"></circle>
+                  </svg>
+                  <div class="score-text-inner">
+                    <span class="score-number" id="verdictScoreVal">78</span>
+                    <span class="score-denom">/ 100</span>
+                  </div>
+                </div>
+
+                <div class="verdict-badge-box">
+                  <span class="verdict-label-sub">INVESTIGATION STATUS VERDICT</span>
+                  <div class="clay-verdict-badge">
+                    <span class="badge-amber-glow-dot"></span>
+                    <span id="verdictBadgeText">UNDER INVESTIGATION</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style="text-align: right;">
+                <span style="font-size: 11px; color: var(--text-muted); font-family: 'Orbitron', monospace;">SIGNAL CONFIDENCE</span>
+                <div style="font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; color: var(--gold-bright); margin-top: 2px;">
+                  HIGH (STATISTICAL)
+                </div>
+                <div style="font-size: 10px; color: var(--amber-warning); margin-top: 2px;">
+                  EXECUTION GATED BY COSTS
+                </div>
+              </div>
+            </div>
+
+            <!-- Verdict Stack Boxes -->
+            <div class="verdict-content-stack">
+              <!-- Key Finding Box -->
+              <div class="verdict-box key-finding-box">
+                <div class="finding-header">
+                  <i class="fa-solid fa-crosshairs"></i>
+                  <span>Key Investigation Finding</span>
+                </div>
+                <div class="finding-body" id="verdictKeyFinding">
+                  Statistically significant spread deviation detected (<strong>+2.47Ïƒ</strong>, 97.3rd percentile). However, estimated transaction costs consume <strong>69â€“90%</strong> of the apparent spread. GOLDPETAL trading liquidity is below the preferred institutional execution threshold.
+                </div>
+              </div>
+
+              <!-- Recommendation Box -->
+              <div class="verdict-box recommendation-box">
+                <div class="recommendation-header">
+                  <i class="fa-solid fa-compass"></i>
+                  <span>Desk Recommendation</span>
+                </div>
+                <div class="recommendation-body" id="verdictRecommendation">
+                  <strong>Monitor for spread widening or cost reduction.</strong> Not actionable at current parameters under standard execution fees. Maintain pair in active surveillance watch.
+                </div>
+              </div>
+
+              <!-- Analytical Caveat Disclaimer Box -->
+              <div class="caveats-box">
+                <div class="caveats-text">
+                  <i class="fa-solid fa-circle-exclamation"></i>
+                  <span id="verdictCaveats">
+                    <strong>Analytical Rigor Note:</strong> Settlement prices from MCX Bhavcopy may not equal executable fills during market hours due to intraday book depth and crossing spreads. This is an objective analytical finding, not an automated trade recommendation.
+                  </span>
+                </div>
+              </div>
+
+              <!-- 4 Dimension Score Bars -->
+              <div class="verdict-subscores-grid">
+                <div class="subscore-pill">
+                  <span class="subscore-label">Statistical Deviation</span>
+                  <div class="subscore-val-wrap">
+                    <span class="subscore-val" style="color: var(--emerald-success);">94/100</span>
+                    <span style="font-size: 9.5px; color: var(--emerald-success);">Extreme</span>
+                  </div>
+                  <div class="subscore-mini-track">
+                    <div class="subscore-mini-fill" style="width: 94%; background: var(--emerald-success);"></div>
+                  </div>
+                </div>
+
+                <div class="subscore-pill">
+                  <span class="subscore-label">Economic Viability</span>
+                  <div class="subscore-val-wrap">
+                    <span class="subscore-val" style="color: var(--amber-warning);">28/100</span>
+                    <span style="font-size: 9.5px; color: var(--amber-warning);">Friction</span>
+                  </div>
+                  <div class="subscore-mini-track">
+                    <div class="subscore-mini-fill" style="width: 28%; background: var(--amber-warning);"></div>
+                  </div>
+                </div>
+
+                <div class="subscore-pill">
+                  <span class="subscore-label">Liquidity Buffer</span>
+                  <div class="subscore-val-wrap">
+                    <span class="subscore-val" style="color: var(--amber-warning);">42/100</span>
+                    <span style="font-size: 9.5px; color: var(--amber-warning);">Low Lot</span>
+                  </div>
+                  <div class="subscore-mini-track">
+                    <div class="subscore-mini-fill" style="width: 42%; background: var(--amber-warning);"></div>
+                  </div>
+                </div>
+
+                <div class="subscore-pill">
+                  <span class="subscore-label">Expiry Safety</span>
+                  <div class="subscore-val-wrap">
+                    <span class="subscore-val" style="color: var(--emerald-success);">88/100</span>
+                    <span style="font-size: 9.5px; color: var(--emerald-success);">Clean</span>
+                  </div>
+                  <div class="subscore-mini-track">
+                    <div class="subscore-mini-fill" style="width: 88%; background: var(--emerald-success);"></div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ==========================================================================
+           SECTION 4: AI EXPLANATION PANEL (BOTTOM FULL-WIDTH GLASSMORPHISM)
+           ========================================================================== -->
+      <section class="ai-explanation-panel">
+        <div class="ai-header-row">
+          <div class="ai-title-wrap">
+            <div class="ai-sparkle-icon">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+              <h3>AI-Powered Event Summary</h3>
+              <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">
+                Deterministic financial reasoning synthesized into natural intelligence
+              </p>
+            </div>
+          </div>
+
+          <div class="ai-meta-pills">
+            <div class="ai-confidence-pill">
+              <i class="fa-solid fa-shield-check"></i>
+              <span>CONFIDENCE: HIGH</span>
+            </div>
+            <button class="btn-clay" onclick="copySummaryText()" style="padding: 6px 12px; font-size: 11px;">
+              <i class="fa-solid fa-copy"></i>
+              <span>Copy Memo</span>
+            </button>
+            <button class="btn-clay" onclick="simulateEventInPlayground()" style="padding: 6px 12px; font-size: 11px;">
+              <i class="fa-solid fa-sliders"></i>
+              <span>Open in Simulator</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Plain English Narrative Paragraph -->
+        <div class="ai-paragraph-content" id="aiParagraphText">
+          <p>
+            A pronounced statistical dislocation has emerged between MCX <strong>GOLDM</strong> (100g contract) and <strong>GOLDPETAL</strong> (1g contract). Following standard fine-gold purity normalization to a 995 basis, GOLDPETAL is trading at an implied rate of <strong>â‚¹63,015.08 per 10g</strong> compared to <strong>â‚¹62,892.46 per 10g</strong> for GOLDM. This yields a net nominal divergence of <strong>â‚¹122.62 per 10g (+0.195%)</strong>, placing the spread at <strong>+2.47 standard deviations</strong> above its 60-day rolling mean (97.3rd percentile).
+          </p>
+          <p>
+            Historical pattern-matching across our 5-year MCX archive identified <strong>7 analogue instances</strong> exhibiting comparable magnitude. In 5 out of 7 previous cases (71.4%), the spread mean-reverted toward parity within an average duration of <strong>4.2 trading sessions</strong>. However, critical microstructural headwinds constrain immediate arbitrage feasibility: GOLDPETAL daily volume stands at just <strong>890 lots</strong>, and bidirectional execution friction (comprising MCX turnover fees, SEBI charges, CTT, GST, and conservative execution slippage) totals an estimated <strong>â‚¹85 to â‚¹110 per 10g equivalent</strong>. Because transaction costs absorb approximately <strong>69% to 90%</strong> of the visible spread, immediate positioning offers negligible risk-adjusted edge. The platform recommends maintaining this pair on watch until either the raw spread widens past â‚¹165/10g or GOLDPETAL liquidity deepens.
+          </p>
+        </div>
+
+        <!-- Meta Footer & Disclaimers -->
+        <div class="ai-footer-bar">
+          <div class="ai-source-disclaimer">
+            <div class="ai-source-row">
+              <i class="fa-solid fa-database"></i>
+              <span><strong>Sources Cited:</strong> Based on Event #247 fields, MCX Bhavcopy data (Oct 12, 2026), 60-day statistical window, and MCX Contract Specifications.</span>
+            </div>
+            <div class="ai-disclaimer-row">
+              <i class="fa-solid fa-scale-balanced"></i>
+              <span><strong>Disclaimer:</strong> AI explanation is supplementary decision-support. Core normalization, statistical parameters, and cost formulas are deterministic and non-hallucinatory.</span>
+            </div>
+          </div>
+
+          <div class="ai-interactive-actions">
+            <span style="font-size: 11px; color: var(--gold-light); font-family: 'Orbitron', monospace;">
+              MODEL: AURORA-QUANT-V3
+            </span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==========================================================================
+       MODAL: RAW BHAVCOPY INSPECTOR
+       ========================================================================== -->
+  <div class="modal-overlay" id="rawModal" onclick="closeRawModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-terminal" style="margin-right: 8px;"></i>MCX Bhavcopy Raw Normalized Tuple</h3>
+        <button class="header-btn" onclick="closeRawModal()" style="width: 32px; height: 32px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+          Audit record cryptographically validated from official MCX Bhavcopy settlement dump (Oct 12, 2026):
+        </p>
+        <pre class="raw-data-pre" id="rawPayloadBlock">
+{
+  "event_id": 247,
+  "timestamp": "2026-10-12T17:30:00.000Z",
+  "anomaly_class": "SPREAD_CROSS_CONTRACT",
+  "contracts": {
+    "leg_a": {
+      "symbol": "GOLDM",
+      "expiry": "2026-10-27",
+      "days_to_expiry": 15,
+      "settlement_price": 62450.00,
+      "lot_size_grams": 100,
+      "purity_spec": 995,
+      "normalized_10g_price": 62892.46,
+      "volume_lots": 12450,
+      "open_interest": 28450
+    },
+    "leg_b": {
+      "symbol": "GOLDPETAL",
+      "expiry": "2026-11-02",
+      "days_to_expiry": 21,
+      "settlement_price": 6310.00,
+      "lot_size_grams": 1,
+      "purity_spec": 999,
+      "normalized_10g_price": 63015.08,
+      "volume_lots": 890,
+      "open_interest": 8457
+    }
+  },
+  "metrics": {
+    "raw_spread_inr": 122.62,
+    "percentage_spread": 0.195,
+    "z_score_60d": 2.47,
+    "percentile": 97.3,
+    "est_round_trip_cost_inr": 97.50,
+    "spread_post_cost_inr": 25.12,
+    "cost_consumption_pct": 79.5
+  },
+  "verdict": {
+    "status": "UNDER_INVESTIGATION",
+    "score": 78,
+    "actionable": false,
+    "reason": "Statistically elevated spread negated by transaction friction and GOLDPETAL liquidity threshold"
+  }
+}
+        </pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       TOAST NOTIFICATION COMPONENT
+       ========================================================================== -->
+  <div class="toast-notification" id="toastBox">
+    <i class="fa-solid fa-circle-check" style="color: var(--gold-bright);"></i>
+    <span id="toastMsg">Action executed successfully.</span>
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT: INTERACTIVE CHARTS, EVENT SWITCHER, & BEHAVIORS
+       ========================================================================== -->
+  <script>
+    // Audio Context Synthesizer for subtle quant audio cues
+    let audioEnabled = true;
+    let audioCtx = null;
+
+    function playBlip(freq = 587.33, type = 'sine', duration = 0.08) {
+      if (!audioEnabled) return;
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        // Audio not allowed by browser autoplay policy
+      }
+    }
+
+    function toggleAudioCue() {
+      audioEnabled = !audioEnabled;
+      const icon = document.getElementById('audioIcon');
+      if (audioEnabled) {
+        icon.className = 'fa-solid fa-volume-high';
+        showToast('Quant audio alerts ENABLED');
+        playBlip(784, 'sine', 0.1);
+      } else {
+        icon.className = 'fa-solid fa-volume-xmark';
+        showToast('Quant audio alerts MUTED');
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toastBox');
+      const msg = document.getElementById('toastMsg');
+      msg.textContent = message;
+      toast.classList.add('show');
+      playBlip(659.25, 'triangle', 0.09);
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
+    }
+
+    // Modal Handlers
+    function openRawModal() {
+      document.getElementById('rawModal').classList.add('active');
+      playBlip(523.25, 'sine', 0.08);
+    }
+    function closeRawModal(e) {
+      document.getElementById('rawModal').classList.remove('active');
+    }
+
+    function exportDossier() {
+      playBlip(880, 'sine', 0.12);
+      showToast('Generating official PDF Investigation Dossier for Event #247...');
+      setTimeout(() => {
+        window.print();
+      }, 800);
+    }
+
+    function copySummaryText() {
+      const text = document.getElementById('aiParagraphText').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('AI Investigation Memo copied to clipboard!');
+      }).catch(() => {
+        showToast('Summary copied to clipboard');
+      });
+    }
+
+    function simulateEventInPlayground() {
+      playBlip(740, 'sine', 0.09);
+      showToast('Routing parameters to Market Simulator module...');
+      setTimeout(() => {
+        window.location.href = 'backtesting-lab.html';
+      }, 1000);
+    }
+
+    // ==========================================================================
+    // CHART.JS IMPLEMENTATIONS: SPREAD CHART & VOLUME/OI CHART
+    // ==========================================================================
+
+    let spreadChart = null;
+    let volumeOIChart = null;
+    let showBands = true;
+    let currentTimeframe = 60;
+
+    // Synthetic 60-day historical spread data generation with mean-reversion & anomaly at end
+    function generateSpreadData(days = 60) {
+      const labels = [];
+      const spreadData = [];
+      const meanData = [];
+      const upper2Sigma = [];
+      const lower2Sigma = [];
+      const upper1Sigma = [];
+      const lower1Sigma = [];
+
+      const baseMean = 14.18;
+      const sigma = 43.9; // Standard deviation
+
+      // Generate dates leading up to Oct 12, 2026
+      const endDate = new Date(2026, 9, 12); // Oct 12, 2026
+
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(endDate);
+        d.setDate(d.getDate() - i);
+        const dayStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        labels.push(dayStr);
+
+        meanData.push(baseMean);
+        upper2Sigma.push(baseMean + 2 * sigma); // 101.98
+        lower2Sigma.push(baseMean - 2 * sigma); // -73.62
+        upper1Sigma.push(baseMean + sigma);
+        lower1Sigma.push(baseMean - sigma);
+
+        if (i === 0) {
+          // Current Anomaly Day
+          spreadData.push(122.62);
+        } else if (i === 1) {
+          spreadData.push(98.40);
+        } else if (i === 2) {
+          spreadData.push(84.10);
+        } else if (i === 3) {
+          spreadData.push(52.30);
+        } else {
+          // Simulated mean-reverting series around ~14
+          const noise = (Math.sin(i * 0.45) * 22) + (Math.cos(i * 0.18) * 18) + (Math.random() * 12 - 6);
+          spreadData.push(Number((baseMean + noise).toFixed(2)));
+        }
+      }
+
+      return { labels, spreadData, meanData, upper2Sigma, lower2Sigma, upper1Sigma, lower1Sigma };
+    }
+
+    // Init Spread Chart
+    function initSpreadChart(days = 60) {
+      const ctx = document.getElementById('spreadChartCanvas').getContext('2d');
+      const data = generateSpreadData(days);
+
+      if (spreadChart) {
+        spreadChart.destroy();
+      }
+
+      // Point styling: only highlight the last anomaly point with big gold glowing marker
+      const pointRadii = data.spreadData.map((val, idx) => idx === data.spreadData.length - 1 ? 8 : 0);
+      const pointHoverRadii = data.spreadData.map((val, idx) => idx === data.spreadData.length - 1 ? 12 : 5);
+      const pointColors = data.spreadData.map((val, idx) => idx === data.spreadData.length - 1 ? '#FCD34D' : '#06B6D4');
+
+      spreadChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.labels,
+          datasets: [
+            {
+              label: 'Upper +2Ïƒ Cutoff (â‚¹101.98)',
+              data: data.upper2Sigma,
+              borderColor: 'rgba(245, 158, 11, 0.45)',
+              borderDash: [5, 5],
+              borderWidth: 1.5,
+              fill: false,
+              pointRadius: 0,
+              hidden: !showBands
+            },
+            {
+              label: 'Historical Mean (â‚¹14.18)',
+              data: data.meanData,
+              borderColor: 'rgba(148, 163, 184, 0.4)',
+              borderDash: [3, 3],
+              borderWidth: 1.2,
+              fill: false,
+              pointRadius: 0
+            },
+            {
+              label: 'Lower -2Ïƒ Cutoff (-â‚¹73.62)',
+              data: data.lower2Sigma,
+              borderColor: 'rgba(245, 158, 11, 0.45)',
+              borderDash: [5, 5],
+              borderWidth: 1.5,
+              fill: false,
+              pointRadius: 0,
+              hidden: !showBands
+            },
+            {
+              label: 'Normalized Spread (GOLDM vs GOLDPETAL)',
+              data: data.spreadData,
+              borderColor: '#F5B041',
+              backgroundColor: 'rgba(245, 176, 65, 0.08)',
+              borderWidth: 2.5,
+              fill: true,
+              tension: 0.28,
+              pointRadius: pointRadii,
+              pointHoverRadius: pointHoverRadii,
+              pointBackgroundColor: pointColors,
+              pointBorderColor: '#FFF',
+              pointBorderWidth: 2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 16, 32, 0.94)',
+              titleColor: '#FCD34D',
+              titleFont: { family: 'Orbitron', size: 12, weight: 'bold' },
+              bodyFont: { family: 'JetBrains Mono', size: 12 },
+              borderColor: 'rgba(245, 176, 65, 0.4)',
+              borderWidth: 1,
+              padding: 12,
+              displayColors: true,
+              callbacks: {
+                label: function(context) {
+                  const val = context.parsed.y;
+                  if (context.datasetIndex === 3) {
+                    if (context.dataIndex === context.dataset.data.length - 1) {
+                      return `ðŸš¨ Current Spread: â‚¹${val.toFixed(2)} (+2.47Ïƒ Anomaly)`;
+                    }
+                    return `Spread: â‚¹${val.toFixed(2)}`;
+                  }
+                  return `${context.dataset.label}: â‚¹${val.toFixed(2)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.04)'
+              },
+              ticks: {
+                color: '#64748B',
+                font: { family: 'JetBrains Mono', size: 10 },
+                maxTicksLimit: 10
+              }
+            },
+            y: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)'
+              },
+              ticks: {
+                color: '#94A3B8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: function(value) {
+                  return 'â‚¹' + value;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateSpreadTimeframe(days, btnElement) {
+      currentTimeframe = days;
+      document.querySelectorAll('.panel-controls .chip-btn').forEach(btn => {
+        if (btn !== document.getElementById('toggleBandsBtn')) {
+          btn.classList.remove('active');
+        }
+      });
+      btnElement.classList.add('active');
+      playBlip(620, 'sine', 0.06);
+      initSpreadChart(days);
+    }
+
+    function toggleBands() {
+      showBands = !showBands;
+      const btn = document.getElementById('toggleBandsBtn');
+      if (showBands) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+      playBlip(550, 'sine', 0.06);
+      spreadChart.data.datasets[0].hidden = !showBands;
+      spreadChart.data.datasets[2].hidden = !showBands;
+      spreadChart.update();
+    }
+
+    // Init Volume & Open Interest Dual-Axis Chart
+    function initVolumeOIChart() {
+      const ctx = document.getElementById('volumeOIChartCanvas').getContext('2d');
+      const days = 14; // Last 14 trading days
+      const labels = [];
+      const goldmVol = [];
+      const petalVol = [];
+      const totalOI = [];
+
+      const endDate = new Date(2026, 9, 12);
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(endDate);
+        d.setDate(d.getDate() - i);
+        labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+        
+        if (i === 0) {
+          goldmVol.push(12450);
+          petalVol.push(890);
+          totalOI.push(36907);
+        } else {
+          goldmVol.push(Math.round(11000 + Math.random() * 3200));
+          petalVol.push(Math.round(750 + Math.random() * 400));
+          totalOI.push(Math.round(35000 + Math.random() * 3000));
+        }
+      }
+
+      volumeOIChart = new Chart(ctx, {
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'GOLDM Volume',
+              data: goldmVol,
+              backgroundColor: 'rgba(6, 182, 212, 0.75)',
+              borderColor: '#06B6D4',
+              borderWidth: 1,
+              borderRadius: 4,
+              yAxisID: 'yVol',
+              barPercentage: 0.6
+            },
+            {
+              type: 'bar',
+              label: 'GOLDPETAL Volume',
+              data: petalVol,
+              backgroundColor: 'rgba(245, 158, 11, 0.85)',
+              borderColor: '#F59E0B',
+              borderWidth: 1,
+              borderRadius: 4,
+              yAxisID: 'yVol',
+              barPercentage: 0.6
+            },
+            {
+              type: 'line',
+              label: 'Total Open Interest (Contracts)',
+              data: totalOI,
+              borderColor: '#FCD34D',
+              backgroundColor: 'transparent',
+              borderWidth: 2.2,
+              tension: 0.25,
+              pointRadius: 3,
+              pointBackgroundColor: '#FCD34D',
+              yAxisID: 'yOI'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 16, 32, 0.94)',
+              titleColor: '#FCD34D',
+              titleFont: { family: 'Orbitron', size: 12 },
+              bodyFont: { family: 'JetBrains Mono', size: 11 },
+              borderColor: 'rgba(245, 176, 65, 0.35)',
+              borderWidth: 1,
+              padding: 10
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.04)' },
+              ticks: { color: '#64748B', font: { family: 'JetBrains Mono', size: 10 } }
+            },
+            yVol: {
+              type: 'linear',
+              position: 'left',
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#94A3B8',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: function(val) { return val.toLocaleString() + ' lots'; }
+              }
+            },
+            yOI: {
+              type: 'linear',
+              position: 'right',
+              grid: { display: false },
+              ticks: {
+                color: '#FCD34D',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: function(val) { return (val / 1000).toFixed(0) + 'k OI'; }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ==========================================================================
+    // INTERACTIVE EVENT SWITCHER
+    // ==========================================================================
+    const EVENT_PRESETS = {
+      "247": {
+        title: "Event #247 â€” GOLDM vs GOLDPETAL Spread Anomaly",
+        score: 78,
+        scoreOffset: 52, // 78% of 238
+        verdictText: "UNDER INVESTIGATION",
+        verdictColor: "#F59E0B",
+        step1: { source: "MCX Bhavcopy", date: "Oct 12, 2026", valid: "4/4 contracts", miss: "None (0.0%)", fresh: "T+0 (Same day, 17:30 IST settlement)" },
+        step2: { goldm: "â‚¹62,450 â†’ â‚¹62,892.46 / 10g", petal: "â‚¹6,310 â†’ â‚¹63,015.08 / 10g", basis: "995 Fine Gold Benchmark" },
+        step3: { raw: "â‚¹122.62 / 10g", pct: "0.195%", dir: "GOLDPETAL trading at premium" },
+        step4: { z: "2.47Ïƒ (60d window)", pct: "97.3%", rev: "73% Probable", regime: "Normal Volatility" },
+        step5: { volA: "12,450 lots âœ“", volB: "890 lots âš ï¸ (Low)", oi: "36,907 contracts", warn: "Warning: GOLDPETAL liquidity may limit executable size" },
+        step6: { expA: "15 days (Safe)", expB: "21 days (Safe)", roll: "Low (No immediate delivery tender)" },
+        step7: { cost: "â‚¹85 â€“ â‚¹110 / 10g", post: "â‚¹12.62 â€“ â‚¹37.62", ratio: "69% â€“ 90% consumed", warn: "Costs consume 69-90% of apparent edge" },
+        step8: { sim: "7 matching events", recent: "Aug 03, 2026", res: "4.2 trading days", hist: "5/7 cases (71.4%)" },
+        keyFinding: "Statistically significant spread deviation detected (+2.47Ïƒ, 97.3rd percentile). However, transaction costs consume 69â€“90% of the apparent spread. GOLDPETAL liquidity is below preferred threshold.",
+        recommendation: "Monitor for spread widening or cost reduction. Not actionable at current parameters under standard execution fees. Maintain pair in active surveillance watch."
+      },
+      "246": {
+        title: "Event #246 â€” GOLD vs GOLDM Contango Inversion",
+        score: 92,
+        scoreOffset: 19, // 92% of 238
+        verdictText: "ARBITRAGE OPPORTUNITY",
+        verdictColor: "#10B981",
+        step1: { source: "MCX Bhavcopy", date: "Oct 11, 2026", valid: "4/4 contracts", miss: "None", fresh: "T+1 Confirmed" },
+        step2: { goldm: "GOLD (1kg): â‚¹62,510 â†’ â‚¹62,510 / 10g", petal: "GOLDM (100g): â‚¹62,690 â†’ â‚¹62,690 / 10g", basis: "995 Fine Gold Pure" },
+        step3: { raw: "â‚¹180.00 / 10g", pct: "0.288%", dir: "GOLDM trading at inverted contango" },
+        step4: { z: "3.12Ïƒ (60d window)", pct: "99.1%", rev: "88% Probable", regime: "Normal Volatility" },
+        step5: { volA: "24,800 lots âœ“", volB: "18,200 lots âœ“", oi: "94,120 contracts", warn: "Deep liquidity on both legs; minimal market impact" },
+        step6: { expA: "32 days", expB: "32 days", roll: "Identical Expiry Month" },
+        step7: { cost: "â‚¹38 â€“ â‚¹45 / 10g", post: "â‚¹135.00 â€“ â‚¹142.00", ratio: "21% â€“ 25% consumed", warn: "Clear edge survives transaction friction" },
+        step8: { sim: "11 matching events", recent: "Jun 14, 2026", res: "2.1 trading days", hist: "10/11 cases reverted" },
+        keyFinding: "Substantial 3.12Ïƒ dislocation between benchmark GOLD 1kg and GOLDM. Bidirectional book depth is exceptionally robust with low friction ratio (22%).",
+        recommendation: "Actionable institutional relative-value spread. Favorable risk-reward for paired convergence positioning."
+      },
+      "245": {
+        title: "Event #245 â€” GOLDGUINEA Purity Basis Disparity",
+        score: 41,
+        scoreOffset: 140, // 41% of 238
+        verdictText: "REJECTED (ILLIQUID)",
+        verdictColor: "#EF4444",
+        step1: { source: "MCX Bhavcopy", date: "Oct 08, 2026", valid: "4/4 contracts", miss: "None", fresh: "T+4 Archive" },
+        step2: { goldm: "GOLDGUINEA (8g, 916 pure): â‚¹45,820 â†’ â‚¹62,410 / 10g (995)", petal: "GOLDM: â‚¹62,440", basis: "916 to 995 conversion" },
+        step3: { raw: "â‚¹30.00 / 10g", pct: "0.048%", dir: "Parity within noise threshold" },
+        step4: { z: "0.85Ïƒ", pct: "58.2%", rev: "51% Unpredictable", regime: "Low Volatility" },
+        step5: { volA: "42 lots âŒ", volB: "11,500 lots âœ“", oi: "1,200 contracts", warn: "Extreme illiquidity in GOLDGUINEA; unexecutable" },
+        step6: { expA: "8 days âš ï¸", expB: "22 days", roll: "Asymmetric Expiry" },
+        step7: { cost: "â‚¹140 â€“ â‚¹180 / 10g", post: "-â‚¹110.00 (Negative)", ratio: ">100% (Negative Edge)", warn: "Costs completely overwhelm apparent price gap" },
+        step8: { sim: "3 matching events", recent: "Mar 12, 2026", res: "9.4 days", hist: "1/3 cases reverted" },
+        keyFinding: "Apparent difference is an artifact of conversion noise and severe lack of liquidity in GOLDGUINEA (42 lots). Negative post-cost expectation.",
+        recommendation: "Dismiss event. Do not alert desk. Tagged as microstructural false positive."
+      }
+    };
+
+    function handleEventSwitch(eventId) {
+      const preset = EVENT_PRESETS[eventId];
+      if (!preset) return;
+
+      playBlip(700, 'sine', 0.1);
+      showToast(`Loading analysis parameters for ${preset.title.split('â€”')[0]}...`);
+
+      // Update Verdict card
+      document.getElementById('verdictScoreVal').textContent = preset.score;
+      document.getElementById('scoreProgressCircle').style.strokeDashoffset = preset.scoreOffset;
+      document.getElementById('verdictBadgeText').textContent = preset.verdictText;
+      document.getElementById('verdictKeyFinding').innerHTML = preset.keyFinding;
+      document.getElementById('verdictRecommendation').innerHTML = preset.recommendation;
+
+      // Update Step values
+      const s3 = document.getElementById('step3Card');
+      s3.querySelector('.detail-val.gold').textContent = preset.step3.raw;
+      s3.querySelectorAll('.detail-val')[1].textContent = preset.step3.pct;
+
+      // Reload chart with subtle variation
+      initSpreadChart(currentTimeframe);
+    }
+
+    // On Load Initializations
+    window.addEventListener('DOMContentLoaded', () => {
+      initSpreadChart(60);
+      initVolumeOIChart();
+      
+      // Animate score circle
+      setTimeout(() => {
+        const circle = document.getElementById('scoreProgressCircle');
+        if (circle) {
+          circle.style.strokeDashoffset = '52'; // 78% filled
+        }
+      }, 300);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,925 @@
+<!DOCTYPE html><html lang="en" style=""><head></head><body class="bg-black text-white antialiased select-none overflow-hidden"><svg class="inline-defs-container" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"></svg>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>AURORA // GOLD INTELLIGENCE</title>
+<!-- Fonts -->
+<link href="https://db.onlinewebfonts.com/c/ca3d10781128664daddf89bf2e2d1305?family=Graphik+LCG+Regular+Regular" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
+<style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { background: #000; overflow: hidden; height: 100vh; width: 100vw; }
+
+      .font-graphik { font-family: 'Graphik LCG Regular Regular', 'Graphik LCG', sans-serif; }
+      .font-manrope { font-family: 'Manrope', sans-serif; }
+
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(18px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes scaleIn {
+        from { opacity: 0; transform: scale(0.85); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      @keyframes drawLine {
+        from { opacity: 0; stroke-dashoffset: 100; }
+        to { opacity: 1; stroke-dashoffset: 0; }
+      }
+      @keyframes gridReveal {
+        from { opacity: 0; transform: scaleY(0); }
+        to { opacity: 1; transform: scaleY(1); }
+      }
+      @keyframes gridRevealH {
+        from { opacity: 0; transform: scaleX(0); }
+        to { opacity: 1; transform: scaleX(1); }
+      }
+      @keyframes pulseGlow {
+        0%, 100% { transform: scale(1); opacity: 0.9; }
+        50% { transform: scale(1.3); opacity: 0.4; }
+      }
+
+      .anim-fade-up {
+        opacity: 0;
+        animation: fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+      .anim-fade-in {
+        opacity: 0;
+        animation: fadeIn 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+      .anim-slide-left {
+        opacity: 0;
+        animation: slideInLeft 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+      .anim-slide-right {
+        opacity: 0;
+        animation: slideInRight 0.8s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+      .anim-scale-in {
+        opacity: 0;
+        animation: scaleIn 0.7s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+      .anim-grid-v {
+        opacity: 0;
+        transform-origin: top;
+        animation: gridReveal 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+      .anim-grid-h {
+        opacity: 0;
+        transform-origin: left;
+        animation: gridRevealH 1.2s cubic-bezier(0.16,1,0.3,1) forwards;
+      }
+
+      /* Radiant Golden Glow for the word "Gold" */
+      .gold-glow-word {
+        background: linear-gradient(135deg, #FFF6A3 0%, #FFD700 50%, #FFA800 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 16px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 32px rgba(255, 170, 0, 0.45));
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      }
+
+      /* Golden Tint directly on creature video */
+      .creature-gold-filter {
+        filter: sepia(100%) saturate(650%) hue-rotate(5deg) brightness(1.2) contrast(1.15);
+      }
+
+      .pulse-marker {
+        animation: pulseGlow 2s infinite ease-in-out;
+      }
+
+      /* Custom scrollbar for telemetry drawer */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.4);
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(175, 221, 255, 0.25);
+        border-radius: 2px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(175, 221, 255, 0.5);
+      }
+    </style>
+
+
+<section class="relative w-full h-screen overflow-hidden bg-black">
+<!-- Layer 0: Background Video with Golden Yellow Creature Tint -->
+<video autoplay="" class="absolute inset-0 w-full h-full object-cover anim-fade-in creature-gold-filter" loop="" muted="" playsinline="" src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260813_115057_94c3699b-0fd1-4124-bcf3-3626bb8c1f77.mp4" style="animation-delay: 0ms; filter: sepia(75%) saturate(360%) hue-rotate(15deg) brightness(1.2) contrast(1.18);"></video>
+<!-- Content Layer -->
+<div class="relative z-10 w-full h-full">
+<!-- Top Navigation -->
+<nav class="absolute top-0 left-0 w-full flex items-center px-5 md:px-[35px] py-5 md:py-[27px]">
+<!-- Left Group -->
+<div class="flex items-center gap-[40px]">
+<!-- Wordmark -->
+<span class="font-graphik text-white text-[18px] md:text-[21px] leading-[21px] whitespace-nowrap anim-fade-up" style="animation-delay: 200ms;">
+              AURORA // GOLD INTELLIGENCE
+            </span>
+<!-- Nav Links -->
+<div class="hidden lg:flex items-center gap-[40px]">
+<!-- 01 -->
+<div class="flex items-center gap-[3px] anim-fade-up" style="animation-delay: 350ms;">
+<span class="font-manrope text-[13px] leading-[15.6px]" style="color: rgba(254, 240, 138, 0.8);">01.</span>
+<span class="font-manrope text-white text-[13px] leading-[15.6px] cursor-pointer hover:text-[#FEF08A] transition-colors">MARKET_OVERVIEW</span>
+</div>
+<!-- 02 -->
+<div class="flex items-center gap-[3px] anim-fade-up" style="animation-delay: 450ms;">
+<span class="font-manrope text-[13px] leading-[15.6px]" style="color: rgba(254, 240, 138, 0.8);">02.</span>
+<span class="font-manrope text-white text-[13px] leading-[15.6px] cursor-pointer hover:text-[#FEF08A] transition-colors">GOLD_CONTRACTS</span>
+</div>
+<!-- 03 -->
+<div class="flex items-center gap-[3px] anim-fade-up" style="animation-delay: 550ms;">
+<span class="font-manrope text-[13px] leading-[15.6px]" style="color: rgba(254, 240, 138, 0.8);">03.</span>
+<span class="font-manrope text-white text-[13px] leading-[15.6px] cursor-pointer hover:text-[#FEF08A] transition-colors">OPPORTUNITY_RADAR</span>
+</div>
+<!-- 04 -->
+<div class="flex items-center gap-[3px] anim-fade-up" style="animation-delay: 650ms;">
+<span class="font-manrope text-[13px] leading-[15.6px]" style="color: rgba(254, 240, 138, 0.8);">04.</span>
+<span class="font-manrope text-white text-[13px] leading-[15.6px] cursor-pointer hover:text-[#FEF08A] transition-colors">MARKET_DETECTIVE</span>
+</div>
+</div>
+</div>
+<!-- Right Group -->
+<div class="hidden lg:flex items-center gap-[12px] ml-auto anim-slide-right" style="animation-delay: 600ms;">
+<!-- Activity Icon -->
+<svg class="w-[15px] h-[15px] text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="font-manrope text-white text-[13px] leading-[15.6px]">MCX_GOLD</span>
+<span class="font-manrope text-[13px] leading-[15.6px]" style="color: #FEF08A;">[ DATA_CONNECTED ]</span>
+<span class="font-manrope text-white text-[13px] leading-[15.6px] ml-[20px]">FEED_STATUS:</span>
+<!-- LIVE_DATA Chip -->
+<div class="rounded-[3px] px-[5px] py-[2px] flex items-center justify-center" style="background-color: #FEF08A;">
+<span class="text-black text-[13px] leading-[15.6px] font-manrope font-medium">LIVE_DATA</span>
+</div>
+</div>
+<!-- Hamburger Button (Mobile / Tablet) -->
+<button aria-label="Toggle menu" class="lg:hidden ml-auto relative w-[40px] h-[40px] flex items-center justify-center anim-fade-in" id="hamburgerBtn" style="animation-delay: 400ms;">
+<!-- Menu Icon Span -->
+<span class="absolute transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-100 rotate-0 scale-100" id="menuIconSpan">
+<svg class="w-[22px] h-[22px] text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<line stroke-linecap="round" x1="3" x2="21" y1="6" y2="6"></line>
+<line stroke-linecap="round" x1="3" x2="21" y1="12" y2="12"></line>
+<line stroke-linecap="round" x1="3" x2="21" y1="18" y2="18"></line>
+</svg>
+</span>
+<!-- Close Icon Span -->
+<span class="absolute transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 -rotate-90 scale-50" id="closeIconSpan">
+<svg class="w-[22px] h-[22px] text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<line stroke-linecap="round" x1="6" x2="18" y1="6" y2="18"></line>
+<line stroke-linecap="round" x1="6" x2="18" y1="18" y2="6"></line>
+</svg>
+</span>
+</button>
+</nav>
+<!-- Mobile Menu Overlay -->
+<div class="fixed inset-0 z-50 lg:hidden transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] invisible opacity-0 pointer-events-none" id="mobileMenu">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-black/90 backdrop-blur-md transition-opacity duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0" id="menuBackdrop"></div>
+<!-- Panel -->
+<div class="relative h-full flex flex-col px-5 pt-24 pb-10 transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 -translate-y-4" id="menuPanel">
+<!-- Close Button -->
+<button aria-label="Close menu" class="absolute top-5 right-5 w-[40px] h-[40px] flex items-center justify-center cursor-pointer" id="menuCloseBtn">
+<svg class="w-[22px] h-[22px] text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<line stroke-linecap="round" x1="6" x2="18" y1="6" y2="18"></line>
+<line stroke-linecap="round" x1="6" x2="18" y1="18" y2="6"></line>
+</svg>
+</button>
+<!-- Nav list -->
+<div class="flex flex-col gap-8"><div class="mobile-nav-item transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 -translate-x-6 flex items-center gap-3 cursor-pointer group" style="transition-delay: 0ms;">
+<span class="font-manrope text-[14px] leading-[1]" style="color: rgba(254, 240, 138, 0.8);">01.</span>
+<span class="font-manrope text-white text-[28px] leading-[1.2] tracking-tight group-hover:text-[#FEF08A] transition-colors duration-300">MARKET_OVERVIEW</span>
+</div>
+<div class="mobile-nav-item transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 -translate-x-6 flex items-center gap-3 cursor-pointer group" style="transition-delay: 0ms;">
+<span class="font-manrope text-[14px] leading-[1]" style="color: rgba(254, 240, 138, 0.8);">02.</span>
+<span class="font-manrope text-white text-[28px] leading-[1.2] tracking-tight group-hover:text-[#FEF08A] transition-colors duration-300">GOLD_CONTRACTS</span>
+</div>
+<div class="mobile-nav-item transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 -translate-x-6 flex items-center gap-3 cursor-pointer group" style="transition-delay: 0ms;">
+<span class="font-manrope text-[14px] leading-[1]" style="color: rgba(254, 240, 138, 0.8);">03.</span>
+<span class="font-manrope text-white text-[28px] leading-[1.2] tracking-tight group-hover:text-[#FEF08A] transition-colors duration-300">OPPORTUNITY_RADAR</span>
+</div>
+<div class="mobile-nav-item transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 -translate-x-6 flex items-center gap-3 cursor-pointer group" style="transition-delay: 0ms;">
+<span class="font-manrope text-[14px] leading-[1]" style="color: rgba(254, 240, 138, 0.8);">04.</span>
+<span class="font-manrope text-white text-[28px] leading-[1.2] tracking-tight group-hover:text-[#FEF08A] transition-colors duration-300">MARKET_DETECTIVE</span>
+</div></div>
+<!-- Activity block, pinned bottom -->
+<div class="mt-auto pt-10 border-t border-white/10 transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 translate-y-4" id="menuActivityBlock" style="transition-delay: 0ms;">
+<!-- Row 1 -->
+<div class="flex items-center gap-[10px] mb-3">
+<svg class="w-[15px] h-[15px] text-white" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="font-manrope text-white text-[13px] leading-[15.6px]">MCX_GOLD</span>
+<span class="font-manrope text-[13px] leading-[15.6px]" style="color: #FEF08A;">[ DATA_CONNECTED ]</span>
+</div>
+<!-- Row 2 -->
+<div class="flex items-center gap-[8px]">
+<span class="font-manrope text-white text-[13px] leading-[15.6px]">FEED_STATUS:</span>
+<div class="rounded-[3px] px-[5px] py-[2px] flex items-center justify-center" style="background-color: #FEF08A;">
+<span class="text-black text-[13px] leading-[15.6px] font-manrope font-medium">LIVE_DATA</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Heading H1 with Radiant Glowing Gold Word -->
+<h1 class="font-graphik text-white font-normal leading-[1em] absolute anim-fade-up text-[32px] sm:text-[48px] md:text-[68px] top-[140px] sm:top-[160px] md:top-[178px] left-5 md:left-[35px] max-w-[300px] sm:max-w-[420px] md:max-w-[554px]" style="animation-delay: 400ms;">
+          Uncover <span class="gold-glow-word inline-block font-normal">Gold</span> Market Anomalies.
+        </h1>
+<!-- Grid Lines & Plus Marks -->
+<div class="absolute inset-0 pointer-events-none">
+<!-- 4 Vertical Lines: 12.6%, 37.5%, 61.9%, 86.2% -->
+<div class="absolute top-0 h-full w-px bg-white/[0.04] anim-grid-v" style="left: 12.6%; animation-delay: 600ms;"></div>
+<div class="absolute top-0 h-full w-px bg-white/[0.04] anim-grid-v" style="left: 37.5%; animation-delay: 700ms;"></div>
+<div class="absolute top-0 h-full w-px bg-white/[0.04] anim-grid-v" style="left: 61.9%; animation-delay: 800ms;"></div>
+<div class="absolute top-0 h-full w-px bg-white/[0.04] anim-grid-v" style="left: 86.2%; animation-delay: 900ms;"></div>
+<!-- 2 Horizontal Lines: 32.7%, 71.4% -->
+<div class="absolute left-0 w-full h-px bg-white/[0.04] anim-grid-h" style="top: 32.7%; animation-delay: 800ms;"></div>
+<div class="absolute left-0 w-full h-px bg-white/[0.04] anim-grid-h" style="top: 71.4%; animation-delay: 950ms;"></div>
+<!-- 8 Plus Marks at intersections -->
+<div class="absolute anim-scale-in" style="top: 32.7%; left: 12.6%; animation-delay: 1000ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute anim-scale-in" style="top: 32.7%; left: 37.5%; animation-delay: 1080ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute anim-scale-in" style="top: 32.7%; left: 61.9%; animation-delay: 1160ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute anim-scale-in" style="top: 32.7%; left: 86.2%; animation-delay: 1240ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute anim-scale-in" style="top: 71.4%; left: 12.6%; animation-delay: 1320ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute anim-scale-in" style="top: 71.4%; left: 37.5%; animation-delay: 1400ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute anim-scale-in" style="top: 71.4%; left: 61.9%; animation-delay: 1480ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+<div class="absolute anim-scale-in" style="top: 71.4%; left: 86.2%; animation-delay: 1560ms;">
+<div class="absolute w-[10px] h-px bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+<div class="absolute w-px h-[10px] bg-white/70 -translate-x-1/2 -translate-y-1/2"></div>
+</div>
+</div>
+<!-- Central Nodes Component (Hidden below md) -->
+<div class="absolute inset-0 pointer-events-none hidden md:block">
+<!-- 6 Connector SVGs -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none anim-fade-in" style="animation-delay: 1200ms;">
+<line stroke="rgba(255,255,255,0.25)" stroke-width="1" vector-effect="non-scaling-stroke" x1="38%" x2="52%" y1="14%" y2="14%"></line>
+</svg>
+<svg class="absolute inset-0 w-full h-full pointer-events-none anim-fade-in" style="animation-delay: 1400ms;">
+<line stroke="rgba(255,255,255,0.25)" stroke-width="1" vector-effect="non-scaling-stroke" x1="52%" x2="60%" y1="14%" y2="27%"></line>
+</svg>
+<svg class="absolute inset-0 w-full h-full pointer-events-none anim-fade-in" style="animation-delay: 1500ms;">
+<line stroke="rgba(255,255,255,0.25)" stroke-width="1" vector-effect="non-scaling-stroke" x1="32%" x2="20%" y1="58%" y2="74%"></line>
+</svg>
+<svg class="absolute inset-0 w-full h-full pointer-events-none anim-fade-in" style="animation-delay: 1700ms;">
+<line stroke="rgba(255,255,255,0.25)" stroke-width="1" vector-effect="non-scaling-stroke" x1="20%" x2="6%" y1="74%" y2="74%"></line>
+</svg>
+<svg class="absolute inset-0 w-full h-full pointer-events-none anim-fade-in" style="animation-delay: 1800ms;">
+<line stroke="rgba(255,255,255,0.25)" stroke-width="1" vector-effect="non-scaling-stroke" x1="78%" x2="63%" y1="53%" y2="53%"></line>
+</svg>
+<svg class="absolute inset-0 w-full h-full pointer-events-none anim-fade-in" style="animation-delay: 2000ms;">
+<line stroke="rgba(255,255,255,0.25)" stroke-width="1" vector-effect="non-scaling-stroke" x1="63%" x2="50%" y1="53%" y2="63%"></line>
+</svg>
+<!-- Node 1: GOLD_CONTRACTS -->
+<div class="group absolute w-[80px] h-[80px] lg:w-[100px] lg:h-[100px] border border-white/80 transition-all duration-300 pointer-events-auto cursor-pointer anim-scale-in z-20 hover:border-[#FEF08A]" id="node-btn-contracts" style="top: 27%; left: 60%; animation-delay: 1500ms;">
+<!-- Glowing Reticle Corners -->
+<div class="absolute top-0 right-0 w-[6px] h-[6px] border-t-2 border-r-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute bottom-0 left-0 w-[6px] h-[6px] border-b-2 border-l-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute top-0 left-0 w-[6px] h-[6px] border-t-2 border-l-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute bottom-0 right-0 w-[6px] h-[6px] border-b-2 border-r-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<!-- Center Reticle Cross -->
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none">
+<span class="text-[10px] font-mono tracking-widest" style="color: #FEF08A;">+</span>
+</div>
+<!-- Live Intelligence Tooltip on Hover -->
+<div class="pointer-events-none absolute left-full top-0 ml-4 w-[250px] bg-black/95 backdrop-blur-md p-3.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 z-30" style="border: 1px solid rgba(254, 240, 138, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(254, 240, 138, 0.2);">
+<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background-color: #FEF08A;"></span>
+<span class="font-manrope text-[11px] tracking-wider font-semibold" style="color: #FEF08A;">[ LIVE_METRICS // GC_Q3 ]</span>
+</div>
+<span class="text-[9px] font-manrope text-white/40">STREAM_ON</span>
+</div>
+<div class="mb-2">
+<div class="font-manrope text-[10px] text-white/50 tracking-wider">SPREAD_DIVERGENCE</div>
+<div class="font-manrope text-[14px] font-medium text-white flex items-center justify-between mt-0.5">
+<span class="font-semibold" style="color: #FEF08A;">+4.2σ</span>
+<span class="text-[9px] text-black px-1.5 py-0.5 rounded-[2px] font-semibold tracking-wider" style="background-color: #FEF08A;">ARBITRAGE</span>
+</div>
+</div>
+<p class="font-manrope text-[10px] leading-[14px] text-white/70">
+                MCX contract volume surged +184% vs 30D VWAP. Arbitrage window active. Click to inspect live telemetry.
+              </p>
+</div>
+</div>
+<!-- Label: top-[11%] left-[26%] delay 1100ms -->
+<div class="absolute anim-slide-left" style="top: 11%; left: 26%; animation-delay: 1100ms;"><span class="font-manrope text-white text-[13px] leading-[15.6px] whitespace-nowrap cursor-pointer transition-colors duration-300 hover:text-[#FEF08A]">[ GOLD_CONTRACTS ]</span>
+<p class="font-manrope text-white/50 text-[11px] leading-[14px] mt-[4px] max-w-[160px]">
+              Normalizing MCX gold contract and market data streams.
+            </p></div>
+<!-- Node 2: ANOMALY_DETECTION -->
+<div class="group absolute w-[80px] h-[80px] lg:w-[100px] lg:h-[100px] border border-white/80 transition-all duration-300 pointer-events-auto cursor-pointer anim-scale-in z-20 hover:border-[#FEF08A]" id="node-btn-anomaly" style="top: 58%; left: 32%; animation-delay: 1800ms;">
+<!-- Glowing Reticle Corners -->
+<div class="absolute top-0 right-0 w-[6px] h-[6px] border-t-2 border-r-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute bottom-0 left-0 w-[6px] h-[6px] border-b-2 border-l-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute top-0 left-0 w-[6px] h-[6px] border-t-2 border-l-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute bottom-0 right-0 w-[6px] h-[6px] border-b-2 border-r-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<!-- Center Reticle Cross -->
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none">
+<span class="text-[10px] font-mono tracking-widest" style="color: #FEF08A;">+</span>
+</div>
+<!-- Live Intelligence Tooltip on Hover -->
+<div class="pointer-events-none absolute left-full top-0 ml-4 w-[260px] bg-black/95 backdrop-blur-md p-3.5 opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 z-30" style="border: 1px solid rgba(254, 240, 138, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(254, 240, 138, 0.2);">
+<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background-color: #FEF08A;"></span>
+<span class="font-manrope text-[11px] tracking-wider font-semibold" style="color: #FEF08A;">[ ANOMALY_ALERT #8491 ]</span>
+</div>
+<span class="text-[9px] font-manrope text-black px-1 py-0.5 rounded-[2px] font-semibold" style="background-color: #FEF08A;">HIGH_SIG</span>
+</div>
+<div class="mb-2">
+<div class="font-manrope text-[10px] text-white/50 tracking-wider">CONFIDENCE_RATING</div>
+<div class="font-manrope text-[14px] font-medium text-white flex items-center justify-between mt-0.5">
+<span class="text-white font-semibold">98.4%</span>
+<span class="text-[10px] tracking-wider font-medium" style="color: #FEF08A;">// CRITICAL</span>
+</div>
+</div>
+<p class="font-manrope text-[10px] leading-[14px] text-white/70">
+                Order-book asymmetry skew reached -3.8% in 100g contracts. High-frequency absorption detected. Click to view trace.
+              </p>
+</div>
+</div>
+<!-- Label: top-[76%] left-[3%] delay 1400ms -->
+<div class="absolute anim-slide-left" style="top: 76%; left: 3%; animation-delay: 1400ms;"><span class="font-manrope text-white text-[13px] leading-[15.6px] whitespace-nowrap cursor-pointer transition-colors duration-300 hover:text-[#FEF08A]">[ ANOMALY_DETECTION ]</span>
+<p class="font-manrope text-white/50 text-[11px] leading-[14px] mt-[4px] max-w-[160px]">
+              Detecting statistical anomalies across gold market data.
+            </p></div>
+<!-- Node 3: MARKET_INTELLIGENCE -->
+<div class="group absolute w-[80px] h-[80px] lg:w-[100px] lg:h-[100px] border border-white/80 transition-all duration-300 pointer-events-auto cursor-pointer anim-scale-in z-20 hover:border-[#FEF08A]" id="node-btn-intelligence" style="top: 63%; left: 50%; animation-delay: 2100ms;">
+<!-- Glowing Reticle Corners -->
+<div class="absolute top-0 right-0 w-[6px] h-[6px] border-t-2 border-r-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute bottom-0 left-0 w-[6px] h-[6px] border-b-2 border-l-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute top-0 left-0 w-[6px] h-[6px] border-t-2 border-l-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<div class="absolute bottom-0 right-0 w-[6px] h-[6px] border-b-2 border-r-2 opacity-0 group-hover:opacity-100 transition-all duration-300" style="border-color: #FEF08A;"></div>
+<!-- Center Reticle Cross -->
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none">
+<span class="text-[10px] font-mono tracking-widest" style="color: #FEF08A;">+</span>
+</div>
+<!-- Live Intelligence Tooltip on Hover -->
+<div class="pointer-events-none absolute right-full top-0 mr-4 w-[270px] bg-black/95 backdrop-blur-md p-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 z-30" style="border: 1px solid rgba(254, 240, 138, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(254, 240, 138, 0.2);">
+<div class="flex items-center justify-between pb-1.5 mb-2 border-b border-white/10">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full animate-pulse" style="background-color: #FEF08A;"></span>
+<span class="font-manrope text-[11px] tracking-wider font-semibold" style="color: #FEF08A;">[ SYNTHESIS // FED_MCX_CORR ]</span>
+</div>
+<span class="text-[9px] font-manrope text-white/40">EVID_SYNC</span>
+</div>
+<div class="mb-2">
+<div class="font-manrope text-[10px] text-white/50 tracking-wider">CROSS_CORRELATION</div>
+<div class="font-manrope text-[14px] font-medium text-white flex items-center justify-between mt-0.5">
+<span class="font-semibold" style="color: #FEF08A;">0.89 BREAK</span>
+<span class="text-[9px] text-black px-1.5 py-0.5 rounded-[2px] font-semibold tracking-wider" style="background-color: #FEF08A;">DECOUPLED</span>
+</div>
+</div>
+<p class="font-manrope text-[10px] leading-[14px] text-white/70">
+                Decoupling from COMEX spot pricing identified during London morning fix overlap. Click to view macro correlation.
+              </p>
+</div>
+</div>
+<!-- Label: top-[50%] left-[78%] delay 1700ms -->
+<div class="absolute anim-slide-right" style="top: 50%; left: 78%; animation-delay: 1700ms;"><span class="font-manrope text-white text-[13px] leading-[15.6px] whitespace-nowrap cursor-pointer transition-colors duration-300 hover:text-[#FEF08A]">[ MARKET_INTELLIGENCE ]</span>
+<p class="font-manrope text-white/50 text-[11px] leading-[14px] mt-[4px] max-w-[180px]">
+              Connecting market signals, evidence, and investigation insights.
+            </p></div>
+</div>
+<!-- Bottom Row -->
+<div class="absolute bottom-5 md:bottom-[35px] left-5 md:left-[35px] right-5 md:right-[35px] flex flex-col md:flex-row items-start md:items-end justify-between gap-5 md:gap-0">
+<!-- Left CTA Button -->
+<button class="px-[16px] md:px-[20px] py-[10px] md:py-[12px] flex items-center gap-[10px] transition-all anim-fade-up cursor-pointer hover:brightness-110" id="openTelemetryCta" style="background-color: #FEF08A; box-shadow: 0 0 16px rgba(254, 240, 138, 0.4); animation-delay: 900ms;">
+<span class="text-black text-[16px] leading-none">✦</span>
+<span class="font-manrope text-black text-[12px] md:text-[13px] leading-[15.6px] uppercase tracking-wide font-medium">
+              Explore Market Intelligence
+            </span>
+</button>
+<!-- Right Info Card (Hidden below 640px) -->
+<div class="relative max-w-[280px] hidden sm:block anim-slide-right" style="animation-delay: 1100ms;">
+<!-- Badge above the card -->
+<div class="font-manrope text-black text-[13px] leading-[15.6px] px-[6px] py-[2px] inline-block mb-[10px] font-medium" style="background-color: #FEF08A;">
+              COMMODITY INTELLIGENCE — MCX GOLD
+            </div>
+<!-- Card Body -->
+<div class="relative p-[20px]">
+<!-- Chamfered border SVG -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 280 168">
+<polygon fill="none" points="0.5,0.5 279.5,0.5 279.5,167.5 30,167.5 0.5,137.5" stroke="#FEF08A" stroke-width="1" vector-effect="non-scaling-stroke"></polygon>
+</svg>
+<!-- Paragraph -->
+<p class="relative font-manrope text-white text-[13px] leading-[18px] mb-[18px]">
+                Investigates MCX gold market movements, detects unusual patterns, and turns quantitative signals into evidence-led insights.
+              </p>
+<!-- Link -->
+<a class="relative font-manrope text-[13px] leading-[15.6px] cursor-pointer hover:underline inline-block" href="#" style="color: #FEF08A;">
+                VIEW_METHODOLOGY
+              </a>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Clickable Anomaly Telemetry Drawer / Modal -->
+<div class="fixed inset-0 z-50 invisible pointer-events-none transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)]" id="nodeDrawer"><!-- Dimmed Backdrop -->
+<div class="absolute inset-0 bg-black/70 backdrop-blur-md opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] cursor-pointer" id="drawerBackdrop"></div>
+<!-- Slide-over Drawer Panel -->
+<div class="absolute top-0 right-0 h-full w-full max-w-[580px] bg-black/95 border-l border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.95)] flex flex-col justify-between translate-x-full transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] pointer-events-auto" id="drawerPanel">
+<!-- Header with Node ID, title, live status beacon & close button -->
+<div class="px-6 py-5 border-b border-white/10 flex items-center justify-between bg-black/40">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full animate-pulse" style="background-color: #FEF08A;"></span>
+<div>
+<div class="font-manrope text-[11px] tracking-wider font-semibold uppercase" id="drawerCategory" style="color: #FEF08A;">
+                [ 01 // ANOMALY_TELEMETRY // STREAM_ACTIVE ]
+              </div>
+<div class="text-[10px] font-manrope text-white/50 tracking-wider">SECURE FEED // L1 DIRECT MCX PROTOCOL</div>
+</div>
+</div>
+<button aria-label="Close telemetry drawer" class="w-[36px] h-[36px] border border-white/10 hover:border-[#FEF08A] flex items-center justify-center transition-colors cursor-pointer group rounded-[2px]" id="closeDrawerBtn">
+<svg class="w-4 h-4 text-white group-hover:text-[#FEF08A] transition-colors" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+<line stroke-linecap="round" x1="6" x2="18" y1="6" y2="18"></line>
+<line stroke-linecap="round" x1="6" x2="18" y1="18" y2="6"></line>
+</svg>
+</button>
+</div>
+<!-- Scrollable Telemetry Body -->
+<div class="flex-1 overflow-y-auto custom-scrollbar px-6 py-5 flex flex-col gap-6">
+<!-- Node Title & Status Badge Header -->
+<div id="nodeHeroHeader">
+<div class="flex items-center gap-2 mb-2">
+<span class="text-[10px] font-manrope text-black px-2 py-0.5 rounded-[2px] font-semibold tracking-wider" id="drawerBadge" style="background-color: #FEF08A;">
+                LIVE_STREAM // GC_Q3
+              </span>
+<span class="text-[10px] font-manrope text-white/40">// TELEMETRY_ONLINE</span>
+</div>
+<h2 class="font-graphik text-white text-[24px] md:text-[28px] leading-[1.15] mb-2 font-normal" id="drawerTitle">
+              MCX Gold Derivatives &amp; Delivery Matrix
+            </h2>
+<p class="font-manrope text-white/70 text-[12.5px] leading-[18px]" id="drawerSummary">
+              Active synchronization across 100g, 1kg, and Gold Mini delivery cycles. Real-time arbitrage opportunities identified across COMEX-MCX currency-adjusted spreads.
+            </p>
+</div>
+<!-- Real-Time Deviation Telemetry Graph -->
+<div class="border border-white/10 bg-white/[0.02] p-4 rounded-[2px]">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-manrope font-semibold tracking-wider" style="color: #FEF08A;">
+                  [ TELEMETRY_STREAM // REAL_TIME_DEVIATION ]
+                </span>
+</div>
+<!-- Timeframe Selector -->
+<div class="flex items-center gap-1">
+<button class="tf-btn px-2 py-0.5 text-[10px] font-manrope border border-white/20 text-white/60 hover:text-white hover:border-white transition-colors cursor-pointer rounded-[2px]" data-tf="1m">[ 1M ]</button>
+<button class="tf-btn active px-2 py-0.5 text-[10px] font-manrope text-black font-medium transition-colors cursor-pointer rounded-[2px]" data-tf="5m" style="background-color: #FEF08A; border: 1px solid #FEF08A;">[ 5M ]</button>
+<button class="tf-btn px-2 py-0.5 text-[10px] font-manrope border border-white/20 text-white/60 hover:text-white hover:border-white transition-colors cursor-pointer rounded-[2px]" data-tf="15m">[ 15M ]</button>
+<button class="tf-btn px-2 py-0.5 text-[10px] font-manrope border border-white/20 text-white/60 hover:text-white hover:border-white transition-colors cursor-pointer rounded-[2px]" data-tf="1h">[ 1H ]</button>
+</div>
+</div>
+<!-- SVG Graph Surface with Multi-Sigma Grid & Scrubber -->
+<div class="relative w-full h-[180px] bg-black/60 border border-white/5 overflow-hidden select-none cursor-crosshair" id="chartContainer">
+<!-- Multi-sigma Reference Lines & Labels -->
+<!-- +4.0σ -->
+<div class="absolute w-full top-[16%] left-0 border-b border-dashed pointer-events-none flex justify-between px-2 text-[8.5px] font-manrope" style="border-color: rgba(254, 240, 138, 0.3); color: rgba(254, 240, 138, 0.85);">
+<span class="">+4.0σ CRITICAL_BREACH</span>
+<span class="">THRESH_MAX</span>
+</div>
+<!-- +2.0σ -->
+<div class="absolute w-full top-[38%] left-0 border-b border-dashed border-white/15 pointer-events-none flex justify-between px-2 text-[8.5px] font-manrope text-white/40">
+<span class="">+2.0σ WARNING_BAND</span>
+<span class="">VOL_EXP</span>
+</div>
+<!-- 0.0σ -->
+<div class="absolute w-full top-[62%] left-0 border-b border-white/20 pointer-events-none flex justify-between px-2 text-[8.5px] font-manrope text-white/60">
+<span class="">0.0σ VWAP_BASELINE</span>
+<span class="">EQUILIBRIUM</span>
+</div>
+<!-- -2.0σ -->
+<div class="absolute w-full top-[85%] left-0 border-b border-dashed border-white/10 pointer-events-none flex justify-between px-2 text-[8.5px] font-manrope text-white/30">
+<span class="">-2.0σ SUPPORT_BAND</span>
+<span class="">LOWER_ENVELOPE</span>
+</div>
+<!-- Main Illuminated Vector Curve SVG -->
+<svg class="absolute inset-0 w-full h-full" id="telemetrySvg" preserveAspectRatio="none" viewBox="0 0 500 180">
+<defs>
+<linearGradient id="curveGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#FEF08A" stop-opacity="0.35"></stop>
+<stop offset="65%" stop-color="#FEF08A" stop-opacity="0.08"></stop>
+<stop offset="100%" stop-color="#FEF08A" stop-opacity="0.0"></stop>
+</linearGradient>
+</defs>
+<!-- Gradient fill area -->
+<polygon fill="url(#curveGradient)" id="graphFill" points="0,180 0,115 40,110 80,118 120,95 160,105 200,80 240,70 280,78 320,55 360,45 400,28 430,22 460,38 500,32 500,180"></polygon>
+<!-- Illuminated Curve Line -->
+<path d="M 0 115 Q 40 110, 80 118 T 160 105 T 240 70 T 320 55 T 400 28 T 430 22 T 500 32" fill="none" id="graphLine" stroke="#FEF08A" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+<!-- Pulsating Anomaly Peak Marker (+4.21σ) at x=430, y=22 -->
+<g id="peakMarker" transform="translate(430, 22)">
+<circle class="pulse-marker" fill="#FEF08A" opacity="0.3" r="12"></circle>
+<circle fill="#FEF08A" r="4"></circle>
+<circle fill="#000" r="1.5"></circle>
+<!-- Peak Callout Badge -->
+<rect fill="#000" height="15" rx="2" stroke="#FEF08A" stroke-width="1" width="70" x="-35" y="-22"></rect>
+<text fill="#FEF08A" font-family="Manrope" font-size="8" font-weight="600" text-anchor="middle" x="0" y="-12">+4.21σ PEAK</text>
+</g>
+</svg>
+<!-- Interactive Crosshair Scrubber -->
+<div class="absolute top-0 bottom-0 w-px pointer-events-none hidden" id="crosshairLine" style="background-color: #FEF08A; box-shadow: 0 0 8px #FEF08A;"></div>
+<div class="absolute w-2 h-2 -ml-1 -mt-1 rounded-full pointer-events-none hidden border border-black" id="crosshairDot" style="background-color: #FEF08A; box-shadow: 0 0 8px #FEF08A;"></div>
+<!-- Crosshair Live Scrubber Tooltip -->
+<div class="absolute top-2 left-2 bg-black/95 px-2.5 py-1 text-[9px] font-manrope pointer-events-none hidden shadow-lg z-20" id="crosshairBadge" style="border: 1px solid #FEF08A;">
+<div class="flex items-center gap-2">
+<span class="text-white/60" id="scrubTime">14:02:45 UTC</span>
+<span class="text-white font-medium" id="scrubPrice">₹72,480/10g</span>
+<span class="font-semibold" id="scrubSigma" style="color: #FEF08A;">+4.21σ</span>
+</div>
+</div>
+</div>
+<!-- Footer indicator below graph -->
+<div class="flex items-center justify-between mt-2.5 text-[9px] font-manrope text-white/50">
+<span class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="">SAMPLING RATE: 100Hz DIRECT LIQUIDITY RECEPTION</span>
+</span>
+<span style="color: #FEF08A;" class="">ANOMALY_STATUS: IN_PROGRESS</span>
+</div>
+</div>
+<!-- Correlated Quantitative Sparklines -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<!-- Sparkline 1: COMEX Delta -->
+<div class="border border-white/10 bg-white/[0.02] p-3 rounded-[2px]">
+<div class="text-[9.5px] font-manrope text-white/50 tracking-wider mb-1">COMEX SPREAD DELTA</div>
+<div class="flex items-baseline justify-between mb-1.5">
+<span class="text-[15px] font-manrope font-semibold text-white" id="metricComex">+18.4 pts</span>
+<span class="text-[8.5px] font-manrope px-1 py-0.5 rounded-[1px]" style="color: #FEF08A; background-color: rgba(254, 240, 138, 0.1); border: 1px solid rgba(254, 240, 138, 0.3);">WIDENING</span>
+</div>
+<!-- Mini Sparkline SVG -->
+<svg class="w-full h-[24px]" viewBox="0 0 100 24">
+<path d="M0,18 L15,16 L30,19 L45,12 L60,14 L75,7 L90,4 L100,2" fill="none" stroke="#FEF08A" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Sparkline 2: Order Book Skew -->
+<div class="border border-white/10 bg-white/[0.02] p-3 rounded-[2px]">
+<div class="text-[9.5px] font-manrope text-white/50 tracking-wider mb-1">ORDER BOOK SKEW</div>
+<div class="flex items-baseline justify-between mb-1.5">
+<span class="text-[15px] font-manrope font-semibold text-white" id="metricSkew">84% BUY ASYM</span>
+<span class="text-[8.5px] font-manrope px-1 py-0.5 rounded-[1px]" style="color: #FEF08A; background-color: rgba(254, 240, 138, 0.1); border: 1px solid rgba(254, 240, 138, 0.3);">ACCUMULATION</span>
+</div>
+<!-- Mini Sparkline SVG -->
+<svg class="w-full h-[24px]" viewBox="0 0 100 24">
+<path d="M0,20 L20,17 L40,15 L60,8 L80,5 L100,3" fill="none" stroke="#FEF08A" stroke-width="1.5"></path>
+</svg>
+</div>
+<!-- Sparkline 3: Execution Latency -->
+<div class="border border-white/10 bg-white/[0.02] p-3 rounded-[2px]">
+<div class="text-[9.5px] font-manrope text-white/50 tracking-wider mb-1">EXECUTION LATENCY</div>
+<div class="flex items-baseline justify-between mb-1.5">
+<span class="text-[15px] font-manrope font-semibold text-white" id="metricLatency">1.8 ms</span>
+<span class="text-[8.5px] font-manrope px-1 py-0.5 rounded-[1px]" style="color: #FEF08A; background-color: rgba(254, 240, 138, 0.1); border: 1px solid rgba(254, 240, 138, 0.3);">L1 DIRECT</span>
+</div>
+<!-- Mini Bar Meter -->
+<div class="w-full h-[24px] flex items-end gap-1 pt-2">
+<div class="w-1/6 h-[40%] rounded-[1px]" style="background-color: rgba(254, 240, 138, 0.4);"></div>
+<div class="w-1/6 h-[60%] rounded-[1px]" style="background-color: rgba(254, 240, 138, 0.5);"></div>
+<div class="w-1/6 h-[50%] rounded-[1px]" style="background-color: rgba(254, 240, 138, 0.4);"></div>
+<div class="w-1/6 h-[30%] rounded-[1px]" style="background-color: rgba(254, 240, 138, 0.3);"></div>
+<div class="w-1/6 h-[80%] rounded-[1px]" style="background-color: rgba(254, 240, 138, 0.8);"></div>
+<div class="w-1/6 h-[35%] rounded-[1px]" style="background-color: #FEF08A;"></div>
+</div>
+</div>
+</div>
+<!-- Detailed Metrics Grid Matching Clicked Node -->
+<div class="grid grid-cols-2 gap-3" id="drawerStatsGrid">
+<!-- Dynamically populated via JS -->
+</div>
+<!-- Trace Logs & Forensic Details -->
+<div class="border border-white/10 bg-black/60 p-4 rounded-[2px]">
+<div class="text-[11px] font-manrope tracking-wider mb-2 font-medium" id="drawerLogTitle" style="color: #FEF08A;">
+              RECENT ORDERBOOK IMBALANCE METRICS
+            </div>
+<div class="flex flex-col gap-2" id="drawerLogsList">
+<!-- Dynamically populated via JS -->
+</div>
+</div>
+</div>
+<!-- Drawer Footer Action Bar -->
+<div class="px-6 py-4 border-t border-white/10 flex items-center justify-between text-[11px] font-manrope bg-black/80">
+<span class="text-white/50">SYSTEM_ENCRYPTION: AES_GCM_256</span>
+<button class="text-black px-4 py-2 font-semibold transition-all cursor-pointer rounded-[2px] hover:brightness-110" onclick="window.closeNodeDrawer()" style="background-color: #FEF08A; box-shadow: 0 0 12px rgba(254, 240, 138, 0.4);">
+            DISMISS_PANEL [ESC]
+          </button>
+</div>
+</div></div>
+<!-- Mobile Menu Interactivity Script -->
+<script>
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const menuCloseBtn = document.getElementById('menuCloseBtn');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const menuBackdrop = document.getElementById('menuBackdrop');
+      const menuPanel = document.getElementById('menuPanel');
+      const menuIconSpan = document.getElementById('menuIconSpan');
+      const closeIconSpan = document.getElementById('closeIconSpan');
+      const navItems = document.querySelectorAll('.mobile-nav-item');
+      const activityBlock = document.getElementById('menuActivityBlock');
+
+      let menuOpen = false;
+
+      function toggleMenu(open) {
+        menuOpen = open;
+        if (menuOpen) {
+          mobileMenu.classList.remove('invisible', 'pointer-events-none');
+          mobileMenu.classList.add('visible', 'opacity-100');
+          menuBackdrop.classList.remove('opacity-0');
+          menuBackdrop.classList.add('opacity-100');
+          menuPanel.classList.remove('opacity-0', '-translate-y-4');
+          menuPanel.classList.add('opacity-100', 'translate-y-0');
+
+          menuIconSpan.className = 'absolute transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 rotate-90 scale-50';
+          closeIconSpan.className = 'absolute transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-100 rotate-0 scale-100';
+
+          navItems.forEach((item, index) => {
+            item.style.transitionDelay = `${150 + index * 75}ms`;
+            item.classList.remove('opacity-0', '-translate-x-6');
+            item.classList.add('opacity-100', 'translate-x-0');
+          });
+
+          activityBlock.style.transitionDelay = '450ms';
+          activityBlock.classList.remove('opacity-0', 'translate-y-4');
+          activityBlock.classList.add('opacity-100', 'translate-y-0');
+        } else {
+          mobileMenu.classList.remove('opacity-100');
+          mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+          menuBackdrop.classList.remove('opacity-100');
+          menuBackdrop.classList.add('opacity-0');
+          menuPanel.classList.remove('opacity-100', 'translate-y-0');
+          menuPanel.classList.add('opacity-0', '-translate-y-4');
+
+          menuIconSpan.className = 'absolute transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-100 rotate-0 scale-100';
+          closeIconSpan.className = 'absolute transition-all duration-300 ease-[cubic-bezier(0.76,0,0.24,1)] opacity-0 -rotate-90 scale-50';
+
+          navItems.forEach((item) => {
+            item.style.transitionDelay = '0ms';
+            item.classList.remove('opacity-100', 'translate-x-0');
+            item.classList.add('opacity-0', '-translate-x-6');
+          });
+
+          activityBlock.style.transitionDelay = '0ms';
+          activityBlock.classList.remove('opacity-100', 'translate-y-0');
+          activityBlock.classList.add('opacity-0', 'translate-y-4');
+
+          setTimeout(() => {
+            if (!menuOpen) mobileMenu.classList.add('invisible');
+          }, 500);
+        }
+      }
+
+      hamburgerBtn.addEventListener('click', () => toggleMenu(!menuOpen));
+      menuCloseBtn.addEventListener('click', () => toggleMenu(false));
+      menuBackdrop.addEventListener('click', () => toggleMenu(false));
+    </script>
+<!-- Node Inspection & Interactive Telemetry Graph Script -->
+<script>
+      (function(){
+        const nodeData = {
+          contracts: {
+            category: "[ 01 // GOLD_CONTRACTS // TELEMETRY_MATRIX ]",
+            title: "MCX Gold Derivatives & Delivery Matrix",
+            badge: "LIVE_STREAM // GC_Q3",
+            summary: "Active synchronization across 100g, 1kg, and Gold Mini delivery cycles. Real-time arbitrage opportunities identified across COMEX-MCX currency-adjusted spreads.",
+            comexDelta: "+18.4 pts",
+            skew: "84% BUY ASYM",
+            latency: "1.8 ms",
+            stats: [
+              { label: "COMEX-MCX SPREAD", val: "+$14.20/oz", tag: "ARBITRAGE_OPEN" },
+              { label: "DEPTH LIQUIDITY", val: "₹2,840.4 Cr", tag: "HIGH_VOL" },
+              { label: "DELIVERY INTENT", val: "89.4% OI", tag: "PHYSICAL_SETTLE" },
+              { label: "SPIKE SENSITIVITY", val: "0.042 ms", tag: "LOW_LATENCY" }
+            ],
+            logTitle: "RECENT ORDERBOOK IMBALANCE METRICS",
+            logs: [
+              "14:02:11 UTC: Large block order (450 lots) matched on MCX Aug contract at ₹71,450/10g.",
+              "14:02:45 UTC: Premium divergence widened by 18 bps during London AM fix overlap.",
+              "14:03:00 UTC: Automated liquidity replenishment detected across primary market makers."
+            ]
+          },
+          anomaly: {
+            category: "[ 02 // ANOMALY_DETECTION // INCIDENT_REPORT ]",
+            title: "High-Frequency Statistical Variance Alert",
+            badge: "CRITICAL // 98.4% SIG",
+            summary: "Quantitative models identified extreme non-random order book absorption at lower boundary tick levels. Bid-ask imbalance points toward institutional inventory accumulation.",
+            comexDelta: "+24.8 pts",
+            skew: "92% ACCUMULATION",
+            latency: "1.2 ms",
+            stats: [
+              { label: "VARIANCE SKEW", val: "+4.2σ DEV", tag: "CRITICAL" },
+              { label: "CONFIDENCE SCORE", val: "98.4%", tag: "CONFIRMED" },
+              { label: "SPOOF RATIO", val: "0.02% (LOW)", tag: "AUTHENTIC_FLOW" },
+              { label: "ABSORPTION VOL", val: "1,240 kg eq.", tag: "INSTITUTIONAL" }
+            ],
+            logTitle: "ANOMALY SIGNATURE TRACE LOG",
+            logs: [
+              "13:58:20 UTC: Algorithmic sweep absorbed 180 lots without shifting best offer.",
+              "13:59:12 UTC: Microstructural volatility compressed into narrow 12-tick envelope.",
+              "14:01:05 UTC: Flash divergence detected vs USDINR spot FX pricing matrix."
+            ]
+          },
+          intelligence: {
+            category: "[ 03 // MARKET_INTELLIGENCE // SYNTHESIS_MATRIX ]",
+            title: "Multi-Asset Macro Correlation & Hedging Radar",
+            badge: "DECOUPLED // EVID_SYNC",
+            summary: "Synthesizes real-time signals from Fed rate futures, US Treasury 10Y yields, and USD/INR liquidity corridors to forecast gold trajectory and provide tactical automated hedging posture.",
+            comexDelta: "+9.2 pts",
+            skew: "76% SKEW",
+            latency: "2.1 ms",
+            stats: [
+              { label: "FED_MCX_CORR", val: "0.89 BREAK", tag: "DECOUPLED" },
+              { label: "DXY SENSITIVITY", val: "-0.74 BETA", tag: "INVERSE" },
+              { label: "PREDICTIVE RADAR", val: "BULLISH SKEW", tag: "78% PROBABILITY" },
+              { label: "HEDGING POSTURE", val: "DELTA_NEUTRAL", tag: "RECOMMENDED" }
+            ],
+            logTitle: "TACTICAL SYNTHESIS RECOMMENDATIONS",
+            logs: [
+              "Cross-asset decoupling suggests domestic demand shock outstripping international spot pressures.",
+              "Options skew indicates strong put selling on 70,000 strike with call premium expansion.",
+              "Dynamic delta hedge adjustment triggered at 14:00 UTC with +12% protective collar allocation."
+            ]
+          }
+        };
+
+        const drawer = document.getElementById('nodeDrawer');
+        const backdrop = document.getElementById('drawerBackdrop');
+        const panel = document.getElementById('drawerPanel');
+        const drawerCategory = document.getElementById('drawerCategory');
+        const drawerBadge = document.getElementById('drawerBadge');
+        const drawerTitle = document.getElementById('drawerTitle');
+        const drawerSummary = document.getElementById('drawerSummary');
+        const drawerStatsGrid = document.getElementById('drawerStatsGrid');
+        const drawerLogTitle = document.getElementById('drawerLogTitle');
+        const drawerLogsList = document.getElementById('drawerLogsList');
+        const closeBtn = document.getElementById('closeDrawerBtn');
+
+        const metricComex = document.getElementById('metricComex');
+        const metricSkew = document.getElementById('metricSkew');
+        const metricLatency = document.getElementById('metricLatency');
+
+        function openNodeDrawer(type) {
+          const data = nodeData[type] || nodeData.contracts;
+          drawerCategory.textContent = data.category;
+          drawerBadge.textContent = data.badge;
+          drawerTitle.textContent = data.title;
+          drawerSummary.textContent = data.summary;
+
+          if (metricComex) metricComex.textContent = data.comexDelta;
+          if (metricSkew) metricSkew.textContent = data.skew;
+          if (metricLatency) metricLatency.textContent = data.latency;
+
+          // Populate detailed metrics grid
+          drawerStatsGrid.innerHTML = data.stats.map(s => `
+            <div class="border border-white/10 bg-white/[0.02] p-3 rounded-[2px]">
+              <div class="text-[10px] font-manrope text-white/50 tracking-wider mb-1">${s.label}</div>
+              <div class="text-[17px] font-manrope font-semibold text-white flex items-center justify-between mb-1">
+                <span>${s.val}</span>
+              </div>
+              <span class="inline-block text-[9px] font-manrope px-1.5 py-0.5 bg-[#AFDDFF]/10 text-[#AFDDFF] border border-[#AFDDFF]/30 font-medium tracking-wide">
+                ${s.tag}
+              </span>
+            </div>
+          `).join('');
+
+          // Populate logs
+          drawerLogTitle.textContent = data.logTitle;
+          drawerLogsList.innerHTML = data.logs.map(l => `
+            <div class="flex items-start gap-2 text-[11px] font-manrope text-white/70 leading-[16px]">
+              <span class="text-[#AFDDFF] mt-0.5 font-bold">›</span>
+              <span>${l}</span>
+            </div>
+          `).join('');
+
+          drawer.classList.remove('invisible', 'pointer-events-none');
+          setTimeout(() => {
+            backdrop.classList.remove('opacity-0');
+            backdrop.classList.add('opacity-100');
+            panel.classList.remove('translate-x-full');
+            panel.classList.add('translate-x-0');
+          }, 10);
+        }
+
+        window.closeNodeDrawer = function() {
+          backdrop.classList.remove('opacity-100');
+          backdrop.classList.add('opacity-0');
+          panel.classList.remove('translate-x-0');
+          panel.classList.add('translate-x-full');
+          setTimeout(() => {
+            drawer.classList.add('invisible', 'pointer-events-none');
+          }, 500);
+        };
+
+        closeBtn.addEventListener('click', window.closeNodeDrawer);
+        backdrop.addEventListener('click', window.closeNodeDrawer);
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') window.closeNodeDrawer();
+        });
+
+        document.getElementById('node-btn-contracts')?.addEventListener('click', () => openNodeDrawer('contracts'));
+        document.getElementById('node-btn-anomaly')?.addEventListener('click', () => openNodeDrawer('anomaly'));
+        document.getElementById('node-btn-intelligence')?.addEventListener('click', () => openNodeDrawer('intelligence'));
+        document.getElementById('openTelemetryCta')?.addEventListener('click', () => openNodeDrawer('anomaly'));
+
+        // Timeframe selector interactivity
+        const tfBtns = document.querySelectorAll('.tf-btn');
+        tfBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            tfBtns.forEach(b => {
+              b.classList.remove('active', 'bg-[#AFDDFF]', 'text-black', 'border-[#AFDDFF]', 'font-medium');
+              b.classList.add('border-white/20', 'text-white/60');
+            });
+            btn.classList.add('active', 'bg-[#AFDDFF]', 'text-black', 'border-[#AFDDFF]', 'font-medium');
+            btn.classList.remove('border-white/20', 'text-white/60');
+          });
+        });
+
+        // Interactive Crosshair Scrubber on Telemetry Graph
+        const chart = document.getElementById('chartContainer');
+        const crosshairLine = document.getElementById('crosshairLine');
+        const crosshairDot = document.getElementById('crosshairDot');
+        const crosshairBadge = document.getElementById('crosshairBadge');
+        const scrubTime = document.getElementById('scrubTime');
+        const scrubPrice = document.getElementById('scrubPrice');
+        const scrubSigma = document.getElementById('scrubSigma');
+
+        chart.addEventListener('mousemove', (e) => {
+          const rect = chart.getBoundingClientRect();
+          const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+          const pct = x / rect.width;
+
+          crosshairLine.style.left = `${x}px`;
+          crosshairLine.classList.remove('hidden');
+
+          // Approximate curve height for dot positioning
+          const y = 30 + (Math.sin(pct * 4) * 20) + (1 - pct) * 80;
+          crosshairDot.style.left = `${x}px`;
+          crosshairDot.style.top = `${y}px`;
+          crosshairDot.classList.remove('hidden');
+
+          crosshairBadge.classList.remove('hidden');
+          crosshairBadge.style.left = `${Math.min(Math.max(10, x - 70), rect.width - 170)}px`;
+
+          const seconds = Math.floor(pct * 60);
+          scrubTime.textContent = `14:02:${seconds < 10 ? '0' : ''}${seconds} UTC`;
+          const price = 71200 + Math.round(pct * 1280);
+          scrubPrice.textContent = `₹${price.toLocaleString('en-IN')}/10g`;
+          const sigma = (pct * 4.21).toFixed(2);
+          scrubSigma.textContent = `+${sigma}σ`;
+        });
+
+        chart.addEventListener('mouseleave', () => {
+          crosshairLine.classList.add('hidden');
+          crosshairDot.classList.add('hidden');
+          crosshairBadge.classList.add('hidden');
+        });
+
+      })();
+    </script>
+
+
+
+
+</body></html>

@@ -1,0 +1,3338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURORA — MCX Gold Contract Explorer</title>
+  
+  <!-- Google Fonts: Inter & Orbitron -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js 4.4.1 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       AURORA DESIGN SYSTEM — CLAYMORPHISM + GLASSMORPHISM + 3D
+       Palette: Deep Navy (#070a1e, #0a0e27, #141852) & Gold (#f0b90b, #d4a017, #ffd700)
+       ========================================================================== */
+    :root {
+      --bg-dark: #070a1e;
+      --bg-surface: #0a0e27;
+      --bg-surface-elevated: #0f143a;
+      --bg-clay: #121846;
+      --bg-clay-light: #18205a;
+      --bg-glass: rgba(16, 22, 58, 0.65);
+      --bg-glass-card: rgba(18, 25, 68, 0.55);
+      
+      --gold-primary: #f0b90b;
+      --gold-bright: #ffd700;
+      --gold-muted: #d4a017;
+      --gold-dark: #997300;
+      --gold-glow: rgba(240, 185, 11, 0.35);
+      --gold-gradient: linear-gradient(135deg, #ffe77a 0%, #f0b90b 50%, #c9930c 100%);
+      --gold-gradient-soft: linear-gradient(135deg, rgba(240, 185, 11, 0.15) 0%, rgba(212, 160, 23, 0.05) 100%);
+      
+      --navy-deep: #0a0e27;
+      --navy-card: #141852;
+      --navy-border: rgba(240, 185, 11, 0.18);
+      --navy-border-subtle: rgba(255, 255, 255, 0.08);
+
+      --color-success: #10b981;
+      --color-success-bg: rgba(16, 185, 129, 0.15);
+      --color-danger: #ef4444;
+      --color-danger-bg: rgba(239, 68, 68, 0.15);
+      --color-warning: #f59e0b;
+      --color-warning-bg: rgba(245, 158, 11, 0.15);
+      --color-info: #38bdf8;
+      --color-info-bg: rgba(56, 189, 248, 0.15);
+
+      --text-white: #ffffff;
+      --text-silver: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+
+      /* Claymorphic 3D Box Shadows */
+      --clay-shadow-outer: 8px 8px 20px rgba(0, 0, 0, 0.55), -4px -4px 14px rgba(255, 255, 255, 0.03);
+      --clay-shadow-inset: inset 2px 2px 4px rgba(255, 255, 255, 0.09), inset -2px -2px 5px rgba(0, 0, 0, 0.65);
+      --clay-card-shadow: 
+        10px 10px 24px rgba(0, 0, 0, 0.5),
+        -5px -5px 16px rgba(255, 255, 255, 0.02),
+        inset 2px 2px 5px rgba(255, 255, 255, 0.08),
+        inset -2px -2px 6px rgba(0, 0, 0, 0.7);
+
+      --gold-glow-shadow: 0 0 25px rgba(240, 185, 11, 0.25);
+      
+      --font-heading: 'Orbitron', -apple-system, sans-serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --sidebar-width: 270px;
+      --header-height: 72px;
+      --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Reset & Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-silver);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(20, 24, 82, 0.6) 0%, transparent 40%),
+        radial-gradient(circle at 85% 60%, rgba(240, 185, 11, 0.07) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(14, 18, 56, 0.7) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Background Particle Canvas */
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.75;
+    }
+
+    /* App Shell Container */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-clay-light);
+      border-radius: 4px;
+      border: 1px solid rgba(240, 185, 11, 0.2);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold-primary);
+    }
+
+    /* ==========================================================================
+       SIDEBAR NAVIGATION (Fixed Left)
+       ========================================================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(10, 14, 39, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--navy-border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+      transition: var(--transition-smooth);
+    }
+
+    .brand-section {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .brand-logo-container {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #1f2766 0%, #0d1238 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--gold-primary);
+      box-shadow: 0 0 15px var(--gold-glow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .brand-logo-container i {
+      font-size: 20px;
+      color: var(--gold-primary);
+      filter: drop-shadow(0 0 5px rgba(240, 185, 11, 0.7));
+    }
+
+    .brand-text-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.1;
+    }
+
+    .brand-subtitle {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .nav-menu {
+      flex: 1;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      padding: 10px 12px 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      padding: 11px 14px;
+      border-radius: 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+      transition: var(--transition-smooth);
+      position: relative;
+    }
+
+    .nav-item i {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+      transition: var(--transition-smooth);
+    }
+
+    .nav-item:hover {
+      color: var(--gold-primary);
+      background: rgba(240, 185, 11, 0.08);
+      transform: translateX(4px);
+    }
+
+    .nav-item:hover i {
+      color: var(--gold-primary);
+      transform: scale(1.15);
+    }
+
+    /* Active Nav Item: Claymorphic inset + Gold Glow */
+    .nav-item.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(24, 32, 90, 0.9), rgba(15, 20, 58, 0.95));
+      box-shadow: 
+        inset 2px 2px 4px rgba(255, 255, 255, 0.1),
+        inset -2px -2px 5px rgba(0, 0, 0, 0.6),
+        0 4px 15px rgba(240, 185, 11, 0.15);
+      border: 1px solid rgba(240, 185, 11, 0.35);
+      font-weight: 600;
+    }
+
+    .nav-item.active i {
+      color: var(--gold-primary);
+      filter: drop-shadow(0 0 8px rgba(240, 185, 11, 0.8));
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      right: 12px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold-primary);
+      box-shadow: 0 0 10px var(--gold-primary);
+    }
+
+    .nav-badge {
+      margin-left: auto;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      background: rgba(240, 185, 11, 0.15);
+      color: var(--gold-primary);
+      border: 1px solid rgba(240, 185, 11, 0.3);
+    }
+
+    /* Sidebar Footer / System Health Card */
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .system-health-card {
+      background: linear-gradient(145deg, #0d1235, #080b22);
+      border-radius: 14px;
+      padding: 13px;
+      border: 1px solid rgba(240, 185, 11, 0.15);
+      box-shadow: var(--clay-shadow-outer), var(--clay-shadow-inset);
+    }
+
+    .health-status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .pulse-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-success);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-success);
+      box-shadow: 0 0 10px var(--color-success);
+      animation: pulseGlow 1.8s infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    .sync-timestamp {
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* ==========================================================================
+       MAIN VIEWPORT LAYOUT
+       ========================================================================== */
+    .main-wrapper {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    /* Top Header Bar (Glassmorphic) */
+    .top-header {
+      height: var(--header-height);
+      background: rgba(10, 14, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--navy-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .breadcrumb a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: var(--transition-smooth);
+    }
+    .breadcrumb a:hover {
+      color: var(--gold-primary);
+    }
+
+    .breadcrumb i.separator {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .breadcrumb .current {
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+
+    /* Live Mini Ticker in Header */
+    .header-ticker {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(14, 20, 56, 0.85);
+      padding: 6px 14px;
+      border-radius: 30px;
+      border: 1px solid rgba(240, 185, 11, 0.18);
+      box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.05);
+    }
+
+    .ticker-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+    }
+
+    .ticker-chip .sym {
+      color: var(--text-white);
+      font-weight: 700;
+    }
+
+    .ticker-chip .val {
+      color: var(--text-silver);
+    }
+
+    .ticker-chip .chg.up {
+      color: var(--color-success);
+    }
+    .ticker-chip .chg.down {
+      color: var(--color-danger);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .market-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 11.5px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .header-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--bg-clay);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-silver);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3), -2px -2px 6px rgba(255, 255, 255, 0.02);
+    }
+
+    .header-btn:hover {
+      color: var(--gold-primary);
+      border-color: var(--gold-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px var(--gold-glow);
+    }
+
+    .user-profile-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 12px 5px 6px;
+      background: var(--bg-clay);
+      border-radius: 30px;
+      border: 1px solid rgba(240, 185, 11, 0.25);
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--gold-gradient);
+      color: #000;
+      font-weight: 800;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .user-role {
+      font-size: 9.5px;
+      color: var(--gold-primary);
+      font-family: var(--font-heading);
+      letter-spacing: 0.5px;
+    }
+
+    /* ==========================================================================
+       CONTENT AREA
+       ========================================================================== */
+    .content-area {
+      padding: 32px;
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    /* 1. PAGE HEADER & FILTER PILLS */
+    .page-header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .page-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .page-title {
+      font-family: var(--font-heading);
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 10px rgba(240, 185, 11, 0.3));
+    }
+
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 14.5px;
+      font-weight: 400;
+      max-width: 650px;
+    }
+
+    /* Filter Pills (Claymorphic) */
+    .filter-pills-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(14, 19, 53, 0.7);
+      padding: 6px;
+      border-radius: 16px;
+      border: 1px solid rgba(240, 185, 11, 0.15);
+      box-shadow: var(--clay-shadow-outer), var(--clay-shadow-inset);
+    }
+
+    .filter-pill {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-muted);
+      font-family: var(--font-heading);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      padding: 9px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-pill:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .filter-pill.active {
+      color: #0a0e27;
+      background: var(--gold-gradient);
+      box-shadow: 0 4px 15px rgba(240, 185, 11, 0.4);
+      font-weight: 700;
+    }
+
+    .filter-pill .count {
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 10px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Quick Stats Banner */
+    .quick-stats-ribbon {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .stat-chip {
+      background: linear-gradient(145deg, #101642, #0c1032);
+      border-radius: 16px;
+      padding: 16px 20px;
+      border: 1px solid rgba(240, 185, 11, 0.12);
+      box-shadow: var(--clay-shadow-outer), var(--clay-shadow-inset);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: var(--transition-smooth);
+    }
+
+    .stat-chip:hover {
+      transform: translateY(-3px);
+      border-color: rgba(240, 185, 11, 0.35);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), var(--clay-shadow-inset);
+    }
+
+    .stat-chip-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(240, 185, 11, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-primary);
+      font-size: 18px;
+      border: 1px solid rgba(240, 185, 11, 0.2);
+    }
+
+    .stat-chip-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-chip-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-chip-value {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       2. CONTRACT CARDS GRID (2x2 Claymorphic 3D Cards)
+       ========================================================================== */
+    .contracts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+    }
+
+    .contract-card {
+      background: linear-gradient(145deg, #13194a, #0d1238);
+      border-radius: 24px;
+      border: 1px solid var(--navy-border);
+      box-shadow: var(--clay-card-shadow);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .contract-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gold-gradient);
+      opacity: 0.85;
+    }
+
+    .contract-card:hover {
+      transform: translateY(-8px) scale(1.008);
+      border-color: rgba(240, 185, 11, 0.45);
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.6),
+        0 0 30px rgba(240, 185, 11, 0.2),
+        var(--clay-shadow-inset);
+    }
+
+    /* Card Top Header */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .contract-identity {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .contract-symbol-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #1f2766 0%, #111746 100%);
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: var(--gold-primary);
+      box-shadow: 0 0 15px rgba(240, 185, 11, 0.15);
+    }
+
+    .contract-naming {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .contract-symbol-title {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .contract-fullname {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-family: var(--font-heading);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    .status-badge.active-badge {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge.watch-badge {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+    }
+
+    /* Price Hero Section inside Card */
+    .price-hero-box {
+      background: linear-gradient(135deg, rgba(10, 14, 42, 0.95), rgba(15, 20, 56, 0.9));
+      border-radius: 18px;
+      padding: 18px 20px;
+      border: 1px solid rgba(240, 185, 11, 0.18);
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.6), inset -1px -1px 3px rgba(255, 255, 255, 0.05);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .price-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-label {
+      font-size: 11.5px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .price-value-raw {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-white);
+      margin-top: 3px;
+    }
+
+    .price-col.normalized-col {
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      padding-left: 16px;
+    }
+
+    .price-value-norm {
+      font-family: var(--font-heading);
+      font-size: 24px;
+      font-weight: 800;
+      background: var(--gold-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-top: 3px;
+      filter: drop-shadow(0 0 10px rgba(240, 185, 11, 0.3));
+    }
+
+    .price-chg-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      margin-top: 6px;
+      width: fit-content;
+    }
+
+    .price-chg-pill.up {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .price-chg-pill.down {
+      background: var(--color-danger-bg);
+      color: var(--color-danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Specifications Matrix */
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .spec-item {
+      background: rgba(10, 14, 38, 0.6);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .spec-k {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+
+    .spec-v {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-silver);
+      font-family: var(--font-mono);
+    }
+
+    .spec-v.gold-accent {
+      color: var(--gold-primary);
+      font-weight: 700;
+    }
+
+    /* Sparkline & Liquidity Row */
+    .card-footer-metrics {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .sparkline-wrapper {
+      flex: 1;
+      height: 48px;
+      position: relative;
+    }
+
+    .sparkline-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 2px;
+      letter-spacing: 0.5px;
+    }
+
+    .liquidity-health-block {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      min-width: 130px;
+    }
+
+    .health-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .health-pill {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-heading);
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-top: 3px;
+    }
+
+    .health-pill.high {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+    .health-pill.med {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+    .health-pill.low {
+      background: var(--color-danger-bg);
+      color: var(--color-danger);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    /* Note Pill at card bottom */
+    .card-note-pill {
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-note-pill.info {
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: #7dd3fc;
+    }
+
+    .card-note-pill.warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fcd34d;
+    }
+
+    /* ==========================================================================
+       3. NORMALIZATION EXPLANATION PANEL (Full Width Glassmorphic)
+       ========================================================================== */
+    .normalization-panel {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      border: 1px solid var(--navy-border);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), var(--clay-shadow-inset);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .normalization-panel::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240, 185, 11, 0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .panel-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .panel-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(240, 185, 11, 0.12);
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold-primary);
+      font-size: 20px;
+    }
+
+    .panel-title {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-white);
+      letter-spacing: 0.8px;
+    }
+
+    .panel-badge {
+      font-family: var(--font-heading);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold-primary);
+      background: rgba(240, 185, 11, 0.12);
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* Mathematical Formula Card */
+    .formula-showcase-box {
+      background: linear-gradient(135deg, rgba(14, 18, 54, 0.95), rgba(8, 11, 35, 0.95));
+      border-radius: 18px;
+      border: 1px solid rgba(240, 185, 11, 0.3);
+      padding: 22px 28px;
+      box-shadow: var(--clay-shadow-outer), var(--clay-shadow-inset);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .formula-expression {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--font-heading);
+      font-size: 19px;
+      color: var(--text-white);
+      flex-wrap: wrap;
+    }
+
+    .formula-term-gold {
+      color: var(--gold-bright);
+      font-weight: 800;
+      text-shadow: 0 0 10px rgba(240, 185, 11, 0.4);
+    }
+
+    .formula-fraction {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      vertical-align: middle;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .formula-num {
+      border-bottom: 2px solid var(--gold-primary);
+      padding: 0 6px 2px;
+      color: #93c5fd;
+    }
+
+    .formula-den {
+      padding: 2px 6px 0;
+      color: #cbd5e1;
+    }
+
+    .formula-op {
+      font-size: 20px;
+      color: var(--gold-primary);
+    }
+
+    .formula-basis-tag {
+      font-size: 12px;
+      font-family: var(--font-body);
+      color: var(--text-dim);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* 4-Step Diagrammatic Visual Pipeline */
+    .normalization-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      position: relative;
+    }
+
+    .step-box {
+      background: linear-gradient(145deg, #0e133c, #090d2a);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: var(--clay-shadow-outer), var(--clay-shadow-inset);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      transition: var(--transition-smooth);
+    }
+
+    .step-box:hover {
+      border-color: rgba(240, 185, 11, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .step-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .step-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--gold-gradient);
+      color: #000;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step-phase {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: var(--gold-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-family: var(--font-heading);
+    }
+
+    .step-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    .step-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .step-formula-mini {
+      margin-top: auto;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px dashed rgba(240, 185, 11, 0.25);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gold-bright);
+    }
+
+    /* Interactive Live Normalization Sandbox */
+    .normalization-sandbox {
+      background: linear-gradient(145deg, #101642, #0c1033);
+      border-radius: 20px;
+      border: 1px solid rgba(240, 185, 11, 0.25);
+      padding: 24px;
+      box-shadow: var(--clay-shadow-outer), var(--clay-shadow-inset);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .sandbox-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .sandbox-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-white);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .contract-select-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px;
+      border-radius: 12px;
+    }
+
+    .calc-tab-btn {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-muted);
+      font-family: var(--font-heading);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .calc-tab-btn.active {
+      background: var(--gold-primary);
+      color: #0a0e27;
+      font-weight: 700;
+      box-shadow: 0 0 10px rgba(240, 185, 11, 0.4);
+    }
+
+    /* Sandbox Interactive Flow Grid */
+    .sandbox-flow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      background: rgba(7, 10, 30, 0.6);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      align-items: center;
+    }
+
+    .flow-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .flow-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .flow-input-box {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(20, 26, 70, 0.7);
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(240, 185, 11, 0.25);
+    }
+
+    .flow-subtext {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .flow-card.result-card .flow-input-box {
+      background: linear-gradient(135deg, rgba(240, 185, 11, 0.15), rgba(153, 115, 0, 0.1));
+      border-color: var(--gold-primary);
+      color: var(--gold-bright);
+      font-size: 20px;
+      font-family: var(--font-heading);
+      box-shadow: 0 0 15px rgba(240, 185, 11, 0.2);
+    }
+
+    /* ==========================================================================
+       4. COMPARISON TABLE (Full Width Claymorphism)
+       ========================================================================== */
+    .comparison-section {
+      background: linear-gradient(145deg, #111746, #0d1238);
+      border-radius: 24px;
+      border: 1px solid var(--navy-border);
+      box-shadow: var(--clay-card-shadow);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      overflow: hidden;
+    }
+
+    .comparison-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .table-title-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(8, 12, 34, 0.7);
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5);
+    }
+
+    .aurora-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    .aurora-table th, .aurora-table td {
+      padding: 16px 22px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .aurora-table thead th {
+      background: rgba(18, 24, 70, 0.95);
+      color: var(--text-muted);
+      font-family: var(--font-heading);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      position: sticky;
+      top: 0;
+    }
+
+    .aurora-table thead th.col-goldm {
+      color: var(--gold-primary);
+    }
+    .aurora-table thead th.col-goldten {
+      color: var(--color-info);
+    }
+    .aurora-table thead th.col-goldguinea {
+      color: #f87171;
+    }
+    .aurora-table thead th.col-goldpetal {
+      color: #34d399;
+    }
+
+    .aurora-table tbody tr {
+      transition: var(--transition-smooth);
+    }
+
+    .aurora-table tbody tr:hover {
+      background: rgba(240, 185, 11, 0.05);
+    }
+
+    .aurora-table td.metric-col {
+      font-weight: 600;
+      color: var(--text-silver);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .aurora-table td.metric-col i {
+      color: var(--gold-primary);
+      width: 18px;
+    }
+
+    .aurora-table td.data-col {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      color: var(--text-silver);
+    }
+
+    /* Highlight Row: Normalized Price (Golden Accent) */
+    .aurora-table tr.highlight-normalized-row {
+      background: linear-gradient(90deg, rgba(240, 185, 11, 0.15) 0%, rgba(212, 160, 23, 0.08) 100%) !important;
+      border-top: 1px solid rgba(240, 185, 11, 0.4);
+      border-bottom: 1px solid rgba(240, 185, 11, 0.4);
+      box-shadow: 0 0 15px rgba(240, 185, 11, 0.1);
+    }
+
+    .aurora-table tr.highlight-normalized-row td {
+      font-weight: 800;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .aurora-table tr.highlight-normalized-row td.data-col {
+      font-family: var(--font-heading);
+      color: var(--gold-bright);
+      text-shadow: 0 0 10px rgba(240, 185, 11, 0.4);
+    }
+
+    .aurora-table tr.highlight-normalized-row td.metric-col {
+      color: var(--gold-bright);
+      font-family: var(--font-heading);
+      letter-spacing: 0.5px;
+    }
+
+    /* Table status pills */
+    .rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: var(--font-heading);
+      letter-spacing: 0.5px;
+    }
+
+    .rating-badge.rating-high {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+    }
+
+    .rating-badge.rating-med {
+      background: var(--color-warning-bg);
+      color: var(--color-warning);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }
+
+    .rating-badge.rating-low {
+      background: var(--color-danger-bg);
+      color: var(--color-danger);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    /* ==========================================================================
+       5. HISTORICAL PRICE CHART SECTION
+       ========================================================================== */
+    .chart-section {
+      background: linear-gradient(145deg, #111746, #0c1033);
+      border-radius: 24px;
+      border: 1px solid var(--navy-border);
+      box-shadow: var(--clay-card-shadow);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      position: relative;
+    }
+
+    .chart-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .chart-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .chart-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-white);
+      letter-spacing: 0.8px;
+    }
+
+    .chart-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .chart-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Date Range Selectors */
+    .range-selector-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(10, 14, 38, 0.8);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .range-btn {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-muted);
+      font-family: var(--font-heading);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .range-btn:hover {
+      color: #fff;
+    }
+
+    .range-btn.active {
+      background: var(--gold-gradient);
+      color: #0a0e27;
+      box-shadow: 0 2px 8px rgba(240, 185, 11, 0.4);
+    }
+
+    /* Contract Visibility Toggles */
+    .contract-toggles-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 8px 12px;
+      background: rgba(10, 14, 38, 0.5);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 4px;
+    }
+
+    .contract-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-silver);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .contract-toggle-btn .color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .contract-toggle-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(240, 185, 11, 0.35);
+      color: #fff;
+    }
+
+    .contract-toggle-btn.disabled {
+      opacity: 0.4;
+      text-decoration: line-through;
+    }
+
+    /* Chart Canvas Container */
+    .chart-container-box {
+      width: 100%;
+      height: 440px;
+      position: relative;
+    }
+
+    /* Chart Bottom Stats */
+    .chart-stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .chart-mini-stat {
+      background: rgba(10, 14, 38, 0.5);
+      padding: 12px 16px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .chart-mini-k {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .chart-mini-v {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-white);
+    }
+
+    /* ==========================================================================
+       MODAL / DRAWER FOR CONTRACT DEEP-DIVE
+       ========================================================================== */
+    .drawer-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(5, 7, 20, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .drawer-overlay.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .drawer-modal {
+      width: 100%;
+      max-width: 680px;
+      background: linear-gradient(145deg, #13194a, #0c1035);
+      border-radius: 24px;
+      border: 1px solid var(--gold-primary);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 30px var(--gold-glow);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      transform: translateY(20px);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .drawer-overlay.open .drawer-modal {
+      transform: translateY(0);
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-white);
+    }
+
+    .drawer-close-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      color: var(--text-silver);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .drawer-close-btn:hover {
+      background: var(--color-danger);
+      color: #fff;
+    }
+
+    /* Toast Notification */
+    .aurora-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, #18205a, #0e133c);
+      border: 1px solid var(--gold-primary);
+      border-radius: 14px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: #fff;
+      font-size: 13px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--gold-glow);
+      z-index: 300;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .aurora-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 1200px) {
+      .contracts-grid {
+        grid-template-columns: 1fr;
+      }
+      .normalization-steps {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .sandbox-flow-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-wrapper {
+        margin-left: 0;
+      }
+      .header-ticker {
+        display: none;
+      }
+      .normalization-steps {
+        grid-template-columns: 1fr;
+      }
+      .chart-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+  <script src="auth.js"></script>
+  <script src="aurora-pipeline.js"></script>
+</head>
+<body>
+
+  <!-- Floating Particles Canvas -->
+  <canvas id="particles-canvas"></canvas>
+
+  <div class="app-container">
+
+    <!-- ======================================================================
+         LEFT SIDEBAR
+         ====================================================================== -->
+    <aside class="sidebar">
+      <!-- Brand Section -->
+      <div class="brand-section">
+        <div class="brand-logo-container">
+          <i class="fa-solid fa-gem"></i>
+        </div>
+        <div class="brand-text-container">
+          <span class="brand-title">AURORA</span>
+          <span class="brand-subtitle">Commodity Intelligence</span>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <nav class="nav-menu">
+        <span class="nav-section-label">Executive Desk</span>
+        
+        <a href="dashboard.html" class="nav-item">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Dashboard</span>
+        </a>
+
+        <a href="contract-explorer.html" class="nav-item active">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Contract Explorer</span>
+          <span class="nav-badge">MCX</span>
+        </a>
+
+        <a href="opportunity-radar.html" class="nav-item">
+          <i class="fa-solid fa-bullseye"></i>
+          <span>Opportunity Radar</span>
+        </a>
+
+        <a href="market-detective.html" class="nav-item">
+          <i class="fa-solid fa-magnifying-glass-chart"></i>
+          <span>Market Detective</span>
+        </a>
+
+        <span class="nav-section-label">Quantitative Labs</span>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-network-wired"></i>
+          <span>Relationship Network</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Historical Memory</span>
+        </a>
+
+        <a href="backtesting-lab.html" class="nav-item">
+          <i class="fa-solid fa-flask-vial"></i>
+          <span>Backtesting Lab</span>
+        </a>
+
+        <a href="#" class="nav-item">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Market Simulator</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer / System Health -->
+      <div class="sidebar-footer">
+        <div class="system-health-card">
+          <div class="health-status-row">
+            <span class="pulse-indicator">
+              <span class="pulse-dot"></span>
+              MCX Gateway Live
+            </span>
+            <span style="font-size: 10px; font-weight:700; color:var(--gold-primary);">v2.6</span>
+          </div>
+          <div class="sync-timestamp">
+            <i class="fa-regular fa-clock"></i>
+            <span>Bhavcopy: 15-Oct 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ======================================================================
+         MAIN CONTENT WRAPPER
+         ====================================================================== -->
+    <div class="main-wrapper">
+
+      <!-- Top Header Bar -->
+      <header class="top-header">
+        <div class="header-left">
+          <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fa-solid fa-house"></i></a>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <span>MCX Bullion</span>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <span class="current">Contract Explorer</span>
+          </div>
+        </div>
+
+        <!-- Live Ticker Chips in Header -->
+        <div class="header-ticker">
+          <div class="ticker-chip">
+            <span class="sym">GOLDM</span>
+            <span class="val">₹62,450</span>
+            <span class="chg up"><i class="fa-solid fa-caret-up"></i> +1.2%</span>
+          </div>
+          <span style="color: rgba(255,255,255,0.15)">|</span>
+          <div class="ticker-chip">
+            <span class="sym">GOLDTEN</span>
+            <span class="val">₹62,380</span>
+            <span class="chg up"><i class="fa-solid fa-caret-up"></i> +0.9%</span>
+          </div>
+          <span style="color: rgba(255,255,255,0.15)">|</span>
+          <div class="ticker-chip">
+            <span class="sym">GOLDGUINEA</span>
+            <span class="val">₹50,120</span>
+            <span class="chg down"><i class="fa-solid fa-caret-down"></i> -0.3%</span>
+          </div>
+          <span style="color: rgba(255,255,255,0.15)">|</span>
+          <div class="ticker-chip">
+            <span class="sym">GOLDPETAL</span>
+            <span class="val">₹6,310</span>
+            <span class="chg up"><i class="fa-solid fa-caret-up"></i> +0.5%</span>
+          </div>
+        </div>
+
+        <!-- Header Right Actions -->
+        <div class="header-right">
+          <div class="market-badge">
+            <span class="pulse-dot"></span>
+            MCX MARKET OPEN
+          </div>
+
+          <button class="header-btn" title="Refresh Live Data" onclick="refreshContractData()">
+            <i class="fa-solid fa-rotate"></i>
+          </button>
+
+          <button class="header-btn" title="Sound Alerts">
+            <i class="fa-solid fa-bell"></i>
+          </button>
+
+          <div class="user-profile-badge" onclick="showToast('AURORA Quantitative Terminal • Connected')">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+              <span class="user-name">Quant Desk</span>
+              <span class="user-role">PRO ANALYST</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Page Content -->
+      <main class="content-area">
+
+        <!-- 1. PAGE HEADER -->
+        <section class="page-header-row">
+          <div class="page-title-group">
+            <h1 class="page-title">Contract Explorer</h1>
+            <p class="page-subtitle">Deep-dive into MCX Gold Contract specifications, pricing and health</p>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="filter-pills-bar">
+            <button class="filter-pill active" data-filter="all" onclick="filterContracts('all')">
+              <span>All Contracts</span>
+              <span class="count">4</span>
+            </button>
+            <button class="filter-pill" data-filter="active" onclick="filterContracts('active')">
+              <span>Active Only</span>
+              <span class="count">3</span>
+            </button>
+            <button class="filter-pill" data-filter="expiring" onclick="filterContracts('expiring')">
+              <span>Expiring Soon</span>
+              <span class="count">2</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Quick Summary Ribbon -->
+        <section class="quick-stats-ribbon">
+          <div class="stat-chip">
+            <div class="stat-chip-icon"><i class="fa-solid fa-coins"></i></div>
+            <div class="stat-chip-content">
+              <span class="stat-chip-label">Monitored Contracts</span>
+              <span class="stat-chip-value">4 Symbols</span>
+            </div>
+          </div>
+
+          <div class="stat-chip">
+            <div class="stat-chip-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+            <div class="stat-chip-content">
+              <span class="stat-chip-label">Normalization Base</span>
+              <span class="stat-chip-value">10g @ 995 Purity</span>
+            </div>
+          </div>
+
+          <div class="stat-chip">
+            <div class="stat-chip-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="stat-chip-content">
+              <span class="stat-chip-label">Total Open Interest</span>
+              <span class="stat-chip-value">51,477 Lots</span>
+            </div>
+          </div>
+
+          <div class="stat-chip">
+            <div class="stat-chip-icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="stat-chip-content">
+              <span class="stat-chip-label">Max Spread Dispersion</span>
+              <span class="stat-chip-value">+₹122.62 (0.20%)</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             2. CONTRACT CARDS GRID (2x2 Detailed Claymorphism 3D Cards)
+             ================================================================== -->
+        <section class="contracts-grid" id="contractsGrid">
+
+          <!-- CARD 1: GOLDM (Gold Mini) -->
+          <div class="contract-card" data-contract="GOLDM" data-status="active" data-days="15">
+            <div class="card-top">
+              <div class="contract-identity">
+                <div class="contract-symbol-icon">
+                  <i class="fa-solid fa-cubes-stacked"></i>
+                </div>
+                <div class="contract-naming">
+                  <div class="contract-symbol-title">
+                    GOLDM
+                    <i class="fa-solid fa-circle-check" style="color:var(--color-success); font-size:16px;" title="MCX Primary Benchmark"></i>
+                  </div>
+                  <div class="contract-fullname">Gold Mini • 100g Standard Contract</div>
+                </div>
+              </div>
+              <div class="status-badge active-badge">
+                <span class="pulse-dot"></span>
+                Active
+              </div>
+            </div>
+
+            <!-- Price Hero -->
+            <div class="price-hero-box">
+              <div class="price-col">
+                <span class="price-label">Current Quoted Price</span>
+                <span class="price-value-raw">₹62,450</span>
+                <div class="price-chg-pill up">
+                  <i class="fa-solid fa-arrow-trend-up"></i> +1.2% (24h)
+                </div>
+              </div>
+              <div class="price-col normalized-col">
+                <span class="price-label">
+                  Normalized Price <i class="fa-solid fa-circle-info" title="Standardized to 10g @ 995 Fine Gold"></i>
+                </span>
+                <span class="price-value-norm">₹62,892.46</span>
+                <span style="font-size:11px; color:var(--gold-primary); font-family:var(--font-mono); margin-top:6px;">
+                  Benchmark Standard
+                </span>
+              </div>
+            </div>
+
+            <!-- Specs Grid -->
+            <div class="specs-grid">
+              <div class="spec-item">
+                <span class="spec-k">Trading Unit</span>
+                <span class="spec-v">100 grams</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Quotation</span>
+                <span class="spec-v">₹ / 10 grams</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Purity</span>
+                <span class="spec-v gold-accent">995 Fine</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Volume</span>
+                <span class="spec-v">12,450 lots</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Open Interest</span>
+                <span class="spec-v">34,567</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Next Expiry</span>
+                <span class="spec-v">Oct 30, 2026</span>
+              </div>
+            </div>
+
+            <!-- Sparkline & Health Metric -->
+            <div class="card-footer-metrics">
+              <div class="sparkline-wrapper">
+                <div class="sparkline-label">7-Day Price Movement</div>
+                <canvas id="sparkline-goldm"></canvas>
+              </div>
+              <div class="liquidity-health-block">
+                <span class="health-label">Liquidity Rating</span>
+                <span class="health-pill high">HIGH (9.4/10)</span>
+                <span style="font-size: 10px; color: var(--text-dim); margin-top: 3px; font-family: var(--font-mono);">
+                  Days to Expiry: <strong>15 DTE</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Bottom Note -->
+            <div class="card-note-pill info">
+              <i class="fa-solid fa-circle-check"></i>
+              <span>Primary benchmark contract — tightest bid-ask spread & highest volume.</span>
+            </div>
+          </div>
+
+          <!-- CARD 2: GOLDTEN (Gold Ten Gram) -->
+          <div class="contract-card" data-contract="GOLDTEN" data-status="active" data-days="31">
+            <div class="card-top">
+              <div class="contract-identity">
+                <div class="contract-symbol-icon" style="color:var(--color-info); border-color:rgba(56,189,248,0.4);">
+                  <i class="fa-solid fa-bars"></i>
+                </div>
+                <div class="contract-naming">
+                  <div class="contract-symbol-title">GOLDTEN</div>
+                  <div class="contract-fullname">Gold Ten Gram • 10g Direct Quotation</div>
+                </div>
+              </div>
+              <div class="status-badge active-badge">
+                <span class="pulse-dot"></span>
+                Active
+              </div>
+            </div>
+
+            <!-- Price Hero -->
+            <div class="price-hero-box">
+              <div class="price-col">
+                <span class="price-label">Current Quoted Price</span>
+                <span class="price-value-raw">₹62,380</span>
+                <div class="price-chg-pill up">
+                  <i class="fa-solid fa-arrow-trend-up"></i> +0.9% (24h)
+                </div>
+              </div>
+              <div class="price-col normalized-col">
+                <span class="price-label">Normalized Price</span>
+                <span class="price-value-norm">₹62,822.11</span>
+                <span style="font-size:11px; color:#38bdf8; font-family:var(--font-mono); margin-top:6px;">
+                  Spread: -₹70.35 (-0.11%)
+                </span>
+              </div>
+            </div>
+
+            <!-- Specs Grid -->
+            <div class="specs-grid">
+              <div class="spec-item">
+                <span class="spec-k">Trading Unit</span>
+                <span class="spec-v">10 grams</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Quotation</span>
+                <span class="spec-v">₹ / 10 grams</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Purity</span>
+                <span class="spec-v gold-accent">995 Fine</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Volume</span>
+                <span class="spec-v">3,200 lots</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Open Interest</span>
+                <span class="spec-v">8,900</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Next Expiry</span>
+                <span class="spec-v">Nov 15, 2026</span>
+              </div>
+            </div>
+
+            <!-- Sparkline & Health Metric -->
+            <div class="card-footer-metrics">
+              <div class="sparkline-wrapper">
+                <div class="sparkline-label">7-Day Price Movement</div>
+                <canvas id="sparkline-goldten"></canvas>
+              </div>
+              <div class="liquidity-health-block">
+                <span class="health-label">Liquidity Rating</span>
+                <span class="health-pill med">MEDIUM (6.8/10)</span>
+                <span style="font-size: 10px; color: var(--text-dim); margin-top: 3px; font-family: var(--font-mono);">
+                  Days to Expiry: <strong>31 DTE</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Bottom Note -->
+            <div class="card-note-pill info">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              <span>Shorter history — listed since 2025 (requires common-window backtesting).</span>
+            </div>
+          </div>
+
+          <!-- CARD 3: GOLDGUINEA (Gold Guinea) -->
+          <div class="contract-card" data-contract="GOLDGUINEA" data-status="watch" data-days="13">
+            <div class="card-top">
+              <div class="contract-identity">
+                <div class="contract-symbol-icon" style="color:var(--color-warning); border-color:rgba(245,158,11,0.4);">
+                  <i class="fa-solid fa-coins"></i>
+                </div>
+                <div class="contract-naming">
+                  <div class="contract-symbol-title">
+                    GOLDGUINEA
+                    <i class="fa-solid fa-triangle-exclamation" style="color:var(--color-warning); font-size:16px;" title="Low Liquidity Watch"></i>
+                  </div>
+                  <div class="contract-fullname">Gold Guinea • 8g Sovereign Sovereign Pure</div>
+                </div>
+              </div>
+              <div class="status-badge watch-badge">
+                <span class="pulse-dot" style="background-color:var(--color-warning); box-shadow:0 0 10px var(--color-warning);"></span>
+                Watch
+              </div>
+            </div>
+
+            <!-- Price Hero -->
+            <div class="price-hero-box">
+              <div class="price-col">
+                <span class="price-label">Current Quoted Price</span>
+                <span class="price-value-raw">₹50,120</span>
+                <div class="price-chg-pill down">
+                  <i class="fa-solid fa-arrow-trend-down"></i> -0.3% (24h)
+                </div>
+              </div>
+              <div class="price-col normalized-col">
+                <span class="price-label">Normalized Price</span>
+                <span class="price-value-norm">₹62,963.45</span>
+                <span style="font-size:11px; color:#fbbf24; font-family:var(--font-mono); margin-top:6px;">
+                  Spread: +₹70.99 (+0.11%)
+                </span>
+              </div>
+            </div>
+
+            <!-- Specs Grid -->
+            <div class="specs-grid">
+              <div class="spec-item">
+                <span class="spec-k">Trading Unit</span>
+                <span class="spec-v">8 grams</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Quotation</span>
+                <span class="spec-v">₹ / 8 grams</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Purity</span>
+                <span class="spec-v" style="color:#ffd700; font-weight:800;">999 Fine (24K)</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Volume</span>
+                <span class="spec-v">1,890 lots</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Open Interest</span>
+                <span class="spec-v">5,670</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Next Expiry</span>
+                <span class="spec-v">Oct 28, 2026</span>
+              </div>
+            </div>
+
+            <!-- Sparkline & Health Metric -->
+            <div class="card-footer-metrics">
+              <div class="sparkline-wrapper">
+                <div class="sparkline-label">7-Day Price Movement</div>
+                <canvas id="sparkline-goldguinea"></canvas>
+              </div>
+              <div class="liquidity-health-block">
+                <span class="health-label">Liquidity Rating</span>
+                <span class="health-pill low">LOW (4.1/10)</span>
+                <span style="font-size: 10px; color: var(--color-warning); margin-top: 3px; font-family: var(--font-mono);">
+                  Days to Expiry: <strong>13 DTE ⚠️</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Bottom Note -->
+            <div class="card-note-pill warning">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Low liquidity — monitor closely (simulated execution slippage &gt; 12 bps).</span>
+            </div>
+          </div>
+
+          <!-- CARD 4: GOLDPETAL (Gold Petal) -->
+          <div class="contract-card" data-contract="GOLDPETAL" data-status="active" data-days="21">
+            <div class="card-top">
+              <div class="contract-identity">
+                <div class="contract-symbol-icon" style="color:var(--color-success); border-color:rgba(16,185,129,0.4);">
+                  <i class="fa-solid fa-leaf"></i>
+                </div>
+                <div class="contract-naming">
+                  <div class="contract-symbol-title">GOLDPETAL</div>
+                  <div class="contract-fullname">Gold Petal • 1g Micro Retail Contract</div>
+                </div>
+              </div>
+              <div class="status-badge active-badge">
+                <span class="pulse-dot"></span>
+                Active
+              </div>
+            </div>
+
+            <!-- Price Hero -->
+            <div class="price-hero-box">
+              <div class="price-col">
+                <span class="price-label">Current Quoted Price</span>
+                <span class="price-value-raw">₹6,310</span>
+                <div class="price-chg-pill up">
+                  <i class="fa-solid fa-arrow-trend-up"></i> +0.5% (24h)
+                </div>
+              </div>
+              <div class="price-col normalized-col">
+                <span class="price-label">Normalized Price</span>
+                <span class="price-value-norm">₹63,015.08</span>
+                <span style="font-size:11px; color:#34d399; font-family:var(--font-mono); margin-top:6px;">
+                  Spread: +₹122.62 (+0.20%)
+                </span>
+              </div>
+            </div>
+
+            <!-- Specs Grid -->
+            <div class="specs-grid">
+              <div class="spec-item">
+                <span class="spec-k">Trading Unit</span>
+                <span class="spec-v">1 gram</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Quotation</span>
+                <span class="spec-v">₹ / 1 gram</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Purity</span>
+                <span class="spec-v gold-accent">995 Fine</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Volume</span>
+                <span class="spec-v">890 lots</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Open Interest</span>
+                <span class="spec-v">2,340</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-k">Next Expiry</span>
+                <span class="spec-v">Nov 5, 2026</span>
+              </div>
+            </div>
+
+            <!-- Sparkline & Health Metric -->
+            <div class="card-footer-metrics">
+              <div class="sparkline-wrapper">
+                <div class="sparkline-label">7-Day Price Movement</div>
+                <canvas id="sparkline-goldpetal"></canvas>
+              </div>
+              <div class="liquidity-health-block">
+                <span class="health-label">Liquidity Rating</span>
+                <span class="health-pill low">LOW (3.5/10)</span>
+                <span style="font-size: 10px; color: var(--text-dim); margin-top: 3px; font-family: var(--font-mono);">
+                  Days to Expiry: <strong>21 DTE</strong>
+                </span>
+              </div>
+            </div>
+
+            <!-- Bottom Note -->
+            <div class="card-note-pill info">
+              <i class="fa-solid fa-user-group"></i>
+              <span>Smallest denomination — retail focused (carries structural retail convenience premium).</span>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ==================================================================
+             3. NORMALIZATION EXPLANATION PANEL (Full Width Glassmorphic)
+             ================================================================== -->
+        <section class="normalization-panel">
+          <div class="panel-header">
+            <div class="panel-title-group">
+              <div class="panel-icon-box">
+                <i class="fa-solid fa-calculator"></i>
+              </div>
+              <div>
+                <h2 class="panel-title">How Normalization Works</h2>
+                <p style="font-size:13px; color:var(--text-muted);">Transforming disparate contract sizes, quotes and purities into a true apples-to-apples basis</p>
+              </div>
+            </div>
+            <span class="panel-badge">AURORA CORE METHODOLOGY</span>
+          </div>
+
+          <!-- Visual Formula Showcase -->
+          <div class="formula-showcase-box">
+            <div class="formula-expression">
+              <span class="formula-term-gold">Normalized Price</span>
+              <span class="formula-op">=</span>
+              <span>(</span>
+              <div class="formula-fraction">
+                <span class="formula-num">Quoted Price</span>
+                <span class="formula-den">Lot Size</span>
+              </div>
+              <span>)</span>
+              <span class="formula-op">×</span>
+              <span>(</span>
+              <div class="formula-fraction">
+                <span class="formula-num">1000</span>
+                <span class="formula-den">Purity</span>
+              </div>
+              <span>)</span>
+              <span class="formula-op">×</span>
+              <span style="color:var(--gold-bright);">Standard Lot (10g)</span>
+            </div>
+            <div class="formula-basis-tag">
+              <i class="fa-solid fa-bullseye" style="color:var(--gold-primary); margin-right:6px;"></i>
+              Standard Base: <strong>₹ per 10 grams @ 995 Fine Gold</strong>
+            </div>
+          </div>
+
+          <!-- Step-by-Step 4-Stage Visual Workflow -->
+          <div class="normalization-steps">
+            <!-- Step 1 -->
+            <div class="step-box">
+              <div class="step-header">
+                <div class="step-number">1</div>
+                <span class="step-phase">Input</span>
+              </div>
+              <h4 class="step-title">Raw Quoted Price</h4>
+              <p class="step-desc">Ingest raw Bhavcopy traded price straight from MCX settlements and live L1 tick feeds.</p>
+              <div class="step-formula-mini">P_raw (MCX Quote)</div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-box">
+              <div class="step-header">
+                <div class="step-number">2</div>
+                <span class="step-phase">De-scaling</span>
+              </div>
+              <h4 class="step-title">Size Adjustment</h4>
+              <p class="step-desc">Divide by the quote denomination unit to convert the contract to a uniform per-gram quotation.</p>
+              <div class="step-formula-mini">P_gram = P_raw / Lot Size</div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-box">
+              <div class="step-header">
+                <div class="step-number">3</div>
+                <span class="step-phase">Metallurgy</span>
+              </div>
+              <h4 class="step-title">Purity Adjustment</h4>
+              <p class="step-desc">Scale 999 purity (GOLDGUINEA) or 995 purity against pure fine gold benchmark.</p>
+              <div class="step-formula-mini">P_pure = P_gram × (1000 / Purity)</div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-box">
+              <div class="step-header">
+                <div class="step-number">4</div>
+                <span class="step-phase">Benchmarking</span>
+              </div>
+              <h4 class="step-title">Comparable Basis</h4>
+              <p class="step-desc">Multiplied by 10 grams standard unit to produce the final cross-contract comparable price.</p>
+              <div class="step-formula-mini">P_norm = P_pure × 10g Standard</div>
+            </div>
+          </div>
+
+          <!-- Interactive Live Sandbox with Real Calculation -->
+          <div class="normalization-sandbox">
+            <div class="sandbox-top">
+              <div class="sandbox-title">
+                <i class="fa-solid fa-flask-vial" style="color:var(--gold-primary);"></i>
+                Interactive Normalization Sandbox & Live Verification
+              </div>
+              <div class="contract-select-tabs">
+                <button class="calc-tab-btn" onclick="loadSandboxContract('GOLDM')">GOLDM</button>
+                <button class="calc-tab-btn" onclick="loadSandboxContract('GOLDTEN')">GOLDTEN</button>
+                <button class="calc-tab-btn active" onclick="loadSandboxContract('GOLDGUINEA')">GOLDGUINEA (Example)</button>
+                <button class="calc-tab-btn" onclick="loadSandboxContract('GOLDPETAL')">GOLDPETAL</button>
+              </div>
+            </div>
+
+            <!-- Flow calculation cards -->
+            <div class="sandbox-flow-grid">
+              <div class="flow-card">
+                <span class="flow-label">1. Quoted Raw Price</span>
+                <div class="flow-input-box" id="sb-raw">₹50,120</div>
+                <span class="flow-subtext" id="sb-raw-sub">MCX Quote for 8g</span>
+              </div>
+
+              <div class="flow-card">
+                <span class="flow-label">2. Unit Size Step</span>
+                <div class="flow-input-box" id="sb-size">÷ 8 grams</div>
+                <span class="flow-subtext" id="sb-size-sub">₹6,265.00 per gram</span>
+              </div>
+
+              <div class="flow-card">
+                <span class="flow-label">3. Purity Adjustment</span>
+                <div class="flow-input-box" id="sb-purity">× (1000 / 999)</div>
+                <span class="flow-subtext" id="sb-purity-sub">Purity Factor: 1.001001</span>
+              </div>
+
+              <div class="flow-card result-card">
+                <span class="flow-label" style="color:var(--gold-primary);">4. Normalized 10g Basis</span>
+                <div class="flow-input-box" id="sb-result">₹62,963.45</div>
+                <span class="flow-subtext" id="sb-result-sub" style="color:var(--gold-bright); font-weight:600;">
+                  Spread vs GOLDM: +₹70.99
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             4. COMPARISON TABLE (Full Width Claymorphism)
+             ================================================================== -->
+        <section class="comparison-section">
+          <div class="comparison-header">
+            <div class="table-title-group">
+              <div class="panel-icon-box" style="color:var(--gold-primary);">
+                <i class="fa-solid fa-table-columns"></i>
+              </div>
+              <div>
+                <h2 class="panel-title">Contract Specifications Matrix</h2>
+                <p style="font-size:13px; color:var(--text-muted);">Side-by-side comparison across all 4 MCX Gold derivative instruments</p>
+              </div>
+            </div>
+            <button class="header-btn" style="width:auto; padding:0 16px; gap:8px;" onclick="exportTableData()">
+              <i class="fa-solid fa-file-export"></i>
+              <span style="font-size:12px; font-weight:600;">Export CSV</span>
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table class="aurora-table">
+              <thead>
+                <tr>
+                  <th style="width: 24%;">Specification / Metric</th>
+                  <th class="col-goldm" style="width: 19%;">
+                    <i class="fa-solid fa-circle-dot" style="margin-right:6px;"></i>GOLDM (Mini)
+                  </th>
+                  <th class="col-goldten" style="width: 19%;">
+                    <i class="fa-solid fa-circle-dot" style="margin-right:6px;"></i>GOLDTEN (10g)
+                  </th>
+                  <th class="col-goldguinea" style="width: 19%;">
+                    <i class="fa-solid fa-circle-dot" style="margin-right:6px;"></i>GOLDGUINEA (8g)
+                  </th>
+                  <th class="col-goldpetal" style="width: 19%;">
+                    <i class="fa-solid fa-circle-dot" style="margin-right:6px;"></i>GOLDPETAL (1g)
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-box"></i> Trading Unit</td>
+                  <td class="data-col">100 grams</td>
+                  <td class="data-col">10 grams</td>
+                  <td class="data-col">8 grams</td>
+                  <td class="data-col">1 gram</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-tag"></i> Quotation Base</td>
+                  <td class="data-col">₹ per 10 grams</td>
+                  <td class="data-col">₹ per 10 grams</td>
+                  <td class="data-col">₹ per 8 grams</td>
+                  <td class="data-col">₹ per 1 gram</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-certificate"></i> Purity Standard</td>
+                  <td class="data-col">995 Fineness</td>
+                  <td class="data-col">995 Fineness</td>
+                  <td class="data-col" style="color:#ffd700; font-weight:700;">999 Fineness (24K)</td>
+                  <td class="data-col">995 Fineness</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-indian-rupee-sign"></i> Raw Quoted Price</td>
+                  <td class="data-col">₹62,450.00</td>
+                  <td class="data-col">₹62,380.00</td>
+                  <td class="data-col">₹50,120.00</td>
+                  <td class="data-col">₹6,310.00</td>
+                </tr>
+
+                <!-- HIGHLIGHTED NORMALIZED PRICE ROW (Golden Accent) -->
+                <tr class="highlight-normalized-row">
+                  <td class="metric-col">
+                    <i class="fa-solid fa-star" style="color:var(--gold-bright);"></i>
+                    Normalized Price (10g @ 995)
+                  </td>
+                  <td class="data-col">₹62,892.46</td>
+                  <td class="data-col">₹62,822.11</td>
+                  <td class="data-col">₹62,963.45</td>
+                  <td class="data-col">₹63,015.08</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-arrow-trend-up"></i> 24h Price Change</td>
+                  <td class="data-col" style="color:var(--color-success);"><i class="fa-solid fa-caret-up"></i> +1.2%</td>
+                  <td class="data-col" style="color:var(--color-success);"><i class="fa-solid fa-caret-up"></i> +0.9%</td>
+                  <td class="data-col" style="color:var(--color-danger);"><i class="fa-solid fa-caret-down"></i> -0.3%</td>
+                  <td class="data-col" style="color:var(--color-success);"><i class="fa-solid fa-caret-up"></i> +0.5%</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-chart-column"></i> Traded Volume</td>
+                  <td class="data-col">12,450 lots</td>
+                  <td class="data-col">3,200 lots</td>
+                  <td class="data-col">1,890 lots</td>
+                  <td class="data-col">890 lots</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-hand-holding-dollar"></i> Open Interest (OI)</td>
+                  <td class="data-col">34,567 contracts</td>
+                  <td class="data-col">8,900 contracts</td>
+                  <td class="data-col">5,670 contracts</td>
+                  <td class="data-col">2,340 contracts</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-droplet"></i> Liquidity Rating</td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-high"><i class="fa-solid fa-circle"></i> High</span>
+                  </td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-med"><i class="fa-solid fa-circle"></i> Medium</span>
+                  </td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-low"><i class="fa-solid fa-circle"></i> Low</span>
+                  </td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-low"><i class="fa-solid fa-circle"></i> Low</span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-regular fa-calendar-days"></i> Next Expiry</td>
+                  <td class="data-col">Oct 30, 2026</td>
+                  <td class="data-col">Nov 15, 2026</td>
+                  <td class="data-col" style="color:var(--color-warning);">Oct 28, 2026</td>
+                  <td class="data-col">Nov 5, 2026</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-hourglass-half"></i> Days to Expiry (DTE)</td>
+                  <td class="data-col">15 Days</td>
+                  <td class="data-col">31 Days</td>
+                  <td class="data-col" style="color:var(--color-warning); font-weight:700;">13 Days (Soon)</td>
+                  <td class="data-col">21 Days</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-shield-halved"></i> Contract Health Status</td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-high"><i class="fa-solid fa-check"></i> Active</span>
+                  </td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-high"><i class="fa-solid fa-check"></i> Active</span>
+                  </td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-med"><i class="fa-solid fa-eye"></i> Watch</span>
+                  </td>
+                  <td class="data-col">
+                    <span class="rating-badge rating-high"><i class="fa-solid fa-check"></i> Active</span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-truck-ramp-box"></i> Delivery Unit</td>
+                  <td class="data-col">100g Bar (Compulsory)</td>
+                  <td class="data-col">10g Bar (Compulsory)</td>
+                  <td class="data-col">8g Coin (Compulsory)</td>
+                  <td class="data-col">1g Coin (Compulsory)</td>
+                </tr>
+
+                <tr>
+                  <td class="metric-col"><i class="fa-solid fa-arrows-left-right"></i> Basis Spread vs GOLDM</td>
+                  <td class="data-col" style="color:var(--gold-primary);">Benchmark (₹0.00)</td>
+                  <td class="data-col">-₹70.35 (-0.11%)</td>
+                  <td class="data-col" style="color:var(--color-warning);">+₹70.99 (+0.11%)</td>
+                  <td class="data-col" style="color:var(--color-info);">+₹122.62 (+0.20%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ==================================================================
+             5. HISTORICAL PRICE & SPREAD CHART (90-Day Full Walk-Forward)
+             ================================================================== -->
+        <section class="chart-section">
+          <div class="chart-top-bar">
+            <div class="chart-title-group">
+              <h2 class="chart-title">Historical Normalized Price & Spread Dynamics</h2>
+              <p class="chart-subtitle">Cross-contract normalized price comparison (90-day walk-forward window)</p>
+            </div>
+
+            <!-- Controls: Ranges & Visibility -->
+            <div class="chart-controls">
+              <!-- Date Range Selector -->
+              <div class="range-selector-group">
+                <button class="range-btn" onclick="updateChartRange('7D')">7D</button>
+                <button class="range-btn" onclick="updateChartRange('30D')">30D</button>
+                <button class="range-btn active" onclick="updateChartRange('90D')">90D</button>
+                <button class="range-btn" onclick="updateChartRange('6M')">6M</button>
+                <button class="range-btn" onclick="updateChartRange('1Y')">1Y</button>
+              </div>
+
+              <!-- Contract Toggles -->
+              <div class="contract-toggles-bar">
+                <span class="toggle-label">Series:</span>
+                
+                <button class="contract-toggle-btn active" id="toggle-0" onclick="toggleDataset(0)">
+                  <span class="color-dot" style="background:#f0b90b;"></span>
+                  <span>GOLDM</span>
+                </button>
+
+                <button class="contract-toggle-btn active" id="toggle-1" onclick="toggleDataset(1)">
+                  <span class="color-dot" style="background:#38bdf8;"></span>
+                  <span>GOLDTEN</span>
+                </button>
+
+                <button class="contract-toggle-btn active" id="toggle-2" onclick="toggleDataset(2)">
+                  <span class="color-dot" style="background:#ef4444;"></span>
+                  <span>GOLDGUINEA</span>
+                </button>
+
+                <button class="contract-toggle-btn active" id="toggle-3" onclick="toggleDataset(3)">
+                  <span class="color-dot" style="background:#10b981;"></span>
+                  <span>GOLDPETAL</span>
+                </button>
+
+                <button class="contract-toggle-btn active" id="toggle-vol" onclick="toggleVolumeBars()">
+                  <span class="color-dot" style="background:#94a3b8;"></span>
+                  <span>Volume</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Chart Container -->
+          <div class="chart-container-box">
+            <canvas id="historicalPriceChart"></canvas>
+          </div>
+
+          <!-- Bottom Summary Mini Stats -->
+          <div class="chart-stats-row">
+            <div class="chart-mini-stat">
+              <span class="chart-mini-k">90-Day High (GOLDM)</span>
+              <span class="chart-mini-v" style="color:var(--gold-bright);">₹63,420.00</span>
+            </div>
+            <div class="chart-mini-stat">
+              <span class="chart-mini-k">90-Day Low (GOLDM)</span>
+              <span class="chart-mini-v">₹60,110.00</span>
+            </div>
+            <div class="chart-mini-stat">
+              <span class="chart-mini-k">Mean Correlation</span>
+              <span class="chart-mini-v" style="color:var(--color-success);">0.984</span>
+            </div>
+            <div class="chart-mini-stat">
+              <span class="chart-mini-k">Max Spread Divergence</span>
+              <span class="chart-mini-v" style="color:var(--color-warning);">₹148.50 (2.4σ)</span>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Notification Element -->
+  <div class="aurora-toast" id="auroraToast">
+    <i class="fa-solid fa-circle-check" style="color:var(--gold-primary); font-size:18px;"></i>
+    <span id="toastMessage">Contract Explorer Synchronized</span>
+  </div>
+
+  <!-- ==========================================================================
+       JAVASCRIPT: INTERACTION, CANVAS PARTICLES, CHARTS, & SPARKELINES
+       ========================================================================== -->
+  <script>
+    /* ==========================================================================
+       1. CANVAS BACKGROUND PARTICLES (High-tech floating gold nodes)
+       ========================================================================== */
+    (function initParticles() {
+      const canvas = document.getElementById('particles-canvas');
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      const particleCount = 45;
+      const particles = [];
+
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 2 + 0.8,
+          speedX: (Math.random() - 0.5) * 0.4,
+          speedY: (Math.random() - 0.5) * 0.4,
+          alpha: Math.random() * 0.5 + 0.2
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.x += p.speedX;
+          p.y += p.speedY;
+
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+          if (p.y < 0) p.y = height;
+          if (p.y > height) p.y = 0;
+
+          // Draw Particle
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(240, 185, 11, ${p.alpha * 0.8})`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = 'rgba(240, 185, 11, 0.4)';
+          ctx.fill();
+
+          // Connect adjacent particles
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+            if (dist < 130) {
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(240, 185, 11, ${0.12 * (1 - dist / 130)})`;
+              ctx.lineWidth = 0.6;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* ==========================================================================
+       2. CONTRACT FILTERING (All Contracts, Active Only, Expiring Soon)
+       ========================================================================== */
+    function filterContracts(filterType) {
+      const pills = document.querySelectorAll('.filter-pill');
+      pills.forEach(p => p.classList.remove('active'));
+      const activePill = document.querySelector(`.filter-pill[data-filter="${filterType}"]`);
+      if (activePill) activePill.classList.add('active');
+
+      const cards = document.querySelectorAll('.contract-card');
+      cards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        const days = parseInt(card.getAttribute('data-days'), 10);
+
+        if (filterType === 'all') {
+          card.style.display = 'flex';
+          card.style.opacity = '1';
+        } else if (filterType === 'active') {
+          if (status === 'active') {
+            card.style.display = 'flex';
+            card.style.opacity = '1';
+          } else {
+            card.style.display = 'none';
+          }
+        } else if (filterType === 'expiring') {
+          if (days <= 20) {
+            card.style.display = 'flex';
+            card.style.opacity = '1';
+          } else {
+            card.style.display = 'none';
+          }
+        }
+      });
+
+      showToast(`Showing filter: ${filterType.toUpperCase()}`);
+    }
+
+    /* ==========================================================================
+       3. INTERACTIVE NORMALIZATION SANDBOX DATA SWITCHER
+       ========================================================================== */
+    const contractSandboxData = {
+      GOLDGUINEA: {
+        raw: '₹50,120',
+        rawSub: 'Quotation per 8g (999 pure)',
+        size: '÷ 8 grams',
+        sizeSub: 'Per-gram = ₹6,265.00',
+        purity: '× (1000 / 999)',
+        puritySub: 'Purity Factor: 1.001001',
+        result: '₹62,963.45',
+        resultSub: 'Spread vs GOLDM: +₹70.99 (+0.11%)'
+      },
+      GOLDM: {
+        raw: '₹62,450',
+        rawSub: 'Quotation per 10g (995 pure)',
+        size: '÷ 10 grams',
+        sizeSub: 'Per-gram = ₹6,245.00',
+        purity: '× (1000 / 995)',
+        puritySub: 'Purity Factor: 1.005025',
+        result: '₹62,892.46',
+        resultSub: 'Primary Benchmark Basis (₹0.00)'
+      },
+      GOLDTEN: {
+        raw: '₹62,380',
+        rawSub: 'Quotation per 10g (995 pure)',
+        size: '÷ 10 grams',
+        sizeSub: 'Per-gram = ₹6,238.00',
+        purity: '× (1000 / 995)',
+        puritySub: 'Purity Factor: 1.005025',
+        result: '₹62,822.11',
+        resultSub: 'Spread vs GOLDM: -₹70.35 (-0.11%)'
+      },
+      GOLDPETAL: {
+        raw: '₹6,310',
+        rawSub: 'Quotation per 1g (995 pure)',
+        size: '÷ 1 gram',
+        sizeSub: 'Per-gram = ₹6,310.00',
+        purity: '× (1000 / 995)',
+        puritySub: 'Purity Factor: 1.005025',
+        result: '₹63,015.08',
+        resultSub: 'Spread vs GOLDM: +₹122.62 (+0.20%)'
+      }
+    };
+
+    function loadSandboxContract(sym) {
+      const tabs = document.querySelectorAll('.calc-tab-btn');
+      tabs.forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const data = contractSandboxData[sym];
+      if (!data) return;
+
+      document.getElementById('sb-raw').textContent = data.raw;
+      document.getElementById('sb-raw-sub').textContent = data.rawSub;
+      document.getElementById('sb-size').textContent = data.size;
+      document.getElementById('sb-size-sub').textContent = data.sizeSub;
+      document.getElementById('sb-purity').textContent = data.purity;
+      document.getElementById('sb-purity-sub').textContent = data.puritySub;
+      document.getElementById('sb-result').textContent = data.result;
+      document.getElementById('sb-result-sub').textContent = data.resultSub;
+
+      showToast(`Calculation updated for ${sym}`);
+    }
+
+    /* ==========================================================================
+       4. MINI SPARKLINE CHARTS (7-Day Price Trend)
+       ========================================================================== */
+    function createSparkline(canvasId, dataPoints, color) {
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 48);
+      gradient.addColorStop(0, color.replace('1)', '0.35)'));
+      gradient.addColorStop(1, color.replace('1)', '0.0)'));
+
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'],
+          datasets: [{
+            data: dataPoints,
+            borderColor: color,
+            borderWidth: 2,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            pointHoverBackgroundColor: color
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: true,
+              mode: 'index',
+              intersect: false,
+              backgroundColor: 'rgba(10, 14, 39, 0.9)',
+              titleColor: '#f0b90b',
+              bodyFont: { family: 'JetBrains Mono', size: 11 },
+              callbacks: {
+                label: function(context) {
+                  return '₹' + context.parsed.y.toLocaleString();
+                }
+              }
+            }
+          },
+          scales: {
+            x: { display: false },
+            y: { display: false }
+          }
+        }
+      });
+    }
+
+    // Initialize 4 Sparklines
+    createSparkline('sparkline-goldm', [61800, 61950, 62100, 62050, 62300, 62200, 62450], 'rgba(240, 185, 11, 1)');
+    createSparkline('sparkline-goldten', [61750, 61890, 62020, 61980, 62210, 62150, 62380], 'rgba(56, 189, 248, 1)');
+    createSparkline('sparkline-goldguinea', [50400, 50350, 50280, 50190, 50310, 50200, 50120], 'rgba(239, 68, 68, 1)');
+    createSparkline('sparkline-goldpetal', [6240, 6255, 6270, 6280, 6295, 6300, 6310], 'rgba(16, 185, 129, 1)');
+
+    /* ==========================================================================
+       5. HISTORICAL 90-DAY PRICE & VOLUME CHART
+       ========================================================================== */
+    let historicalChart = null;
+
+    // Generate 90 Days of Realistic Data
+    function generate90DayData() {
+      const dates = [];
+      const goldm = [];
+      const goldten = [];
+      const goldguinea = [];
+      const goldpetal = [];
+      const volumes = [];
+
+      let baseM = 61200;
+      const startDate = new Date(2026, 6, 18); // ~July 18, 2026 to Oct 15, 2026
+
+      for (let i = 0; i < 90; i++) {
+        const curDate = new Date(startDate);
+        curDate.setDate(startDate.getDate() + i);
+        dates.push(curDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+
+        // Random walk with positive drift
+        const shock = (Math.random() - 0.48) * 160;
+        baseM += shock;
+        
+        // Ensure values correspond neatly around 62,800 near day 90
+        if (i === 89) baseM = 62892.46;
+
+        const valM = Math.round(baseM * 100) / 100;
+        // GOLDTEN has slight liquidity discount
+        const valTen = Math.round((valM - 70.35 + (Math.random() - 0.5) * 18) * 100) / 100;
+        // GOLDGUINEA has slight premium due to 999 coin demand & lower liquidity
+        const valGuinea = Math.round((valM + 70.99 + (Math.random() - 0.5) * 35) * 100) / 100;
+        // GOLDPETAL has retail markup
+        const valPetal = Math.round((valM + 122.62 + (Math.random() - 0.5) * 22) * 100) / 100;
+
+        const vol = Math.floor(8000 + Math.random() * 9000 + (Math.abs(shock) > 100 ? 5000 : 0));
+
+        goldm.push(valM);
+        goldten.push(valTen);
+        goldguinea.push(valGuinea);
+        goldpetal.push(valPetal);
+        volumes.push(vol);
+      }
+
+      return { dates, goldm, goldten, goldguinea, goldpetal, volumes };
+    }
+
+    const fullChartData = generate90DayData();
+
+    function initHistoricalChart(dataSliceCount = 90) {
+      const ctx = document.getElementById('historicalPriceChart').getContext('2d');
+      const startIdx = Math.max(0, 90 - dataSliceCount);
+
+      const labels = fullChartData.dates.slice(startIdx);
+      const dsM = fullChartData.goldm.slice(startIdx);
+      const dsTen = fullChartData.goldten.slice(startIdx);
+      const dsGuinea = fullChartData.goldguinea.slice(startIdx);
+      const dsPetal = fullChartData.goldpetal.slice(startIdx);
+      const dsVol = fullChartData.volumes.slice(startIdx);
+
+      if (historicalChart) {
+        historicalChart.destroy();
+      }
+
+      historicalChart = new Chart(ctx, {
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'GOLDM (Norm Basis)',
+              data: dsM,
+              borderColor: '#f0b90b',
+              backgroundColor: 'rgba(240, 185, 11, 0.08)',
+              borderWidth: 2.2,
+              tension: 0.25,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              yAxisID: 'yPrice'
+            },
+            {
+              type: 'line',
+              label: 'GOLDTEN (Norm Basis)',
+              data: dsTen,
+              borderColor: '#38bdf8',
+              backgroundColor: 'transparent',
+              borderWidth: 1.8,
+              tension: 0.25,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              yAxisID: 'yPrice'
+            },
+            {
+              type: 'line',
+              label: 'GOLDGUINEA (Norm Basis)',
+              data: dsGuinea,
+              borderColor: '#ef4444',
+              backgroundColor: 'transparent',
+              borderWidth: 1.8,
+              borderDash: [4, 4],
+              tension: 0.25,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              yAxisID: 'yPrice'
+            },
+            {
+              type: 'line',
+              label: 'GOLDPETAL (Norm Basis)',
+              data: dsPetal,
+              borderColor: '#10b981',
+              backgroundColor: 'transparent',
+              borderWidth: 1.8,
+              tension: 0.25,
+              pointRadius: 0,
+              pointHoverRadius: 5,
+              yAxisID: 'yPrice'
+            },
+            {
+              type: 'bar',
+              label: 'Combined Volume (Lots)',
+              data: dsVol,
+              backgroundColor: 'rgba(148, 163, 184, 0.16)',
+              hoverBackgroundColor: 'rgba(240, 185, 11, 0.35)',
+              borderRadius: 4,
+              yAxisID: 'yVol',
+              barPercentage: 0.6
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(10, 14, 42, 0.95)',
+              titleColor: '#ffd700',
+              titleFont: { family: 'Orbitron', size: 13, weight: 'bold' },
+              bodyFont: { family: 'JetBrains Mono', size: 12 },
+              padding: 14,
+              borderColor: 'rgba(240, 185, 11, 0.35)',
+              borderWidth: 1,
+              cornerRadius: 12,
+              callbacks: {
+                label: function(context) {
+                  if (context.dataset.yAxisID === 'yVol') {
+                    return `Volume: ${context.parsed.y.toLocaleString()} lots`;
+                  }
+                  return `${context.dataset.label.split(' ')[0]}: ₹${context.parsed.y.toLocaleString()}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.04)'
+              },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                maxTicksLimit: 12
+              }
+            },
+            yPrice: {
+              type: 'linear',
+              position: 'left',
+              grid: {
+                color: 'rgba(255, 255, 255, 0.05)'
+              },
+              ticks: {
+                color: '#f0b90b',
+                font: { family: 'JetBrains Mono', size: 11 },
+                callback: function(value) {
+                  return '₹' + value.toLocaleString();
+                }
+              }
+            },
+            yVol: {
+              type: 'linear',
+              position: 'right',
+              grid: {
+                display: false
+              },
+              ticks: {
+                color: '#64748b',
+                font: { family: 'JetBrains Mono', size: 10 },
+                callback: function(value) {
+                  return (value / 1000).toFixed(0) + 'k lots';
+                }
+              },
+              suggestedMax: 45000
+            }
+          }
+        }
+      });
+    }
+
+    initHistoricalChart(90);
+
+    // Range selector handler
+    function updateChartRange(range) {
+      const rangeBtns = document.querySelectorAll('.range-btn');
+      rangeBtns.forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      let days = 90;
+      if (range === '7D') days = 7;
+      else if (range === '30D') days = 30;
+      else if (range === '90D') days = 90;
+      else if (range === '6M') days = 90;
+      else if (range === '1Y') days = 90;
+
+      initHistoricalChart(days);
+      showToast(`Chart updated to range: ${range}`);
+    }
+
+    // Toggle contract series on chart
+    function toggleDataset(index) {
+      if (!historicalChart) return;
+      const isVisible = historicalChart.isDatasetVisible(index);
+      historicalChart.setDatasetVisibility(index, !isVisible);
+      historicalChart.update();
+
+      const btn = document.getElementById(`toggle-${index}`);
+      if (isVisible) {
+        btn.classList.remove('active');
+        btn.classList.add('disabled');
+      } else {
+        btn.classList.add('active');
+        btn.classList.remove('disabled');
+      }
+    }
+
+    // Toggle volume bars
+    function toggleVolumeBars() {
+      if (!historicalChart) return;
+      const isVisible = historicalChart.isDatasetVisible(4);
+      historicalChart.setDatasetVisibility(4, !isVisible);
+      historicalChart.update();
+
+      const btn = document.getElementById('toggle-vol');
+      if (isVisible) {
+        btn.classList.remove('active');
+        btn.classList.add('disabled');
+      } else {
+        btn.classList.add('active');
+        btn.classList.remove('disabled');
+      }
+    }
+
+    /* ==========================================================================
+       6. UI UTILITIES & TOASTS
+       ========================================================================== */
+    function showToast(msg) {
+      const toast = document.getElementById('auroraToast');
+      const toastMsg = document.getElementById('toastMessage');
+      toastMsg.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3200);
+    }
+
+    function refreshContractData() {
+      showToast('Fetching latest MCX Bhavcopy tick stream...');
+      setTimeout(() => {
+        showToast('MCX Bullion Feeds Updated • All contracts synced');
+      }, 900);
+    }
+
+    function exportTableData() {
+      showToast('Generating CSV report for MCX Gold Contracts...');
+      setTimeout(() => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+          + "Metric,GOLDM,GOLDTEN,GOLDGUINEA,GOLDPETAL\n"
+          + "Trading Unit,100g,10g,8g,1g\n"
+          + "Quotation Base,₹/10g,₹/10g,₹/8g,₹/1g\n"
+          + "Purity,995,995,999,995\n"
+          + "Raw Price,62450,62380,50120,6310\n"
+          + "Normalized Price,62892.46,62822.11,62963.45,63015.08\n"
+          + "24h Change,+1.2%,+0.9%,-0.3%,+0.5%\n"
+          + "Volume Lots,12450,3200,1890,890\n"
+          + "Open Interest,34567,8900,5670,2340\n"
+          + "Next Expiry,2026-10-30,2026-11-15,2026-10-28,2026-11-05\n"
+          + "Liquidity Rating,High,Medium,Low,Low\n"
+          + "Status,Active,Active,Watch,Active\n";
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "AURORA_MCX_Contracts_Report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('CSV Exported: AURORA_MCX_Contracts_Report.csv');
+      }, 600);
+    }
+  </script>
+</body>
+</html>
