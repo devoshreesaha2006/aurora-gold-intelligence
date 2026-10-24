@@ -13,7 +13,7 @@
 
   const defaults = {
     pair: 'GOLDM-GOLDPETAL', lookback: '30', units: '1', entry: '2.0', exit: '0.5',
-    capital: '100000', cost: '25.31', slippage: '15', volume: '0', expiry: '3', start: '', end: '',
+    capital: '100000', cost: '10.31', slippage: '15', volume: '0', expiry: '3', start: '', end: '',
   };
   const presets = {
     baseline: { lookback: '30', entry: '2.0', exit: '0.5', volume: '0', expiry: '3' },

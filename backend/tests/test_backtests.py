@@ -7,6 +7,16 @@ from backend.app.schemas.backtest import BacktestRequest
 from backend.app.services.backtest_service import BacktestService
 
 
+def test_default_backtest_fees_exclude_separately_configured_slippage():
+    request = BacktestRequest()
+
+    # Analytics' reference round-trip hurdle is ₹25.31/10g including ₹15 slippage.
+    # Backtesting accepts fees and slippage separately, so its fee default must be ₹10.31.
+    assert request.transaction_cost_per_10g == pytest.approx(10.31)
+    assert request.slippage_per_10g == pytest.approx(15.00)
+    assert request.transaction_cost_per_10g + request.slippage_per_10g == pytest.approx(25.31)
+
+
 def test_backtest_excludes_synthetic_rows(db_session):
     for idx in range(8):
         day = date(2026, 1, 1) + timedelta(days=idx)
