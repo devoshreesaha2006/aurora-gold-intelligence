@@ -1415,9 +1415,12 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
             const p = pairMap[pairKey];
             if (p && p.spread !== null && p.spread !== undefined) {
               td.setAttribute('onclick', `selectPairFromMatrix('${pairKey}')`);
-              const sign = (p.leg_a === rowContract) ? 1 : -1;
-              const cellSpread = (p.spread * sign).toFixed(2);
-              const cellZ = p.z_score !== null ? (p.z_score * sign).toFixed(2) : 'N/A';
+              // pairMap is keyed by the requested orientation and reverse entries are
+              // already normalized by orientRadarPair(). Do not invert them a second time.
+              const cellSpread = Number(p.spread).toFixed(2);
+              const cellZ = p.z_score !== null && p.z_score !== undefined
+                ? Number(p.z_score).toFixed(2)
+                : 'N/A';
               td.innerHTML = `${cellSpread > 0 ? '+' : ''}${cellSpread}<br><span style="font-size:0.6rem;">${cellZ}σ</span>`;
               td.title = `${pairKey} · ${p.trade_date} · expiry ${p.expiry_date} · Spread ₹${cellSpread} · Z ${cellZ}σ · ${p.classification}`;
               td.classList.remove('cell-normal', 'cell-high', 'cell-critical', 'cell-unavailable');
