@@ -122,10 +122,13 @@ def test_database_persistence_and_relationships(client, db_session):
     assert obs.normalized_price_per_gram > 0
     assert obs.normalized_price_10g_basis > 0
 
-def test_zero_open_price_is_treated_as_missing(client):
+def test_zero_open_price_is_treated_as_missing(client, db_session):
+    from datetime import date
+    from backend.app.models.market_observation import MarketObservation
+
     csv_content = (
-        b"symbol,trade_date,expiry_date,open,high,low,close,volume,open_interest\\n"
-        b"GOLDM,2026-10-15,2026-10-30,0,63100,62710,62980,15400,37800\\n"
+        b"symbol,trade_date,expiry_date,open,high,low,close,volume,open_interest\n"
+        b"GOLDM,2026-10-15,2026-10-30,0,63100,62710,62980,15400,37800\n"
     )
     response = client.post(
         "/api/data/upload",
@@ -137,3 +140,42 @@ def test_zero_open_price_is_treated_as_missing(client):
     assert result["accepted_rows"] == 1
     assert result["rejected_rows"] == 0
 
+    observation = db_session.query(MarketObservation).filter(
+        MarketObservation.symbol == "GOLDM",
+        MarketObservation.trade_date == date(2026, 10, 15),
+        MarketObservation.expiry_date == date(2026, 10, 30),
+    ).first()
+    assert observation is not None
+    assert observation.open_price is None
+    assert observation.high_price == 63100.0
+    assert observation.low_price == 62710.0
+
+
+def test_zero_high_and_low_prices_are_treated_as_missing(client, db_session):
+    from datetime import date
+    from backend.app.models.market_observation import MarketObservation
+
+    csv_content = (
+        b"symbol,trade_date,expiry_date,open,high,low,close,volume,open_interest\n"
+        b"GOLDTEN,2026-10-16,2026-11-27,0,0,0,62890,3850,9720\n"
+    )
+    response = client.post(
+        "/api/data/upload",
+        files={"file": ("zero_high_low_test.csv", io.BytesIO(csv_content), "text/csv")},
+        data={"data_source": "test_zero_ohl"}
+    )
+    assert response.status_code == 200
+    result = response.json()["data"]
+    assert result["accepted_rows"] == 1
+    assert result["rejected_rows"] == 0
+
+    observation = db_session.query(MarketObservation).filter(
+        MarketObservation.symbol == "GOLDTEN",
+        MarketObservation.trade_date == date(2026, 10, 16),
+        MarketObservation.expiry_date == date(2026, 11, 27),
+    ).first()
+    assert observation is not None
+    assert observation.open_price is None
+    assert observation.high_price is None
+    assert observation.low_price is None
+    assert observation.close_price == 62890.0
