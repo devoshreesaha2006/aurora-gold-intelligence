@@ -5,6 +5,16 @@ AURORA transforms Multi Commodity Exchange of India (MCX) gold commodity futures
 
 ---
 
+## Data Integrity & Evaluation Notes
+
+- Treat imported Bhavcopy/CSV records as **user-imported historical data** unless the API explicitly confirms an authenticated, authorized provider feed. A file name or user-supplied source label is not proof of exchange provenance.
+- Do not interpret a historical snapshot, heuristic opportunity/ranking score, spread percentile, or backtest result as a probability of profit or a live execution recommendation.
+- A pair must remain **No Signal / unavailable** when required synchronized observations, expiry matching, observed liquidity, provenance, or other configured eligibility checks are missing. Missing inputs must not be treated as passing checks.
+- Normalized spreads use the documented **₹ per 10g, 995 fine-gold benchmark**. Individual contract purities remain contract-specific inputs to normalization; the benchmark label does not mean every contract is 995 purity.
+- Before production use, independently verify effective-dated contract specifications, source permissions, source-data quality, transaction-cost assumptions, and the behavior of the authorized provider integration. Do not claim a live feed unless the backend status confirms an authenticated and fresh provider response.
+
+---
+
 ## Architecture Overview (Phase 1 & Phase 2)
 
 ```
