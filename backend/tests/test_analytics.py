@@ -622,3 +622,43 @@ def test_api_events_filtering_by_status_and_pair(client):
     assert res_z.status_code == 200
     for it in res_z.json()["data"]["items"]:
         assert abs(it["evidence"]["z_score"]) >= 1.0
+
+
+
+def test_pairwise_spreads_are_transitive_on_same_session_and_expiry(client):
+    """Pair spreads must reconcile when all legs share the same session/expiry.
+
+    For normalized prices A, B, C: (A-B) + (B-C) == (A-C).
+    This protects the radar from pair cards that disagree because of mismatched
+    observations or inconsistent normalization.
+    """
+    ingest_sample_bhavcopy(client)
+
+    pair_names = (
+        "GOLDTEN-GOLDGUINEA",
+        "GOLDGUINEA-GOLDPETAL",
+        "GOLDTEN-GOLDPETAL",
+    )
+    snapshots = {}
+    for pair_name in pair_names:
+        response = client.get(f"/api/analytics/spreads?pair={pair_name}&window=30")
+        assert response.status_code == 200
+        points = response.json()["data"]["data_points"]
+        snapshots[pair_name] = {point["trade_date"]: point for point in points}
+
+    common_dates = (
+        set(snapshots[pair_names[0]])
+        & set(snapshots[pair_names[1]])
+        & set(snapshots[pair_names[2]])
+    )
+    assert common_dates, "sample fixture must contain a synchronized three-leg session"
+
+    for trade_date in common_dates:
+        ten_guinea = snapshots["GOLDTEN-GOLDGUINEA"][trade_date]
+        guinea_petal = snapshots["GOLDGUINEA-GOLDPETAL"][trade_date]
+        ten_petal = snapshots["GOLDTEN-GOLDPETAL"][trade_date]
+
+        assert ten_guinea["expiry_date"] == guinea_petal["expiry_date"] == ten_petal["expiry_date"]
+        assert abs(
+            (ten_guinea["spread"] + guinea_petal["spread"]) - ten_petal["spread"]
+        ) < 0.02
