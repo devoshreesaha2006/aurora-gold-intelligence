@@ -226,6 +226,7 @@
     const drawdown = curve.map((point) => point.drawdown_pct);
     $('equityEmpty').hidden = true; $('drawdownEmpty').hidden = true;
     $('spreadEmpty').hidden = !spreadSeries.length;
+    $('spreadEmpty').style.display = spreadSeries.length ? 'none' : 'flex';
     document.querySelectorAll('.bt-chart-wrap').forEach((wrap) => wrap.classList.add('has-chart'));
     if (typeof window.Chart === 'function') {
       equityChart = new Chart($('equityChart'), { type: 'line', data: { labels, datasets: [{ label: 'Portfolio equity', data: equity, borderColor: '#d7b86d', backgroundColor: 'rgba(197,158,70,.1)', fill: true, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: .22 }] }, options: chartOptions((n) => inr(n, 0)) });

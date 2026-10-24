@@ -19,6 +19,7 @@ ASSUMPTIONS = [
     "Spread P&L uses normalized ₹ per 10g basis and the configured number of spread units.",
     "Configured transaction cost and slippage are charged half on entry and half on exit per 10g unit.",
     "Only synchronized, non-synthetic observations from non-test imports are eligible; settlement fills are proxies, not executable quotes.",
+    "P&L is only booked between consecutive sessions of the same expiry pair. If the nearest shared expiry changes while a position is open, the position is closed at the last settlement of the expiring pair (exit costs charged once); the level difference between the two contract pairs is never booked as P&L.",
 ]
 
 
@@ -130,6 +131,17 @@ class BacktestService:
             oa, ob, spread = pairs[idx]
             previous_spread = spreads[idx - 1]
             daily_pnl = 0.0
+            if open_trade and oa.expiry_date != pairs[idx - 1][0].expiry_date:
+                # A new contract pair has a different level; do not book that jump as P&L.
+                prev_oa, prev_ob, prev_spread = pairs[idx - 1]
+                equity -= half_cost
+                total_costs += half_cost
+                gross_trade = open_trade["gross_pnl"]
+                trades.append(self._trade(
+                    open_trade, prev_oa, prev_ob, prev_spread, req.units, gross_trade, half_cost * 2,
+                    gross_trade - half_cost * 2, "Expiry roll (pair changed)",
+                ))
+                open_trade = None
             if open_trade:
                 daily_pnl = (spread - previous_spread) * open_trade["sign"] * req.units
                 equity += daily_pnl
