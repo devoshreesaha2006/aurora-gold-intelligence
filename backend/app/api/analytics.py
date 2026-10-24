@@ -24,9 +24,10 @@ def get_pairwise_spreads(
     db: Session = Depends(get_db)
 ):
     """
-    Returns the time-series of normalized price spreads for a contract pair.
-    Includes rolling mean, sample standard deviation (ddof=1), rolling Z-score,
-    empirical percentile rank, volume/OI, and expiry DTE without look-ahead bias.
+    Returns the eligible stored time-series of normalized price spreads for a contract
+    pair. Includes rolling mean, sample standard deviation (ddof=1), rolling Z-score,
+    empirical percentile rank, observed volume/OI where available, and expiry DTE
+    without look-ahead bias. Returned observations may be historical, not live.
     """
     try:
         leg_a, leg_b, is_inverted = parse_pair(pair)
@@ -60,9 +61,10 @@ def get_opportunity_radar(
     db: Session = Depends(get_db)
 ):
     """
-    Returns real-time relative-value radar across all 6 canonical MCX Gold pairs.
-    Includes deviation intensities (0-100), opportunity scores, trap-risk scores,
-    and classifications (Investigate, Watch, Cost-Blocked, Expiry-Risk, No Signal).
+    Returns a relative-value radar across all 6 canonical MCX Gold pairs using the
+    latest eligible observations available in storage (or the requested evaluation date).
+    This is not a claim of live market connectivity. Includes deviation intensities,
+    heuristic ranking scores, trap-risk scores, and rule-based classifications.
     """
     service = RelativeValueAnalyticsService(db)
     radar_data = service.get_radar_summary(
@@ -87,9 +89,10 @@ def get_relative_value_events(
     db: Session = Depends(get_db)
 ):
     """
-    Returns detected relative-value events with complete evidence trails:
-    normalized spread, Z-score, empirical percentile, estimated friction hurdle,
-    volume/OI proxy, DTE, and plain-language decision rules.
+    Returns eligible stored relative-value events with evidence trails: normalized
+    spread, Z-score, empirical percentile, estimated friction hurdle, observed
+    volume/OI where available, DTE, and plain-language decision rules. Event dates
+    may be historical; this endpoint does not imply a live feed.
     """
     service = RelativeValueAnalyticsService(db)
     events_data = service.get_events(
