@@ -143,9 +143,12 @@ def test_backtest_requires_observed_volume_and_preserves_threshold_semantics(
     spreads = [0, 2, -2, 3, -3, 4, -4, 5, -5, 1, 0, -1, 2, -2, 4, -4, 0, 1]
     for idx, spread in enumerate(spreads):
         day = date(2026, 7, 1) + timedelta(days=idx)
+        # Keep one contract expiry across the historical window; a changing
+        # expiry every day would correctly trigger the engine expiry-roll guard.
+        expiry = date(2026, 8, 25)
         for symbol, close in (("GOLDM", 62500 + spread), ("GOLDPETAL", 62500)):
             db_session.add(MarketObservation(
-                symbol=symbol, trade_date=day, expiry_date=day + timedelta(days=25),
+                symbol=symbol, trade_date=day, expiry_date=expiry,
                 close_price=close, normalized_price_per_gram=close / 10,
                 normalized_price_10g_basis=close, volume=volume, volume_observed=observed,
                 data_source="csv_upload", is_synthetic=False,
