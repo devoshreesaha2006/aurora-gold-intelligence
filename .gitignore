@@ -26,7 +26,8 @@ ENV/
 
 # Environment
 .env
-.env.local
+.env.*
+!.env.example
 
 # Testing & logs
 .pytest_cache/
