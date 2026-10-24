@@ -1435,41 +1435,8 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       updateRadarSignalCards(pairs);
       if (typeof window.applySignalFilters === 'function') window.applySignalFilters();
 
-      // Update Active Signal Cards
-      pairs.forEach(p => {
-        if (p.spread === null || p.spread === undefined) return;
-        const card = document.querySelector(`.signal-card[data-pair="${p.pair}"]`) ||
-                     document.querySelector(`.signal-card[data-pair="${p.pair.split('-').reverse().join('-')}"]`);
-        if (card) {
-          const spreadEl = card.querySelector('.stat-num');
-          if (spreadEl) spreadEl.innerHTML = `₹${p.spread.toFixed(2)} <span class="stat-subtext">/ 10g</span>`;
-
-          const zCell = card.querySelectorAll('.stat-num')[1];
-          if (zCell && p.z_score !== null) {
-            zCell.innerHTML = `${p.z_score >= 0 ? '+' : ''}${p.z_score.toFixed(2)}σ <span class="stat-subtext">${Math.abs(p.z_score) > 2 ? 'extreme' : 'moderate'}</span>`;
-          }
-
-          const pctCell = card.querySelectorAll('.stat-num')[2];
-          if (pctCell && p.percentile_rank !== null) {
-            pctCell.innerHTML = `${p.percentile_rank.toFixed(1)}% <span class="stat-subtext">30d</span>`;
-          }
-
-          const radialText = card.querySelector('.radial-text');
-          if (radialText) radialText.textContent = p.opportunity_score == null ? '—' : `${Math.round(Number(p.opportunity_score))}`;
-
-          const pill = card.querySelector('.severity-pill');
-          if (pill) {
-            pill.innerHTML = `<i class="fa-solid fa-satellite-dish"></i> ${p.classification.toUpperCase()}`;
-            if (p.classification === 'Investigate') {
-              pill.className = 'severity-pill pill-critical';
-            } else if (p.classification === 'Cost-Blocked' || p.classification === 'Expiry-Risk') {
-              pill.className = 'severity-pill pill-high';
-            } else {
-              pill.className = 'severity-pill pill-medium';
-            }
-          }
-        }
-      });
+      // Cards and hero are rendered once by updateRadarSignalCards/renderRadarPair.
+      // Do not rewrite a reversed card with the backend's canonical pair values here.
 
       ensureLiveBadge(usablePairs.length, pairs.length);
       return top ? top.pair : null;
