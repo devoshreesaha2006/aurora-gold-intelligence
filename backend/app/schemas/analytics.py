@@ -107,10 +107,10 @@ class EventEvidenceTrail(BaseModel):
     net_edge: Optional[float] = None
     dte_a: Optional[int] = None
     dte_b: Optional[int] = None
-    volume_a: int = 0
-    volume_b: int = 0
-    open_interest_a: int = 0
-    open_interest_b: int = 0
+    volume_a: Optional[int] = None
+    volume_b: Optional[int] = None
+    open_interest_a: Optional[int] = None
+    open_interest_b: Optional[int] = None
     cost_hurdle: float
     rule_triggered: str
     caveats: List[str] = Field(default_factory=list)
