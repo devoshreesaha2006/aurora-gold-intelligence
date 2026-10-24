@@ -22,7 +22,7 @@ def test_backtest_excludes_synthetic_rows(db_session):
         day = date(2026, 1, 1) + timedelta(days=idx)
         for symbol, value in (("GOLDM", 62500 + idx), ("GOLDPETAL", 62400)):
             db_session.add(MarketObservation(
-                symbol=symbol, trade_date=day, expiry_date=day + timedelta(days=25),
+                symbol=symbol, trade_date=day, expiry_date=date(2026, 7, 26),
                 close_price=value, normalized_price_per_gram=value / 10,
                 normalized_price_10g_basis=value, volume=1000, open_interest=1000,
                 data_source="synthetic_seed", is_synthetic=True,
@@ -86,7 +86,7 @@ def test_backtest_reports_insufficient_real_history(db_session):
         spread = [0, 8, -4, 12, -9, 3, -2, 7][idx]
         for symbol, value in (("GOLDM", 62500 + spread), ("GOLDPETAL", 62500)):
             db_session.add(MarketObservation(
-                symbol=symbol, trade_date=day, expiry_date=day + timedelta(days=25),
+                symbol=symbol, trade_date=day, expiry_date=date(2026, 7, 26),
                 close_price=value, normalized_price_per_gram=value / 10,
                 normalized_price_10g_basis=value, volume=1000, open_interest=1000,
                 data_source="csv_upload", is_synthetic=False,
@@ -106,7 +106,7 @@ def test_backtest_runs_on_eligible_observations(db_session):
         day = date(2026, 3, 1) + timedelta(days=idx)
         for symbol, value in (("GOLDM", 62500 + spread), ("GOLDPETAL", 62500)):
             db_session.add(MarketObservation(
-                symbol=symbol, trade_date=day, expiry_date=day + timedelta(days=25),
+                symbol=symbol, trade_date=day, expiry_date=date(2026, 7, 26),
                 close_price=value, normalized_price_per_gram=value / 10,
                 normalized_price_10g_basis=value, volume=1000, open_interest=1000,
                 volume_observed=True,
@@ -145,7 +145,7 @@ def test_backtest_requires_observed_volume_and_preserves_threshold_semantics(
         day = date(2026, 7, 1) + timedelta(days=idx)
         for symbol, close in (("GOLDM", 62500 + spread), ("GOLDPETAL", 62500)):
             db_session.add(MarketObservation(
-                symbol=symbol, trade_date=day, expiry_date=day + timedelta(days=25),
+                symbol=symbol, trade_date=day, expiry_date=date(2026, 7, 26),
                 close_price=close, normalized_price_per_gram=close / 10,
                 normalized_price_10g_basis=close, volume=volume, volume_observed=observed,
                 data_source="csv_upload", is_synthetic=False,
