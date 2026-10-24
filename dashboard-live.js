@@ -492,10 +492,52 @@
     if (chart) { const p = model.radar; chart.data.datasets[0].data = pairKeys.map(key => { const row = p.find(item => item.pair === key || item.pair === key.split('-').reverse().join('-')); if (!row || !Number.isFinite(Number(row.spread))) return null; if (model.costFilter && ['Cost-Blocked', 'Expiry-Risk'].includes(row.classification)) return null; return Number(row.spread) * (row.pair === key ? 1 : -1); }); chart.update(); }
   };
   window.showContractDetailModal = function (symbol) {
-    const modal = $('#contractModal'), title = $('#modalContractTitle'), body = $('#modalContractBody');
-    const list = symbol === 'ALL' ? model.contracts : model.contracts.filter(c => c.symbol === symbol);
-    if (title) title.textContent = symbol === 'ALL' ? 'Contract specifications' : `${symbol} specification`;
-    if (body) body.innerHTML = list.length ? list.map(c => { const row = latestBySymbol().get(c.symbol); return `<article class="dashboard-contract-detail"><h3>${esc(c.symbol)} · ${esc(c.name)}</h3><p>${esc(c.trading_unit)} · quotation ${esc(c.quote_unit)} · ${esc(c.purity)} fineness</p><p>${row ? `Latest ${esc(row.trade_date)} close ${money(row.close_price)} · normalized ${money(row.normalized_price_10g_basis)} / 10g · volume ${Number(row.volume || 0).toLocaleString('en-IN')} · OI ${Number(row.open_interest || 0).toLocaleString('en-IN')}` : 'No market observation is available for this contract.'}</p></article>`; }).join('') : empty('Contract specifications could not be loaded from the backend.');
+    const modal = $('#contractModal');
+    const title = $('#modalContractTitle');
+    const body = $('#modalContractBody');
+
+    const list = symbol === 'ALL'
+      ? model.contracts
+      : model.contracts.filter(c => c.symbol === symbol);
+
+    if (title) {
+      title.textContent = symbol === 'ALL'
+        ? 'Contract specifications'
+        : `${symbol} specification`;
+    }
+
+    const latest = latestBySymbol();
+    const priceLabel = model.pure
+      ? 'Normalized price (₹/10g, 995 fine-gold basis)'
+      : 'Raw quoted close price';
+
+    if (body) {
+      body.innerHTML = list.length
+        ? list.map(c => {
+            const row = latest.get(c.symbol);
+            return `
+              <article class="dashboard-contract-detail">
+                <h3>${esc(c.symbol)} · ${esc(c.name)}</h3>
+                <p>
+                  ${esc(c.trading_unit)} · quotation ${esc(c.quote_unit)}
+                  · ${esc(c.purity)} fineness
+                </p>
+                <p>
+                  ${row
+                    ? `Latest ${esc(row.trade_date)} · ${priceLabel}: ${money(
+                        model.pure
+                          ? row.normalized_price_10g_basis
+                          : row.close_price
+                      )} · volume ${Number(row.volume || 0).toLocaleString('en-IN')}
+                      · OI ${Number(row.open_interest || 0).toLocaleString('en-IN')}`
+                    : 'No market observation is available for this contract.'}
+                </p>
+              </article>
+            `;
+          }).join('')
+        : empty('Contract specifications could not be loaded from the backend.');
+    }
+
     modal?.classList.add('active');
   };
   window.filterByAnomalies = function () { const list = model.radar.filter(p => p.classification === 'Investigate'); if (list.length) showEvent(model.events.find(e => e.pair === list[0].pair) || { pair: list[0].pair, classification: list[0].classification, opportunity_score: list[0].opportunity_score, trap_risk_score: list[0].trap_risk_score, evidence: { spread: list[0].spread, z_score: list[0].z_score, percentile_rank: list[0].percentile_rank, cost_hurdle: list[0].estimated_cost_hurdle, rule_triggered: list[0].reason } }); else window.openAlertModal('No pair is currently classified as Investigate by the analytics API.'); };
