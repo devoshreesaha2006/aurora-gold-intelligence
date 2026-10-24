@@ -283,7 +283,15 @@
     const chart = window.priceChart;
     const symbols = ['GOLDM', 'GOLDTEN', 'GOLDGUINEA', 'GOLDPETAL'];
     const rows = model.prices.filter(item => symbols.includes(item.symbol));
-    if (!rows.length) { if (chart) { chart.data.labels = []; chart.data.datasets.forEach(ds => { ds.data = []; }); chart.update(); } else canvasContext('priceComparisonChart', 310); showChartEmpty(model.loaded.prices ? 'Upload an MCX CSV or wait for market observations to compare contracts.' : 'Market price service unavailable.'); return; }
+    if (!rows.length) {
+      if (chart) {
+        chart.data.labels = [];
+        chart.data.datasets.forEach(ds => { ds.data = []; });
+        chart.update();
+      } else canvasContext('priceComparisonChart', 310);
+      showChartEmpty(model.loaded.prices ? 'Upload an MCX CSV or wait for market observations to compare contracts.' : 'Market price service unavailable.');
+      return;
+    }
     const maxDate = rows.reduce((latest, row) => String(row.trade_date) > String(latest) ? row.trade_date : latest, rows[0].trade_date);
     const days = model.timeframe === '1D' ? 1 : model.timeframe === '7D' ? 7 : model.timeframe === '30D' ? 30 : model.timeframe === '90D' ? 90 : 365;
     const cutoff = new Date(`${maxDate}T00:00:00`); cutoff.setDate(cutoff.getDate() - days);
