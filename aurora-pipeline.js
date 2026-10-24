@@ -1773,7 +1773,7 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         const values = [
           points.map(point => point.volume_a),
           points.map(point => point.volume_b),
-          points.map(point => Number(point.open_interest_a || 0) + Number(point.open_interest_b || 0)),
+          points.map(point => point.open_interest_a == null || point.open_interest_b == null ? null : Number(point.open_interest_a) + Number(point.open_interest_b)),
         ];
         volumeChart.data.datasets.forEach((dataset, index) => { dataset.data = values[index] || []; });
         volumeChart.update();
@@ -1788,10 +1788,10 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       set(1, evt.evidence.rolling_mean == null ? '—' : `₹${Number(evt.evidence.rolling_mean).toFixed(2)}`);
       set(2, latest.upper_2sigma == null ? '—' : `₹${Number(latest.upper_2sigma).toFixed(2)}`);
       set(3, `${Number(evt.evidence.z_score) >= 0 ? '+' : ''}${Number(evt.evidence.z_score).toFixed(2)}σ`);
-      set(4, `${Number(evt.evidence.volume_a || 0).toLocaleString('en-IN')}`);
-      set(5, `${Number(evt.evidence.volume_b || 0).toLocaleString('en-IN')}`);
-      set(6, Number(evt.evidence.volume_a) > 0 ? `${(Number(evt.evidence.volume_b || 0) / Number(evt.evidence.volume_a)).toFixed(3)}` : '—');
-      set(7, `${(Number(evt.evidence.open_interest_a || 0) + Number(evt.evidence.open_interest_b || 0)).toLocaleString('en-IN')}`);
+      set(4, evt.evidence.volume_a == null ? 'Unavailable' : Number(evt.evidence.volume_a).toLocaleString('en-IN'));
+      set(5, evt.evidence.volume_b == null ? 'Unavailable' : Number(evt.evidence.volume_b).toLocaleString('en-IN'));
+      set(6, evt.evidence.volume_a == null || evt.evidence.volume_b == null || Number(evt.evidence.volume_a) <= 0 ? '—' : `${(Number(evt.evidence.volume_b) / Number(evt.evidence.volume_a)).toFixed(3)}`);
+      set(7, evt.evidence.open_interest_a == null || evt.evidence.open_interest_b == null ? 'Unavailable' : (Number(evt.evidence.open_interest_a) + Number(evt.evidence.open_interest_b)).toLocaleString('en-IN'));
     } catch (error) {
       if (requestId === detectiveRequestId) {
         clearDetectiveCharts();
@@ -1986,9 +1986,9 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     if (s5) {
       const vals = s5.querySelectorAll('.detail-val');
       if (vals.length >= 3) {
-        vals[0].textContent = `${evt.evidence.volume_a.toLocaleString()} lots`;
-        vals[1].textContent = `${evt.evidence.volume_b.toLocaleString()} lots`;
-        vals[2].textContent = `${(evt.evidence.open_interest_a + evt.evidence.open_interest_b).toLocaleString()} contracts`;
+        vals[0].textContent = evt.evidence.volume_a == null ? 'Unavailable' : `${Number(evt.evidence.volume_a).toLocaleString()} lots`;
+        vals[1].textContent = evt.evidence.volume_b == null ? 'Unavailable' : `${Number(evt.evidence.volume_b).toLocaleString()} lots`;
+        vals[2].textContent = evt.evidence.open_interest_a == null || evt.evidence.open_interest_b == null ? 'Unavailable' : `${(Number(evt.evidence.open_interest_a) + Number(evt.evidence.open_interest_b)).toLocaleString()} contracts`;
       }
     }
 
