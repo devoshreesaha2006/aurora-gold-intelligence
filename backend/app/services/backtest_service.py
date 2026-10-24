@@ -53,11 +53,18 @@ class BacktestService:
         rows_a = self._eligible_rows(a, req.start_date, req.end_date)
         rows_b = self._eligible_rows(b, req.start_date, req.end_date)
         map_b = {(row.trade_date, row.expiry_date): row for row in rows_b}
-        pairs = [
-            (row, map_b[(row.trade_date, row.expiry_date)])
-            for row in rows_a
-            if (row.trade_date, row.expiry_date) in map_b
-        ]
+
+        # Match exact expiries, then keep only the nearest shared expiry per
+        # trading session. This mirrors the analytics series and prevents a
+        # multi-expiry session from being counted as several independent days.
+        pairs_by_date = {}
+        for row_a in sorted(rows_a, key=lambda row: (row.trade_date, row.expiry_date)):
+            key = (row_a.trade_date, row_a.expiry_date)
+            row_b = map_b.get(key)
+            if row_b is not None:
+                pairs_by_date.setdefault(row_a.trade_date, (row_a, row_b))
+
+        pairs = [pairs_by_date[day] for day in sorted(pairs_by_date)]
         return [(oa, ob, round(oa.normalized_price_10g_basis - ob.normalized_price_10g_basis, 6)) for oa, ob in pairs]
 
     @staticmethod
