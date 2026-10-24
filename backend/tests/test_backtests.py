@@ -189,3 +189,41 @@ def test_backtest_api_runs_full_request_with_real_rows(client, db_session):
     assert result["observations"] == len(spreads)
     assert result["metrics"]["total_pnl"] == round(result["equity_curve"][-1]["equity"] - 250000, 2)
     assert all(trade["units"] == 2 for trade in result["trades"])
+
+
+def test_backtest_uses_only_nearest_shared_expiry_per_session(db_session):
+    day = date(2026, 5, 4)
+    front_expiry = date(2026, 5, 28)
+    next_expiry = date(2026, 6, 25)
+    db_session.add_all([
+        MarketObservation(
+            symbol="GOLDM", trade_date=day, expiry_date=next_expiry,
+            close_price=63500, normalized_price_per_gram=6350,
+            normalized_price_10g_basis=63500, data_source="csv_upload", is_synthetic=False,
+        ),
+        MarketObservation(
+            symbol="GOLDM", trade_date=day, expiry_date=front_expiry,
+            close_price=62500, normalized_price_per_gram=6250,
+            normalized_price_10g_basis=62500, data_source="csv_upload", is_synthetic=False,
+        ),
+        MarketObservation(
+            symbol="GOLDPETAL", trade_date=day, expiry_date=next_expiry,
+            close_price=63400, normalized_price_per_gram=6340,
+            normalized_price_10g_basis=63400, data_source="csv_upload", is_synthetic=False,
+        ),
+        MarketObservation(
+            symbol="GOLDPETAL", trade_date=day, expiry_date=front_expiry,
+            close_price=62400, normalized_price_per_gram=6240,
+            normalized_price_10g_basis=62400, data_source="csv_upload", is_synthetic=False,
+        ),
+    ])
+    db_session.commit()
+
+    pairs = BacktestService(db_session)._paired_rows(
+        BacktestRequest(pair="GOLDM-GOLDPETAL", lookback=5)
+    )
+
+    assert len(pairs) == 1
+    assert pairs[0][0].trade_date == day
+    assert pairs[0][0].expiry_date == pairs[0][1].expiry_date == front_expiry
+    assert pairs[0][2] == 100
