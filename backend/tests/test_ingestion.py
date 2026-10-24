@@ -122,3 +122,18 @@ def test_database_persistence_and_relationships(client, db_session):
     assert obs.normalized_price_per_gram > 0
     assert obs.normalized_price_10g_basis > 0
 
+def test_zero_open_price_is_treated_as_missing(client):
+    csv_content = (
+        b"symbol,trade_date,expiry_date,open,high,low,close,volume,open_interest\\n"
+        b"GOLDM,2026-10-15,2026-10-30,0,63100,62710,62980,15400,37800\\n"
+    )
+    response = client.post(
+        "/api/data/upload",
+        files={"file": ("zero_open_test.csv", io.BytesIO(csv_content), "text/csv")},
+        data={"data_source": "test_zero_open"}
+    )
+    assert response.status_code == 200
+    result = response.json()["data"]
+    assert result["accepted_rows"] == 1
+    assert result["rejected_rows"] == 0
+

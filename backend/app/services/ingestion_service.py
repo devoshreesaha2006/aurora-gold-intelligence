@@ -367,8 +367,13 @@ class CsvIngestionService:
 
         try:
             open_price = parse_numeric(get_val("open"), "open", allow_none=True)
-            if open_price is not None and open_price <= 0:
-                return RowError(row_number=row_num, field="open", reason=f"Open price must be positive, got {open_price}")
+            # Some historical MCX CSVs encode an unavailable opening price as 0.
+            # Preserve the observation but represent the missing open as None;
+            # never treat zero as a real market price.
+            if open_price == 0:
+                open_price = None
+            elif open_price is not None and open_price < 0:
+                return RowError(row_number=row_num, field="open", reason=f"Open price cannot be negative, got {open_price}")
         except ValueError as e:
             return RowError(row_number=row_num, field="open", reason=str(e))
 
