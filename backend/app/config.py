@@ -29,10 +29,19 @@ class Settings(BaseSettings):
     # Data Mode: "demo_synthetic", "staged_csv", or "live_feed_authorized"
     data_mode: str = "demo_synthetic"
 
-    # Live Feed API credentials (optional, strictly for future authorized endpoints)
+    # Authorized provider HTTPS bridge credentials; never expose these in API responses.
     mcx_feed_api_key: Optional[str] = None
     mcx_feed_api_secret: Optional[str] = None
     mcx_feed_base_url: Optional[str] = None
+    mcx_feed_provider_name: str = "Authorized MCX Data Distributor"
+    mcx_feed_quotes_path: str = "/quotes"
+    mcx_feed_timeout_seconds: float = 5.0
+    mcx_feed_live_max_age_seconds: int = 90
+    mcx_feed_delayed_max_age_seconds: int = 1800
+    mcx_feed_poll_interval_seconds: int = 5
+    # Explicit operator attestation that the subscribed product's license permits
+    # AURORA's intended processing and storage. Credentials alone are insufficient.
+    mcx_feed_license_confirmed: bool = False
 
     @property
     def cors_origins_list(self) -> List[str]:

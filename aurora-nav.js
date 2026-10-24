@@ -239,6 +239,25 @@
       .cal-roll-row:last-child {
         border-bottom: none;
       }
+      .aurora-modal-backdrop { background: rgba(4,4,3,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+      .aurora-modal-card { color: #eee8d9; background: linear-gradient(145deg,rgba(27,25,19,.97),rgba(10,10,8,.985)); border-color: rgba(214,179,99,.24); box-shadow: 0 28px 84px rgba(0,0,0,.72), inset 0 1px rgba(255,255,255,.055); }
+      .aurora-modal-header { border-bottom-color: rgba(214,179,99,.14); }
+      .aurora-modal-header h3 { color: #e2c579; font-family: Inter,system-ui,sans-serif; letter-spacing: .015em; }
+      .aurora-modal-close { color: #c9c0ad; border-color: rgba(214,179,99,.16); }
+      .aurora-modal-close:hover { background: rgba(214,179,99,.12); border-color: rgba(214,179,99,.38); color: #f1dfaa; }
+      .aurora-modal-body { color: #c9c1b1; }
+      .aurora-modal-body p, .aurora-modal-body strong { color: inherit; }
+      .aurora-modal-body [style*="background: rgba(5, 8, 24"], .aurora-modal-body [style*="background: rgba(10, 14, 39"], .aurora-modal-body [style*="background: rgba(12, 22, 48"] { background: rgba(9,9,7,.76) !important; border-color: rgba(214,179,99,.18) !important; }
+      .aurora-modal-body [style*="56, 189, 248"], .aurora-modal-body [style*="#38bdf8"], .aurora-modal-body [style*="#38BDF8"] { background-color: rgba(174,139,60,.1) !important; border-color: rgba(214,179,99,.23) !important; color: #ddc276 !important; }
+      .aurora-modal-body strong[style*="#38bdf8"], .aurora-modal-body strong[style*="#38BDF8"] { color: #e0c77e !important; }
+      .aurora-badge-blue { color: #dec57d !important; background: rgba(174,139,60,.12) !important; border-color: rgba(214,179,99,.27) !important; }
+      .aurora-modal-body [style*="background: rgba(5, 8, 24"], .aurora-modal-body [style*="background: rgba(10, 14, 39"] { background: rgba(8,8,6,.72) !important; border-color: rgba(214,179,99,.18) !important; }
+      .aurora-modal-footer { border-top-color: rgba(214,179,99,.13); }
+      .aurora-input { color: #eee8d9; background: rgba(5,5,4,.55); border-color: rgba(214,179,99,.16); }
+      .aurora-analogue-card { background: rgba(9,9,7,.52); border-color: rgba(214,179,99,.14); }
+      .aurora-analogue-card:hover { background: rgba(32,27,16,.76); border-color: rgba(214,179,99,.34); }
+      .cal-roll-row { border-bottom-color: rgba(214,179,99,.1); }
+      @media (prefers-reduced-transparency: reduce) { .aurora-modal-backdrop,.aurora-modal-card { backdrop-filter:none; -webkit-backdrop-filter:none; } .aurora-modal-card { background:#12110d; } }
     `;
     document.head.appendChild(style);
   }

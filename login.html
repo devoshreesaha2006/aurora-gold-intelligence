@@ -255,15 +255,52 @@
       .card-title { font-size: 20px; }
     }
   </style>
+  <link rel="stylesheet" href="auth-premium.css?v=20261022-login-polish-1">
 </head>
-<body>
+<body class="aurora-auth-page aurora-signin">
   <div class="bg"></div>
   <div class="bg-grid"></div>
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
 
-  <div class="page">
+  <main class="page">
+    <div class="auth-shell">
+      <aside class="auth-visual" aria-label="AURORA gold market intelligence overview">
+        <a href="landing.html" class="visual-brand" aria-label="AURORA home">
+          <span class="visual-mark" aria-hidden="true">A</span><span>AURORA<span class="visual-period">.</span></span>
+        </a>
+        <div class="visual-kicker"><span></span> MCX GOLD · RELATIVE VALUE</div>
+        <div class="market-illustration" aria-hidden="true">
+          <div class="illustration-halo"></div>
+          <div class="dust dust-one"></div><div class="dust dust-two"></div><div class="dust dust-three"></div><div class="dust dust-four"></div>
+          <div class="market-panel panel-spread">
+            <div class="panel-heading"><span>PAIRWISE SPREAD</span><b>GOLDM / GOLDTEN</b></div>
+            <svg viewBox="0 0 280 112" role="presentation">
+              <path class="chart-gridline" d="M0 27H280M0 56H280M0 84H280" />
+              <path class="chart-band" d="M0 58 C25 55 30 45 52 49 S82 73 105 65 S135 38 158 48 S190 72 212 61 S245 29 280 38 L280 79 C250 70 236 89 213 81 S183 62 158 69 S130 88 106 82 S77 62 54 70 S27 74 0 78Z" />
+              <path class="chart-line" d="M0 66 C25 62 30 49 52 58 S82 78 105 71 S135 42 158 55 S190 78 212 68 S245 35 280 45" />
+              <circle cx="212" cy="68" r="4" class="chart-point" />
+            </svg>
+            <div class="panel-foot"><span>ROLLING CONTEXT</span><span>6 COMPARISONS</span></div>
+          </div>
+          <div class="market-panel panel-context">
+            <span class="context-orb">Au</span><div><small>FINE-GOLD BASIS</small><b>995 <em>‰</em></b></div><i>↗</i>
+          </div>
+          <div class="market-panel panel-signal">
+            <span class="signal-dot"></span><div><small>EVENT REVIEW</small><b>Liquidity · Expiry · Cost</b></div>
+          </div>
+          <div class="coin-orbit orbit-back"><span class="auth-coin"><span class="coin-face coin-face-front"><b>AURORA</b></span></span></div>
+          <div class="coin-orbit orbit-front"><span class="auth-coin"><span class="coin-face coin-face-front"><b>AURORA</b></span></span></div>
+          <div class="bullion-stack bullion-one"><span></span><span></span><span></span></div>
+          <div class="illustration-floor"></div>
+        </div>
+        <div class="visual-caption">
+          <h2>Read the gold market<br><span>in context.</span></h2>
+          <p>Compare MCX contracts on a common fine-gold basis, then examine the rolling history and evidence around every spread.</p>
+          <div class="visual-tags"><span>4 CONTRACTS</span><i></i><span>6 PAIRWISE SPREADS</span><i></i><span>EVIDENCE LED</span></div>
+        </div>
+      </aside>
     <div class="card">
 
       <!-- Logo -->
@@ -271,6 +308,9 @@
         <div class="logo-icon"><i class="fa-solid fa-gem"></i></div>
         <span class="logo-name">AURORA</span>
       </a>
+      <nav class="auth-tabs" aria-label="Account access">
+        <a href="signup.html">Create account</a><a class="active" href="login.html" aria-current="page">Sign in</a>
+      </nav>
 
       <!-- Notices -->
       <div class="notice notice-success" id="signedOutNotice">
@@ -288,8 +328,8 @@
       </div>
 
       <!-- Heading -->
-      <h1 class="card-title">Welcome back</h1>
-      <p class="card-sub">Sign in to access your AURORA dashboard.</p>
+      <h1 class="card-title">Welcome back,<br><span class="welcome-highlight">good to see you.</span></h1>
+      <p class="card-sub">Your gold-market research workspace is ready when you are.</p>
 
       <!-- Error -->
       <div class="err-box" id="err" role="alert">
@@ -334,13 +374,14 @@
 
       <p class="switch">No account yet? <a href="signup.html">Create one free</a></p>
     </div>
+    </div>
 
     <a href="landing.html" class="back-link">
       <i class="fa-solid fa-arrow-left"></i> Back to AURORA home
     </a>
 
     <p class="page-foot">AURORA &mdash; Gold Commodity Intelligence Platform &bull; Research tool, not investment advice.</p>
-  </div>
+  </main>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -349,6 +390,13 @@
       var dest = (next && /^[a-z-]+\.html$/i.test(next) && publicPages.indexOf(next.toLowerCase()) === -1) ? next : 'dashboard.html';
       var $ = function (id) { return document.getElementById(id); };
       function showErr(m) { $('errMsg').textContent = m; $('err').classList.add('show'); }
+      function setSubmitBusy(busy) {
+        var button = $('submit');
+        button.disabled = busy;
+        button.classList.toggle('is-auth-loading', busy);
+        button.setAttribute('aria-busy', busy ? 'true' : 'false');
+        if (busy) button.dataset.loadingLabel = 'Signing in securely…'; else delete button.dataset.loadingLabel;
+      }
 
       var curSess = Aurora.session();
       var params = new URLSearchParams(location.search);
@@ -375,11 +423,12 @@
         $('fEmail').classList.toggle('invalid', !okEmail);
         $('fPw').classList.toggle('invalid', !pw);
         if (!okEmail || !pw) return;
-        var b = $('submit'); b.disabled = true;
+        setSubmitBusy(true);
         Aurora.login(email, pw).then(function () { location.href = dest; })
-          .catch(function (x) { showErr(x.message); b.disabled = false; });
+          .catch(function (x) { showErr(x.message); setSubmitBusy(false); });
       });
     });
   </script>
+  <script src="aurora-nuggets.js" defer></script>
 </body>
 </html>

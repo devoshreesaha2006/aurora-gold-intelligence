@@ -1814,8 +1814,9 @@
   <script src="auth.js"></script>
   <script src="aurora-pipeline.js"></script>
   <script src="aurora-nav.js"></script>
+  <link rel="stylesheet" href="analytics-premium.css">
 </head>
-<body>
+<body class="aurora-contract-explorer">
 
   <!-- Floating Particles Canvas -->
   <canvas id="particles-canvas"></canvas>
@@ -1829,7 +1830,7 @@
       <!-- Brand Section -->
       <div class="brand-section">
         <div class="brand-logo-container">
-          <i class="fa-solid fa-gem"></i>
+          <img class="aurora-brand-image" src="aurora-mark.png" alt="">
         </div>
         <div class="brand-text-container">
           <span class="brand-title">AURORA</span>
@@ -1921,7 +1922,7 @@
     <div class="main-wrapper">
 
       <!-- Top Header Bar -->
-      <header class="top-header">
+      <header class="top-header contract-top-header">
         <div class="header-left">
           <div class="breadcrumb">
             <a href="dashboard.html"><i class="fa-solid fa-house"></i></a>
@@ -2749,7 +2750,7 @@
                 </button>
 
                 <button class="contract-toggle-btn active" id="toggle-1" onclick="toggleDataset(1)">
-                  <span class="color-dot" style="background:#38bdf8;"></span>
+                  <span class="color-dot" style="background:#c9a650;"></span>
                   <span>GOLDTEN</span>
                 </button>
 
@@ -3036,7 +3037,7 @@
 
     // Initialize 4 Sparklines
     createSparkline('sparkline-goldm', [61800, 61950, 62100, 62050, 62300, 62200, 62450], 'rgba(240, 185, 11, 1)');
-    createSparkline('sparkline-goldten', [61750, 61890, 62020, 61980, 62210, 62150, 62380], 'rgba(56, 189, 248, 1)');
+    createSparkline('sparkline-goldten', [61750, 61890, 62020, 61980, 62210, 62150, 62380], 'rgba(201, 166, 80, 1)');
     createSparkline('sparkline-goldguinea', [50400, 50350, 50280, 50190, 50310, 50200, 50120], 'rgba(239, 68, 68, 1)');
     createSparkline('sparkline-goldpetal', [6240, 6255, 6270, 6280, 6295, 6300, 6310], 'rgba(16, 185, 129, 1)');
 
@@ -3126,7 +3127,7 @@
               type: 'line',
               label: 'GOLDTEN (Norm Basis)',
               data: dsTen,
-              borderColor: '#38bdf8',
+              borderColor: '#c9a650',
               backgroundColor: 'transparent',
               borderWidth: 1.8,
               tension: 0.25,
@@ -3347,5 +3348,6 @@
       }, 600);
     }
   </script>
+  <script src="aurora-nuggets.js" defer></script>
 </body>
 </html>

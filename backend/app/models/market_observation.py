@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import (
     Column, Integer, String, Float, Boolean, DateTime, Date,
-    ForeignKey, UniqueConstraint
+    ForeignKey, UniqueConstraint, false
 )
 from backend.app.database import Base
 
@@ -30,6 +30,10 @@ class MarketObservation(Base):
     close_price = Column(Float, nullable=False) # Settlement / Close price
     volume = Column(Integer, default=0, nullable=False) # Traded lots
     open_interest = Column(Integer, default=0, nullable=False) # Open contracts
+    # Keep zero distinct from an omitted CSV/provider field. Legacy rows are
+    # backfilled conservatively by the additive startup schema upgrade.
+    volume_observed = Column(Boolean, default=False, server_default=false(), nullable=False)
+    open_interest_observed = Column(Boolean, default=False, server_default=false(), nullable=False)
 
     # Normalized metrics (Common comparable basis across all gold contracts)
     # 1. Pure fine-gold price per gram: (Quoted Price / Quoted Grams) / (Purity / 1000)
@@ -41,6 +45,10 @@ class MarketObservation(Base):
     data_source = Column(String(50), default="csv_upload", nullable=False)
     is_synthetic = Column(Boolean, default=False, nullable=False)
     import_batch_id = Column(Integer, ForeignKey("import_batches.id"), nullable=True)
+    # Exchange/provider timestamp is distinct from local persistence time.
+    provider_timestamp = Column(DateTime(timezone=True), nullable=True, index=True)
+    # Set only by the authorized adapter after a confirmed provider response.
+    is_provider_verified = Column(Boolean, default=False, server_default=false(), nullable=False)
     created_at = Column(DateTime, default=utc_now, nullable=False)
 
     # Prevent accidental duplicates of the exact same contract observation on the same trade date & expiry

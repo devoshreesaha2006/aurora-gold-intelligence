@@ -21,6 +21,7 @@
 
     .font-graphik { font-family: 'Graphik LCG Regular Regular', 'Graphik LCG', sans-serif; }
     .font-manrope { font-family: 'Manrope', sans-serif; }
+    body { font-family: 'Graphik LCG Regular Regular', 'Manrope', sans-serif; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(18px); }
@@ -76,10 +77,27 @@
       text-shadow: 0 0 20px rgba(255,215,0,0.5);
     }
 
-    /* Golden Tint directly on creature video */
-    .creature-gold-filter {
-      filter: sepia(100%) saturate(650%) hue-rotate(5deg) brightness(1.2) contrast(1.15);
+    /* Quiet, circular champagne sparkles replace the oversized moving creature. */
+    .intro-sparkle-field {
+      position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:0;
+      background: radial-gradient(ellipse at 72% 35%, rgba(132,94,24,.12), transparent 38%),
+        radial-gradient(ellipse at 27% 74%, rgba(116,82,21,.09), transparent 36%);
     }
+    .intro-sparkle {
+      position:absolute; left:var(--x); top:var(--y); width:var(--size); aspect-ratio:1;
+      border:1px solid rgba(241,217,149,.52); border-radius:50%;
+      background:radial-gradient(circle, rgba(255,239,186,.92) 0 2%, rgba(236,197,102,.24) 16%, rgba(214,179,99,.08) 42%, transparent 72%);
+      box-shadow:0 0 12px rgba(226,187,88,.32), 0 0 35px rgba(201,155,48,.16), inset 0 0 12px rgba(255,225,151,.18);
+      opacity:var(--opacity); animation:orbDrift var(--duration) ease-in-out var(--delay) infinite alternate;
+    }
+    .intro-sparkle::before,.intro-sparkle::after { content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border-radius:50%; }
+    .intro-sparkle::before { width:18%; height:18%; background:#fff4cf; box-shadow:0 0 10px 4px rgba(255,224,142,.72),0 0 30px 10px rgba(218,175,69,.34); }
+    .intro-sparkle::after { width:170%; height:1px; background:linear-gradient(90deg,transparent,rgba(255,241,195,.72),transparent); opacity:.7; }
+    .intro-sparkle:nth-child(even)::after { transform:translate(-50%,-50%) rotate(90deg); }
+    .intro-sparkle-dust { position:absolute; width:2px; height:2px; border-radius:50%; background:#f4d98e; opacity:.55; box-shadow:0 0 8px 2px rgba(236,194,90,.4); animation:dustFloat 8s ease-in-out infinite alternate; }
+    @keyframes orbDrift { from { transform:translate3d(-8px,8px,0) scale(.88); filter:brightness(.78); } to { transform:translate3d(10px,-12px,0) scale(1.08); filter:brightness(1.18); } }
+    @keyframes dustFloat { from { transform:translateY(12px); opacity:.22; } to { transform:translateY(-18px); opacity:.68; } }
+    @media (prefers-reduced-motion: reduce) { .intro-sparkle,.intro-sparkle-dust { animation:none; } }
 
     .pulse-marker { animation: pulseGlow 2s infinite ease-in-out; }
 
@@ -108,11 +126,22 @@
 
 <section class="relative w-full h-screen overflow-hidden bg-black">
 
-  <!-- Layer 0: Background Video with Golden Yellow Creature Tint -->
-  <video autoplay class="absolute inset-0 w-full h-full object-cover anim-fade-in creature-gold-filter" loop muted playsinline
+  <!-- Layer 0: original moving creature, with soft gold sparkle-orbs in front -->
+  <video autoplay class="absolute inset-0 w-full h-full object-cover intro-creature anim-fade-in" loop muted playsinline
     src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260813_115057_94c3699b-0fd1-4124-bcf3-3626bb8c1f77.mp4"
-    style="animation-delay:0ms; filter:sepia(75%) saturate(360%) hue-rotate(15deg) brightness(1.2) contrast(1.18);">
+    style="animation-delay:0ms;filter:sepia(75%) saturate(360%) hue-rotate(15deg) brightness(1.2) contrast(1.18);">
   </video>
+  <div class="intro-sparkle-field" aria-hidden="true">
+    <span class="intro-sparkle" style="--x:68%;--y:19%;--size:clamp(32px,5vw,76px);--opacity:.7;--duration:5.8s;--delay:-1.4s"></span>
+    <span class="intro-sparkle" style="--x:82%;--y:57%;--size:clamp(18px,2.5vw,38px);--opacity:.48;--duration:6.7s;--delay:-3s"></span>
+    <span class="intro-sparkle" style="--x:41%;--y:71%;--size:clamp(24px,3.4vw,52px);--opacity:.52;--duration:7.4s;--delay:-2s"></span>
+    <span class="intro-sparkle" style="--x:17%;--y:31%;--size:clamp(13px,1.8vw,26px);--opacity:.42;--duration:6.2s;--delay:-4s"></span>
+    <span class="intro-sparkle" style="--x:91%;--y:29%;--size:clamp(12px,1.5vw,22px);--opacity:.4;--duration:8s;--delay:-2.8s"></span>
+    <i class="intro-sparkle-dust" style="left:24%;top:22%;animation-delay:-2s"></i>
+    <i class="intro-sparkle-dust" style="left:57%;top:42%;animation-delay:-5s"></i>
+    <i class="intro-sparkle-dust" style="left:76%;top:78%;animation-delay:-1s"></i>
+    <i class="intro-sparkle-dust" style="left:34%;top:54%;animation-delay:-3s"></i>
+  </div>
 
   <!-- Content Layer -->
   <div class="relative z-10 w-full h-full">

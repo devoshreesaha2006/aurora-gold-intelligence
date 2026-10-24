@@ -391,6 +391,7 @@ class CsvIngestionService:
 
         # 5. Validate Volume & OI
         try:
+            volume_observed = get_val("volume") is not None
             vol_raw = parse_numeric(get_val("volume"), "volume", allow_none=True)
             volume = int(vol_raw) if vol_raw is not None else 0
             if volume < 0:
@@ -399,6 +400,7 @@ class CsvIngestionService:
             return RowError(row_number=row_num, field="volume", reason=str(e))
 
         try:
+            open_interest_observed = get_val("open_interest") is not None
             oi_raw = parse_numeric(get_val("open_interest"), "open_interest", allow_none=True)
             open_interest = int(oi_raw) if oi_raw is not None else 0
             if open_interest < 0:
@@ -422,6 +424,8 @@ class CsvIngestionService:
             close_price=close_price,
             volume=volume,
             open_interest=open_interest,
+            volume_observed=volume_observed,
+            open_interest_observed=open_interest_observed,
             normalized_price_per_gram=norm_per_gram,
             normalized_price_10g_basis=norm_10g_basis,
             data_source=data_source,

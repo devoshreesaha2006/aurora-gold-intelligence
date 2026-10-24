@@ -240,6 +240,71 @@ backend/tests/test_market.py::test_market_prices_query_and_pagination PASSED [10
 
 ---
 
+## Authorized MCX Provider Adapter (Phase 2 Integration Boundary)
+
+The backend supports an authorized MCX distributor bridge through the existing
+`MarketDataProvider` factory and `GET /api/market/status`. MCX's official feed is
+contracted and does not publish a generic REST quote protocol. The adapter accepts
+the HTTPS response contract in `backend/app/providers/README.md`; a distributor or
+their authorized integration must provide that bridge. An API key or URL alone
+does not enable a connected status.
+
+For production, request a current MCX feed quote and agreement directly from MCX
+or an authorized distributor. The current MCX datafeed page describes real-time
+Level 1/2, delayed snapshots, EOD Bhavcopy and historical order/trade products.
+MCX says public websites may display delayed data only and data use/display is
+subject to agreements. Its page currently lists internet feed connectivity at
+₹1,00,000 plus taxes annually; verify the product-level and current total charges
+with MCX before ordering. For private evaluation, broker APIs may return MCX
+quotes, but their terms and storage/display permissions differ and are not a
+substitute for AURORA-wide distribution rights.
+
+### Windows PowerShell setup
+
+1. Obtain a written MCX/distributor agreement that permits the intended AURORA
+   audience, display, analysis, and persistence. Get the distributor's HTTPS
+   bridge URL and provider-issued API key and secret. The vendor must implement
+   the payload contract in `backend/app/providers/README.md` and return an explicit
+   authenticated response, `MCX` exchange, feed type, expiry, and timezone-aware
+   timestamps.
+2. From the project root, create/update the ignored local environment file:
+
+   ```powershell
+   Copy-Item .env.example .env -ErrorAction SilentlyContinue
+   notepad .env
+   ```
+
+   Set `DATA_MODE=live_feed_authorized`, the provider URL/name/credentials and
+   timeout/freshness values. Set `MCX_FEED_LICENSE_CONFIRMED=true` only after the
+   agreement is in force. Keep `.env` private; do not paste secrets into frontend
+   files, source control, screenshots, or logs.
+3. Install and run the backend:
+
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   python -m pytest backend/tests -q
+   uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+   ```
+
+   The startup migration adds nullable provider timestamp and verification columns
+   to existing `market_observations` tables without deleting or rewriting rows.
+4. Open `http://127.0.0.1:8000/api/market/status`. Check `feed_status`,
+   `authentication_state`, `last_provider_timestamp`, `feed_freshness_seconds`,
+   and `data_provenance`. It reports `LIVE` only after an authenticated response
+   with validated, recent MCX quotes has been persisted. Delayed data is labelled
+   `DELAYED`; old observations are `STALE`; absent or invalid data is
+   `UNAVAILABLE`. The CSV import remains available at `POST /api/data/upload` and
+   is labelled user-imported historical data rather than provider-verified data.
+
+This adapter stores the latest provider observation per existing
+`(symbol, trade_date, expiry_date)` key, not every intraday tick. It refuses to
+replace a CSV or other non-provider row for that key. Confirm the licensed storage
+scope accommodates this model; use a purpose-built tick store only if the agreed
+feed and analytics require tick-level history.
+
+---
+
 ## Git Branches & Safety Backups
 
 - `backup-phase0-baseline`: Preserved snapshot of original repository state before Phase 1 implementation.

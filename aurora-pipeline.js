@@ -10,6 +10,19 @@
 (function () {
   const API_BASE = 'http://127.0.0.1:8000';
   let backendOnline = false;
+  let radarPairMap = {};
+  let radarRequestId = 0;
+  let distributionRequestId = 0;
+  let priceSnapshotRequestId = 0;
+  let detectiveRequestId = 0;
+  let selectedDetectiveEvent = null;
+  let detectiveFeedLabel = null;
+  let selectedRadarPairKey = null;
+  const sparklineRequestIds = new Map();
+  const RADAR_CANONICAL_PAIRS = [
+    ['GOLDM', 'GOLDTEN'], ['GOLDM', 'GOLDGUINEA'], ['GOLDM', 'GOLDPETAL'],
+    ['GOLDTEN', 'GOLDGUINEA'], ['GOLDTEN', 'GOLDPETAL'], ['GOLDGUINEA', 'GOLDPETAL']
+  ].map(([leg_a, leg_b]) => ({ pair: `${leg_a}-${leg_b}`, leg_a, leg_b }));
 
   // Initialize once DOM is ready
   if (document.readyState === 'loading') {
@@ -26,7 +39,7 @@
     // Poll backend status periodically (every 12 seconds)
     setInterval(checkBackendStatus, 12000);
     // Initialize Phase 2 Relative-Value Analytics Live Integration
-    setTimeout(initPhase2AnalyticsSync, 400);
+    initPhase2AnalyticsSync();
   }
 
   /* --------------------------------------------------------------------------
@@ -44,13 +57,14 @@
       const payload = data.data || {};
 
       if (statusChip) {
-        statusChip.style.background = 'rgba(16, 185, 129, 0.15)';
-        statusChip.style.borderColor = 'rgba(16, 185, 129, 0.4)';
-        statusChip.style.color = '#34d399';
-        statusChip.title = `Backend Connected: ${payload.provider_name || 'Static DB'}`;
+        const isLive = payload.feed_status === 'LIVE' && payload.is_live_connected === true;
+        statusChip.style.background = isLive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(209, 173, 94, 0.12)';
+        statusChip.style.borderColor = isLive ? 'rgba(16, 185, 129, 0.4)' : 'rgba(209, 173, 94, 0.35)';
+        statusChip.style.color = isLive ? '#34d399' : '#d1ad5e';
+        statusChip.title = `Backend connected · ${payload.provider_name || 'AURORA local data'} · feed ${payload.feed_status || 'UNAVAILABLE'}`;
         statusChip.innerHTML = `
-          <div class="live-pulse-dot" style="background:#10b981;box-shadow:0 0 10px #10b981;"></div>
-          <span>API LIVE &bull; ${formatDataMode(payload.data_mode)}</span>
+          <div class="live-pulse-dot" style="background:${isLive ? '#10b981' : '#d1ad5e'};box-shadow:0 0 8px ${isLive ? '#10b981' : '#d1ad5e'};"></div>
+          <span>API CONNECTED &bull; ${formatDataMode(payload.data_mode, payload)}</span>
         `;
       }
 
@@ -82,10 +96,17 @@
     }
   }
 
-  function formatDataMode(mode) {
-    if (mode === 'staged_csv') return 'Staged CSV Data';
-    if (mode === 'live_feed_authorized') return 'Authorized Live Feed';
-    return 'Demo Mode (Synthetic)';
+  function formatDataMode(mode, payload = {}) {
+    if (payload.feed_status === 'LIVE' && payload.is_live_connected === true) return 'Verified MCX Live Feed';
+    if (payload.feed_status === 'DELAYED') return 'Authorized MCX Delayed Feed';
+    if (payload.feed_status === 'STALE') return 'Provider Feed Stale';
+    if (mode === 'staged_csv') return 'User CSV (Unverified)';
+    if (mode === 'live_feed_disconnected') return 'Live Feed Disconnected';
+    if (mode === 'live_feed_stale') return 'Provider Feed Stale';
+    if (mode === 'delayed_feed_authorized') return 'Authorized MCX Delayed Feed';
+    if (mode === 'test_data') return 'Test Data · Excluded from Analysis';
+    if (mode === 'demo_synthetic') return 'Synthetic Demo Data';
+    return 'Feed Unavailable';
   }
 
   /* --------------------------------------------------------------------------
@@ -372,8 +393,8 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     const submitBtn = document.getElementById('btnSubmitUpload');
 
     feedbackBox.style.display = 'block';
-    feedbackBox.className = 'feedback-box loading';
-    feedbackBox.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> Ingesting and validating ${file.name}...`;
+    feedbackBox.className = 'feedback-box loading pipeline-progress';
+    feedbackBox.innerHTML = `<div class="pipeline-progress-head"><i class="fa-solid fa-circle-notch fa-spin"></i><span>Uploading <b>${file.name}</b> for validation and fine-gold normalization…</span></div><div class="pipeline-progress-track" aria-label="Processing upload"><span></span></div><small>Progress becomes available when the server reports it.</small>`;
     errorSection.style.display = 'none';
     submitBtn.disabled = true;
 
@@ -390,6 +411,7 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         mode: 'cors'
       });
 
+      feedbackBox.querySelector('.pipeline-progress-head span').textContent = 'Validation and normalization response received…';
       const resData = await response.json();
       submitBtn.disabled = false;
 
@@ -931,10 +953,17 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         line-height: 1.5;
       }
       .feedback-box.loading {
-        background: rgba(56, 189, 248, 0.12);
-        border: 1px solid rgba(56, 189, 248, 0.35);
-        color: #7dd3fc;
+        background: rgba(213, 179, 99, 0.08);
+        border: 1px solid rgba(220, 190, 116, 0.26);
+        color: #ead8a4;
       }
+      .pipeline-progress-head { display:flex; align-items:flex-start; gap:9px; }
+      .pipeline-progress-head b { color:#fff1bc; font-weight:600; overflow-wrap:anywhere; }
+      .pipeline-progress-track { height:3px; overflow:hidden; margin:12px 0 6px; border-radius:9px; background:rgba(255,255,255,.11); }
+      .pipeline-progress-track span { display:block; width:40%; height:100%; border-radius:inherit; background:linear-gradient(90deg,transparent,#f1d378,transparent); animation:auroraPipelineIndeterminate 1.3s ease-in-out infinite; }
+      .pipeline-progress small { color:rgba(231,218,182,.7); }
+      @keyframes auroraPipelineIndeterminate { from { transform:translateX(-160%); } to { transform:translateX(310%); } }
+      @media (prefers-reduced-motion: reduce) { .pipeline-progress-track span { animation:none; transform:translateX(75%); } }
       .feedback-box.success {
         background: rgba(16, 185, 129, 0.12);
         border: 1px solid rgba(16, 185, 129, 0.4);
@@ -1090,6 +1119,114 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         color: #94a3b8;
         font-size: 13.5px;
       }
+
+      /* Warm AURORA treatment for the existing market-data pipeline modal. */
+      #auroraIngestModal .aurora-modal-container {
+        color: #eee8dc;
+        background: linear-gradient(145deg, rgba(26, 23, 17, 0.97), rgba(10, 10, 9, 0.98));
+        border-color: rgba(202, 169, 91, 0.28);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.78), inset 0 1px rgba(255, 244, 211, 0.08);
+        backdrop-filter: blur(20px);
+      }
+      #auroraIngestModal .aurora-modal-head,
+      #auroraIngestModal .aurora-modal-tabs {
+        border-color: rgba(202, 169, 91, 0.16);
+      }
+      #auroraIngestModal .aurora-modal-tabs {
+        background: rgba(8, 8, 7, 0.48);
+      }
+      #auroraIngestModal .modal-icon-badge {
+        color: #e6c77d;
+        background: linear-gradient(145deg, rgba(210, 173, 91, 0.18), rgba(80, 58, 21, 0.18));
+        border-color: rgba(210, 173, 91, 0.34);
+      }
+      #auroraIngestModal .modal-title-group h3 { color: #f5f0e6; }
+      #auroraIngestModal .modal-title-group p,
+      #auroraIngestModal .tab-btn { color: #aaa395; }
+      #auroraIngestModal .tab-btn:hover,
+      #auroraIngestModal .aurora-modal-close:hover { color: #f6e3b0; }
+      #auroraIngestModal .tab-btn.active {
+        color: #e8c977;
+        border-bottom-color: #c9a650;
+      }
+      #auroraIngestModal .aurora-modal-body { color: #e8e1d3; }
+      #auroraIngestModal .upload-dropzone,
+      #auroraIngestModal .sample-actions-row,
+      #auroraIngestModal .data-table-scroll {
+        background: rgba(15, 14, 12, 0.68);
+        border-color: rgba(202, 169, 91, 0.2);
+        box-shadow: inset 0 1px rgba(255, 244, 211, 0.035);
+      }
+      #auroraIngestModal .upload-dropzone:hover,
+      #auroraIngestModal .upload-dropzone.dragover {
+        background: rgba(202, 169, 91, 0.075);
+        border-color: rgba(222, 190, 119, 0.7);
+      }
+      #auroraIngestModal .upload-dropzone h4 { color: #f5f0e6; }
+      #auroraIngestModal .upload-dropzone p,
+      #auroraIngestModal .sample-label,
+      #auroraIngestModal .table-loading,
+      #auroraIngestModal .table-empty { color: #b2aa9a; }
+      #auroraIngestModal .drop-icon { color: #d8b765; }
+      #auroraIngestModal .sample-btn,
+      #auroraIngestModal .refresh-btn {
+        color: #e6dfd1;
+        background: rgba(255, 255, 255, 0.035);
+        border-color: rgba(220, 208, 181, 0.16);
+      }
+      #auroraIngestModal .sample-btn:hover,
+      #auroraIngestModal .refresh-btn:hover {
+        color: #f8e8bd;
+        background: rgba(202, 169, 91, 0.1);
+        border-color: rgba(202, 169, 91, 0.32);
+      }
+      #auroraIngestModal .upload-options-grid label,
+      #auroraIngestModal .filter-group { color: #c4bcad; }
+      #auroraIngestModal .upload-options-grid input,
+      #auroraIngestModal .upload-options-grid select,
+      #auroraIngestModal .filter-group select {
+        color: #f0eade;
+        background: rgba(9, 9, 8, 0.76);
+        border-color: rgba(202, 169, 91, 0.22);
+      }
+      #auroraIngestModal .upload-options-grid input:focus,
+      #auroraIngestModal .upload-options-grid select:focus,
+      #auroraIngestModal .filter-group select:focus {
+        border-color: #c9a650;
+        box-shadow: 0 0 0 3px rgba(201, 166, 80, 0.12);
+      }
+      #auroraIngestModal .submit-upload-btn {
+        color: #17130b;
+        background: linear-gradient(110deg, #ead18a, #c9a650 58%, #a98234);
+        box-shadow: 0 6px 20px rgba(167, 128, 45, 0.22);
+      }
+      #auroraIngestModal .submit-upload-btn:hover:not(:disabled) {
+        box-shadow: 0 8px 24px rgba(167, 128, 45, 0.32);
+      }
+      #auroraIngestModal .aurora-pipeline-table th {
+        color: #dfc77f;
+        background: rgba(31, 27, 19, 0.97);
+        border-bottom-color: rgba(202, 169, 91, 0.22);
+      }
+      #auroraIngestModal .aurora-pipeline-table td {
+        color: #e2dccf;
+        border-bottom-color: rgba(225, 213, 184, 0.075);
+      }
+      #auroraIngestModal .aurora-pipeline-table tbody tr:hover {
+        background: rgba(202, 169, 91, 0.055);
+      }
+      #auroraIngestModal .gold-badge {
+        color: #e6c66d;
+        background: rgba(167, 128, 45, 0.13);
+        border-color: rgba(202, 169, 91, 0.28);
+      }
+      @media (prefers-reduced-transparency: reduce) {
+        #auroraIngestModal .aurora-modal-container { backdrop-filter: none; background: #11100d; }
+        #auroraIngestModal .aurora-modal-tabs,
+        #auroraIngestModal .upload-dropzone,
+        #auroraIngestModal .sample-actions-row,
+        #auroraIngestModal .data-table-scroll { background: #15130f; }
+      }
     `;
     document.head.appendChild(style);
   }
@@ -1107,42 +1244,134 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
   }
 
   async function setupOpportunityRadarSync() {
-    await loadLiveRadarData();
-    await loadLiveDistributionData('GOLDM-GOLDPETAL');
+    const windowFilter = document.getElementById('dateRangeFilter');
+    const selectedPair = await loadLiveRadarData(Number(windowFilter?.value) || 30);
+    if (selectedPair) await loadLiveDistributionData(selectedPair);
+    else clearDistributionSampleData();
+    loadRadarPriceSnapshots();
 
     const refreshBtn = document.getElementById('refresh-radar-btn');
     if (refreshBtn) {
-      refreshBtn.addEventListener('click', () => {
-        loadLiveRadarData();
-        const activeTab = document.querySelector('.dist-tab-btn.active');
-        const activePair = activeTab ? (activeTab.id === 'tab-guinea-ten' ? 'GOLDGUINEA-GOLDTEN' : (activeTab.id === 'tab-goldm-ten' ? 'GOLDM-GOLDTEN' : 'GOLDM-GOLDPETAL')) : 'GOLDM-GOLDPETAL';
-        loadLiveDistributionData(activePair);
+      refreshBtn.addEventListener('click', async () => {
+        try {
+          const selectedPair = await loadLiveRadarData(Number(windowFilter?.value) || 30);
+          if (selectedPair) loadLiveDistributionData(selectedPair);
+          else clearDistributionSampleData();
+          loadRadarPriceSnapshots();
+        } finally {
+          refreshBtn.querySelector('i')?.classList.remove('fa-spin');
+        }
       });
     }
 
-    const tabPetal = document.getElementById('tab-goldm-petal');
-    const tabGuinea = document.getElementById('tab-guinea-ten');
-    const tabTen = document.getElementById('tab-goldm-ten');
-
-    if (tabPetal) tabPetal.addEventListener('click', () => loadLiveDistributionData('GOLDM-GOLDPETAL'));
-    if (tabGuinea) tabGuinea.addEventListener('click', () => loadLiveDistributionData('GOLDGUINEA-GOLDTEN'));
-    if (tabTen) tabTen.addEventListener('click', () => loadLiveDistributionData('GOLDM-GOLDTEN'));
+    if (windowFilter) {
+      windowFilter.addEventListener('change', async () => {
+        const selectedPair = await loadLiveRadarData(Number(windowFilter.value) || 30);
+        if (selectedPair) loadLiveDistributionData(selectedPair);
+        else clearDistributionSampleData();
+      });
+    }
   }
 
-  async function loadLiveRadarData() {
+  async function loadRadarPriceSnapshots() {
+    const requestId = ++priceSnapshotRequestId;
+    const items = document.querySelectorAll('.ticker-item[data-market-symbol]');
     try {
-      const res = await fetch(`${API_BASE}/api/analytics/radar?window=30`);
-      if (!res.ok) return;
-      const json = await res.json();
-      if (!json.success || !json.data || !json.data.pairs || json.data.pairs.length === 0) return;
+      const response = await fetch(`${API_BASE}/api/market/prices?limit=1000`);
+      if (requestId !== priceSnapshotRequestId) return;
+      if (!response.ok) throw new Error(`Market prices unavailable (${response.status})`);
+      const json = await response.json();
+      const rows = json?.success && Array.isArray(json?.data?.items) ? json.data.items : [];
+      const latest = new Map();
+      rows.forEach(row => {
+        const current = latest.get(row.symbol);
+        if (!current || String(row.trade_date) > String(current.trade_date) ||
+            (row.trade_date === current.trade_date && String(row.expiry_date) < String(current.expiry_date))) latest.set(row.symbol, row);
+      });
+      items.forEach(item => {
+        const row = latest.get(item.dataset.marketSymbol);
+        const name = item.querySelector('.ticker-name');
+        const price = item.querySelector('.ticker-price');
+        if (!row) {
+          if (name) name.textContent = `${item.dataset.marketSymbol} · latest close:`;
+          if (price) price.textContent = '—';
+          return;
+        }
+        const source = row.is_synthetic ? 'synthetic' : row.data_source === 'csv_upload' ? 'user CSV' : row.data_source || 'unverified';
+        if (name) name.textContent = `${row.symbol} · ${row.trade_date} · ${source}:`;
+        if (price) price.textContent = `₹${Number(row.close_price).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+      });
+    } catch (error) {
+      if (requestId !== priceSnapshotRequestId) return;
+      console.warn('AURORA: Market snapshot unavailable:', error);
+      items.forEach(item => {
+        const name = item.querySelector('.ticker-name');
+        const price = item.querySelector('.ticker-price');
+        if (name) name.textContent = `${item.dataset.marketSymbol} · backend unavailable:`;
+        if (price) price.textContent = '—';
+      });
+    }
+  }
 
-      const pairs = json.data.pairs;
+  async function loadLiveRadarData(windowDays = 30) {
+    const requestId = ++radarRequestId;
+    clearRadarSampleData('Loading backend signal data…');
+    try {
+      const [statusRes, res] = await Promise.all([
+        fetch(`${API_BASE}/api/market/status`),
+        fetch(`${API_BASE}/api/analytics/radar?window=${encodeURIComponent(windowDays)}`)
+      ]);
+      if (requestId !== radarRequestId) return null;
+      if (!statusRes.ok) {
+        clearRadarSampleData('Market status unavailable');
+        updateRadarFreshnessIndicator(null, 'Market status endpoint returned an error.');
+        return null;
+      }
+      const statusJson = await statusRes.json();
+      if (requestId !== radarRequestId) return null;
+      if (!statusJson.success || !statusJson.data) {
+        clearRadarSampleData('Market status unavailable');
+        updateRadarFreshnessIndicator(null, 'Market status data unavailable.');
+        return null;
+      }
+      if (['test_data', 'demo_synthetic'].includes(statusJson.data.data_mode)) {
+        clearRadarSampleData(statusJson.data.data_mode === 'test_data'
+          ? 'Test-only data excluded from analysis'
+          : 'Synthetic demo data excluded from analysis');
+        updateRadarFreshnessIndicator(statusJson.data, statusJson.data.data_mode === 'test_data'
+          ? 'Test data excluded from market analysis.'
+          : 'Synthetic demo data excluded from market analysis.');
+        return null;
+      }
+      if (!res.ok) {
+        clearRadarSampleData('Backend data unavailable');
+        updateRadarFreshnessIndicator(statusJson.data, 'Backend relative-value analytics unavailable.');
+        return null;
+      }
+      const json = await res.json();
+      if (requestId !== radarRequestId) return null;
+      updateRadarFreshnessIndicator(statusJson.data);
+      const pairs = json.success && json.data && Array.isArray(json.data.pairs) ? json.data.pairs : [];
+      const usablePairs = pairs.filter(p => p && p.spread !== null && p.spread !== undefined && Number.isFinite(Number(p.spread)));
+      ensureRadarSignalCards(pairs);
+      if (!usablePairs.length) {
+        clearRadarSampleData('No synchronized backend snapshots');
+      } else {
+        clearRadarSampleData('');
+      }
+
+      const signalCount = document.querySelector('.signals-section .clay-chip');
+      const unavailableCount = Math.max(0, pairs.length - usablePairs.length);
+      if (signalCount) signalCount.textContent = `${usablePairs.length}/${pairs.length} pairs have synchronized snapshots · ${unavailableCount} unavailable`;
+      renderRadarFunnel(pairs);
       const pairMap = {};
       pairs.forEach(p => {
         pairMap[p.pair] = p;
         const inv = p.pair.split('-').reverse().join('-');
-        pairMap[inv] = p;
+        pairMap[inv] = orientRadarPair(p, inv);
       });
+      radarPairMap = pairMap;
+      window.AURORA_RADAR_PAIRS = radarPairMap;
 
       // Update Radar Polar Chart
       if (typeof Chart !== 'undefined') {
@@ -1150,32 +1379,25 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         if (radarChart && radarChart.data && radarChart.data.labels) {
           const newData = radarChart.data.labels.map(lbl => {
             const p = pairMap[lbl];
-            return p ? Math.round(p.deviation_intensity) : 30;
+            return p && p.spread != null && p.deviation_intensity != null && Number.isFinite(Number(p.deviation_intensity)) ? Math.round(Number(p.deviation_intensity)) : null;
           });
           radarChart.data.datasets[0].data = newData;
+          if (radarChart.data.datasets[1]) radarChart.data.datasets[1].data = radarChart.data.labels.map(lbl => pairMap[lbl]?.historical_norm != null ? Number(pairMap[lbl].historical_norm) : null);
+          if (radarChart.data.datasets[2]) radarChart.data.datasets[2].data = radarChart.data.labels.map(lbl => pairMap[lbl]?.friction_boundary != null ? Number(pairMap[lbl].friction_boundary) : null);
           radarChart.update();
         }
       }
 
       // Update Top Anomaly in Hero Stat Claybox
-      const sorted = [...pairs].filter(p => p.spread !== null).sort((a, b) => (b.opportunity_score || 0) - (a.opportunity_score || 0));
+      const sorted = [...usablePairs].sort((a, b) => {
+        const scoreA = a.opportunity_score == null ? -Infinity : Number(a.opportunity_score);
+        const scoreB = b.opportunity_score == null ? -Infinity : Number(b.opportunity_score);
+        return scoreB - scoreA;
+      });
       const top = sorted[0];
-      if (top && top.spread !== null) {
-        const titleEl = document.querySelector('.headline-pair-title');
-        if (titleEl) titleEl.textContent = `${top.leg_a} vs ${top.leg_b}`;
-
-        const spreadSub = document.querySelector('.hero-stat-claybox .mono');
-        if (spreadSub) {
-          spreadSub.innerHTML = `<span style="color: var(--gold-bright); font-weight: 700;">${top.spread >= 0 ? '+' : ''}₹${top.spread.toFixed(2)}/10g</span>`;
-        }
-
-        const metricsCells = document.querySelectorAll('.headline-metric-cell .value');
-        if (metricsCells.length >= 3) {
-          if (top.z_score !== null) metricsCells[0].textContent = `${top.z_score >= 0 ? '+' : ''}${top.z_score.toFixed(2)}σ`;
-          if (top.percentile_rank !== null) metricsCells[1].textContent = `${top.percentile_rank.toFixed(1)}%`;
-          metricsCells[2].textContent = `${Math.round(top.opportunity_score)}%`;
-        }
-      }
+      if (top) renderRadarPair(top);
+      window.AURORA_SELECT_RADAR_PAIR = selectRadarPairFromUi;
+      window.AURORA_LOAD_DISTRIBUTION = loadLiveDistributionData;
 
       // Update Pairwise Spread Matrix Table
       const matrixTable = document.querySelector('.matrix-table');
@@ -1191,20 +1413,31 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
 
             const pairKey = `${rowContract}-${colContract}`;
             const p = pairMap[pairKey];
-            if (p && p.spread !== null) {
+            if (p && p.spread !== null && p.spread !== undefined) {
+              td.setAttribute('onclick', `selectPairFromMatrix('${pairKey}')`);
               const sign = (p.leg_a === rowContract) ? 1 : -1;
               const cellSpread = (p.spread * sign).toFixed(2);
               const cellZ = p.z_score !== null ? (p.z_score * sign).toFixed(2) : 'N/A';
               td.innerHTML = `${cellSpread > 0 ? '+' : ''}${cellSpread}<br><span style="font-size:0.6rem;">${cellZ}σ</span>`;
-              td.title = `Spread: ₹${cellSpread} | Z: ${cellZ}σ (${p.classification})`;
+              td.title = `${pairKey} · ${p.trade_date} · expiry ${p.expiry_date} · Spread ₹${cellSpread} · Z ${cellZ}σ · ${p.classification}`;
+              td.classList.remove('cell-normal', 'cell-high', 'cell-critical', 'cell-unavailable');
+              td.classList.add(p.classification === 'Investigate' ? 'cell-critical' : ['Cost-Blocked', 'Expiry-Risk'].includes(p.classification) ? 'cell-high' : 'cell-normal');
+            } else {
+              td.removeAttribute('onclick');
+              td.title = p?.reason ? `Unavailable: ${p.reason}` : 'No synchronized same-date, same-expiry snapshot is available.';
+              td.classList.remove('cell-normal', 'cell-high', 'cell-critical');
+              td.classList.add('cell-unavailable');
             }
           });
         });
       }
 
+      updateRadarSignalCards(pairs);
+      if (typeof window.applySignalFilters === 'function') window.applySignalFilters();
+
       // Update Active Signal Cards
       pairs.forEach(p => {
-        if (p.spread === null) return;
+        if (p.spread === null || p.spread === undefined) return;
         const card = document.querySelector(`.signal-card[data-pair="${p.pair}"]`) ||
                      document.querySelector(`.signal-card[data-pair="${p.pair.split('-').reverse().join('-')}"]`);
         if (card) {
@@ -1222,7 +1455,7 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
           }
 
           const radialText = card.querySelector('.radial-text');
-          if (radialText) radialText.textContent = `${Math.round(p.opportunity_score)}%`;
+          if (radialText) radialText.textContent = p.opportunity_score == null ? '—' : `${Math.round(Number(p.opportunity_score))}`;
 
           const pill = card.querySelector('.severity-pill');
           if (pill) {
@@ -1238,18 +1471,133 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         }
       });
 
-      ensureLiveBadge();
+      ensureLiveBadge(usablePairs.length, pairs.length);
+      return top ? top.pair : null;
     } catch (e) {
+      if (requestId !== radarRequestId) return null;
       console.warn('AURORA: Error syncing live radar data:', e);
+      clearRadarSampleData('Backend data unavailable');
+      updateRadarFreshnessIndicator(null, 'Network error / backend unavailable.');
+      return null;
     }
   }
 
+  function clearRadarSampleData(message) {
+    // Invalidate any in-flight histogram request so a late response cannot
+    // repopulate the page after the selected Radar snapshot becomes empty.
+    distributionRequestId += 1;
+    clearDistributionSampleData();
+    radarPairMap = {};
+    window.AURORA_RADAR_PAIRS = radarPairMap;
+    window.AURORA_SELECT_RADAR_PAIR = selectRadarPairFromUi;
+    window.AURORA_SYNC_RADAR_FILTER_STATE = syncRadarSelectionFilterState;
+    selectedRadarPairKey = null;
+    syncRadarSelectionFilterState();
+    // Keep the complete canonical pair grid visible even when the first
+    // request fails or the API has no eligible observations.
+    ensureRadarSignalCards(RADAR_CANONICAL_PAIRS);
+    renderRadarFunnel([]);
+    if (typeof Chart !== 'undefined') {
+      const radarChart = Chart.getChart('radarChartCanvas');
+      if (radarChart) {
+        radarChart.data.datasets.forEach(dataset => { dataset.data = radarChart.data.labels.map(() => null); });
+        radarChart.update();
+      }
+      document.querySelectorAll('.signal-card canvas').forEach(canvas => {
+        const chart = Chart.getChart(canvas);
+        if (!chart) return;
+        chart.data.labels = [];
+        chart.data.datasets.forEach(dataset => { dataset.data = []; });
+        chart.update();
+      });
+    }
+    const title = document.querySelector('.headline-pair-title');
+    if (title) title.textContent = message || 'No backend signal data';
+    const badge = document.getElementById('radarPairStatusBadge');
+    if (badge) badge.textContent = message === 'Loading backend signal data…' ? 'Loading' : message?.toLowerCase().includes('unavailable') ? 'Unavailable' : message?.toLowerCase().includes('excluded') ? 'Excluded' : 'No data';
+    const liveBadge = document.querySelector('.live-radar-badge');
+    if (liveBadge) liveBadge.textContent = message === 'Loading backend signal data…' ? 'Loading backend data' : message?.toLowerCase().includes('unavailable') ? 'Backend data unavailable' : message?.toLowerCase().includes('excluded') ? 'Test-only data excluded' : 'No backend pair data';
+    const classification = document.getElementById('radarClassification');
+    if (classification) classification.textContent = message || 'No signal';
+    const snapshotDate = document.getElementById('radarSnapshotDate');
+    if (snapshotDate) snapshotDate.textContent = 'As of —';
+    const signalCount = document.querySelector('.signals-section .clay-chip');
+    if (signalCount) signalCount.textContent = message || 'No backend signal data';
+    const spread = document.getElementById('radarHeroSpread');
+    if (spread) spread.textContent = '—';
+    document.getElementById('radarDeepDiveButton')?.setAttribute('disabled', 'disabled');
+    document.getElementById('radarWatchButton')?.setAttribute('disabled', 'disabled');
+    document.querySelectorAll('.headline-metric-cell .value').forEach(el => { el.textContent = '—'; });
+    document.querySelectorAll('.matrix-table tbody tr').forEach(row => {
+      row.querySelectorAll('td:not(.cell-self)').forEach(cell => {
+        cell.textContent = '—';
+        cell.removeAttribute('title');
+        cell.removeAttribute('onclick');
+        cell.classList.remove('cell-normal', 'cell-high', 'cell-critical');
+        cell.classList.add('cell-unavailable');
+      });
+    });
+    document.querySelectorAll('.signal-card').forEach(card => {
+      const pairKey = card.getAttribute('data-pair');
+      if (pairKey) sparklineRequestIds.set(pairKey, (sparklineRequestIds.get(pairKey) || 0) + 1);
+      const reason = card.querySelector('.pair-data-reason');
+      if (reason) { reason.textContent = ''; reason.hidden = true; }
+      const pill = card.querySelector('.severity-pill');
+      if (pill) {
+        pill.textContent = 'DATA UNAVAILABLE';
+        pill.className = 'severity-pill';
+      }
+      card.querySelectorAll('.stat-num, .radial-text').forEach(el => { el.textContent = '—'; });
+      card.querySelectorAll('.v-status').forEach(el => { el.textContent = 'Unavailable'; });
+      card.querySelectorAll('.pair-direction-tag, .confidence-radial-box > div:last-child span:last-child').forEach(el => { el.textContent = 'Unavailable'; });
+      const confidence = card.querySelector('.confidence-radial-box');
+      if (confidence) confidence.title = 'No backend confidence data available';
+      card.classList.remove('critical', 'high', 'medium');
+      card.dataset.hasSnapshot = 'false';
+      card.dataset.classification = 'unavailable';
+      card.dataset.zScore = '';
+      card.dataset.liquidityTrap = 'false';
+      card.dataset.costBlocked = 'false';
+      card.dataset.expiryRisk = 'false';
+      card.querySelectorAll('button').forEach(button => { button.disabled = true; });
+    });
+    document.querySelectorAll('.dist-tab-btn').forEach(tab => {
+      tab.textContent = tab.textContent.replace(/\s+\([^)]*\)$/, '');
+    });
+    if (typeof window.applySignalFilters === 'function') window.applySignalFilters();
+  }
+
   async function loadLiveDistributionData(pairKey) {
+    const requestId = ++distributionRequestId;
+    window.AURORA_LOAD_DISTRIBUTION = loadLiveDistributionData;
+    window.AURORA_SELECT_RADAR_PAIR = selectRadarPairFromUi;
+    document.querySelectorAll('.dist-tab-btn').forEach(tab => tab.classList.remove('active'));
+    const distributionTabs = {
+      'GOLDM-GOLDPETAL': 'tab-goldm-petal',
+      'GOLDGUINEA-GOLDTEN': 'tab-guinea-ten',
+      'GOLDM-GOLDTEN': 'tab-goldm-ten',
+      'GOLDM-GOLDGUINEA': 'tab-goldm-guinea',
+      'GOLDTEN-GOLDPETAL': 'tab-ten-petal',
+      'GOLDGUINEA-GOLDPETAL': 'tab-guinea-petal'
+    };
+    const tabId = distributionTabs[pairKey];
+    if (tabId) document.getElementById(tabId)?.classList.add('active');
+    clearDistributionSampleData();
+    const distributionContext = document.getElementById('distributionContext');
+    if (distributionContext) distributionContext.textContent = `Loading ${pairKey} historical distribution from the backend…`;
     try {
       const res = await fetch(`${API_BASE}/api/analytics/distribution?pair=${encodeURIComponent(pairKey)}&window=365&bins=15`);
-      if (!res.ok) return;
+      if (requestId !== distributionRequestId) return;
+      if (!res.ok) {
+        if (distributionContext) distributionContext.textContent = `${pairKey} historical distribution is unavailable (${res.status}).`;
+        return;
+      }
       const json = await res.json();
-      if (!json.success || !json.data || json.data.sample_size === 0) return;
+      if (requestId !== distributionRequestId) return;
+      if (!json.success || !json.data || !json.data.sample_size || !json.data.bins || !json.data.frequencies) {
+        if (distributionContext) distributionContext.textContent = `${pairKey} has no eligible synchronized historical distribution.`;
+        return;
+      }
 
       const d = json.data;
       const meanEl = document.getElementById('stat-mean');
@@ -1257,14 +1605,21 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       const medEl = document.getElementById('stat-median');
       const kurtEl = document.getElementById('stat-kurtosis');
       const skewEl = document.getElementById('stat-skewness');
-      const zEl = document.getElementById('stat-current-z');
 
       if (meanEl && d.mean !== null) meanEl.textContent = `₹${d.mean.toFixed(2)}`;
       if (sigmaEl && d.sigma !== null) sigmaEl.textContent = `₹${d.sigma.toFixed(2)}`;
       if (medEl && d.median !== null) medEl.textContent = `₹${d.median.toFixed(2)}`;
       if (kurtEl && d.kurtosis !== null) kurtEl.textContent = d.kurtosis;
       if (skewEl && d.skewness !== null) skewEl.textContent = `${d.skewness >= 0 ? '+' : ''}${d.skewness.toFixed(2)}`;
-      if (zEl && d.current_z_score) zEl.textContent = d.current_z_score;
+      const currentZ = document.getElementById('stat-current-z');
+      if (currentZ) currentZ.textContent = d.current_z_score || '—';
+      if (distributionContext) {
+        const latest = d.evaluation_date ? `Latest exact-expiry observation ${d.evaluation_date} · expiry ${d.expiry_date || 'unavailable'}` : 'Latest observation date and expiry unavailable';
+        const spread = d.current_spread == null ? 'spread unavailable' : `spread ₹${Number(d.current_spread).toFixed(2)}/10g`;
+        const expiryPolicy = d.expiry_policy || 'Each point matches trade date and expiry; expiry may roll between historical points.';
+        const radarWindow = Number(document.getElementById('dateRangeFilter')?.value) || 30;
+        distributionContext.textContent = `${pairKey} · ${Number(d.sample_size).toLocaleString('en-IN')} synchronized observations (up to ${d.window_days}) · ${latest} · ${spread}. Distribution Z-score uses this distribution window; Radar uses ${radarWindow} synchronized sessions. Rolling-contract history: ${expiryPolicy}`;
+      }
 
       if (typeof Chart !== 'undefined') {
         const distChart = Chart.getChart('distributionChartCanvas');
@@ -1278,51 +1633,314 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         }
       }
     } catch (e) {
+      if (requestId !== distributionRequestId) return;
+      if (distributionContext) distributionContext.textContent = `${pairKey} historical distribution is unavailable.`;
       console.warn('AURORA: Error syncing live distribution data:', e);
     }
   }
 
-  async function setupMarketDetectiveSync() {
-    try {
-      const res = await fetch(`${API_BASE}/api/analytics/events?limit=30`);
-      if (!res.ok) return;
-      const json = await res.json();
-      if (!json.success || !json.data || !json.data.items || json.data.items.length === 0) return;
+  function clearDistributionSampleData() {
+    ['stat-mean', 'stat-sigma', 'stat-median', 'stat-kurtosis', 'stat-skewness', 'stat-current-z'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
+    const chart = typeof Chart !== 'undefined' ? Chart.getChart('distributionChartCanvas') : null;
+    if (chart) {
+      chart.data.labels = [];
+      chart.data.datasets.forEach(dataset => { dataset.data = []; });
+      chart.update();
+    }
+  }
 
-      const events = json.data.items;
+  function setDetectiveUnavailable(message) {
+    detectiveRequestId += 1;
+    selectedDetectiveEvent = null;
+    window.AURORA_SELECTED_EVENT = null;
+    window.AURORA_LIVE_EVENTS = {};
+    window.AURORA_EVENT_PROVENANCE = null;
+    const feedLabel = document.getElementById('detectiveFeedLabel');
+    if (feedLabel) feedLabel.textContent = detectiveFeedLabel || 'Feed status unavailable';
+    const selector = document.getElementById('eventSelector');
+    const grid = document.querySelector('.investigation-grid');
+    const summary = document.querySelector('.ai-explanation-panel');
+    if (selector) {
+      selector.replaceChildren(new Option(message, '', true, true));
+      selector.disabled = true;
+    }
+    if (grid) {
+      grid.hidden = true;
+      grid.style.display = 'none';
+    }
+    if (summary) {
+      summary.hidden = true;
+      summary.style.display = 'none';
+    }
+    document.querySelectorAll('[data-detective-action]').forEach(button => {
+      button.disabled = true;
+      button.setAttribute('aria-disabled', 'true');
+    });
+    clearDetectiveDossier();
+    let notice = document.getElementById('detectiveDataNotice');
+    if (!notice && selector) {
+      notice = document.createElement('p');
+      notice.id = 'detectiveDataNotice';
+      notice.setAttribute('role', 'status');
+      notice.style.cssText = 'padding:16px 20px;margin:12px 0;color:var(--text-muted,#b7b2a5);border:1px solid rgba(202,169,91,.24);border-radius:12px;background:rgba(20,18,14,.72);';
+      const header = document.querySelector('.page-header-card');
+      if (header) header.insertAdjacentElement('afterend', notice);
+    }
+    if (notice) notice.textContent = message;
+  }
+
+  function clearDetectiveDossier() {
+    document.querySelectorAll('.investigation-grid .detail-val').forEach(el => { el.textContent = '—'; });
+    document.querySelectorAll('.investigation-grid .step-badge').forEach(el => { el.textContent = 'Awaiting data'; });
+    const stepsBadge = document.getElementById('stepsCountBadge'); if (stepsBadge) stepsBadge.textContent = 'AWAITING BACKEND DATA';
+    const score = document.getElementById('verdictScoreVal'); if (score) score.textContent = '—';
+    const verdict = document.getElementById('verdictBadgeText'); if (verdict) verdict.textContent = 'NO INVESTIGATION';
+    const finding = document.getElementById('verdictKeyFinding'); if (finding) finding.textContent = '';
+    const recommendation = document.getElementById('verdictRecommendation'); if (recommendation) recommendation.textContent = '';
+    const circle = document.getElementById('scoreProgressCircle'); if (circle) circle.style.strokeDashoffset = '240';
+    const narrative = document.getElementById('aiParagraphText');
+    if (narrative) narrative.textContent = 'A current backend investigation summary will appear here when eligible observations produce an event.';
+    const confidence = document.querySelector('.ai-confidence-pill span');
+    if (confidence) confidence.textContent = 'OPPORTUNITY SCORE: UNAVAILABLE';
+    const signalConfidence = document.getElementById('detectiveSignalConfidence');
+    if (signalConfidence) signalConfidence.textContent = 'UNAVAILABLE';
+    const executionState = document.getElementById('detectiveExecutionState');
+    if (executionState) executionState.textContent = 'No backend execution assessment';
+    const caveats = document.getElementById('verdictCaveats');
+    if (caveats) caveats.textContent = 'Backend caveats will appear here when returned for the selected event.';
+    const scoreLabel = document.querySelector('.verdict-header-row > div:last-child > span');
+    if (scoreLabel) scoreLabel.textContent = 'OPPORTUNITY SCORE · BACKEND';
+    const verdictMeta = document.querySelectorAll('.verdict-header-row > div:last-child > div');
+    if (verdictMeta[0]) verdictMeta[0].textContent = 'Unavailable';
+    if (verdictMeta[1]) verdictMeta[1].textContent = 'No backend execution assessment';
+    const source = document.querySelector('.ai-source-row span');
+    if (source) source.textContent = 'Sources will be shown for a selected backend investigation.';
+    const raw = document.getElementById('rawPayloadBlock');
+    if (raw) raw.textContent = 'No valid backend investigation selected.';
+    const rawNotice = document.getElementById('rawPayloadNotice');
+    if (rawNotice) rawNotice.textContent = 'Backend investigation payload appears when a valid event is selected.';
+    document.querySelectorAll('.chart-footer-metrics .chart-metric-value').forEach(el => { el.textContent = '—'; });
+    document.querySelectorAll('.subscore-val').forEach(el => { el.textContent = '—'; });
+    document.querySelectorAll('.subscore-val-wrap span:last-child').forEach(el => { el.textContent = 'Unavailable'; });
+    document.querySelectorAll('.subscore-mini-fill').forEach(el => { el.style.width = '0%'; });
+    document.querySelectorAll('.z-meter-fill').forEach(el => { el.style.width = '0%'; });
+    document.querySelectorAll('.warning-callout').forEach(el => { el.hidden = true; el.style.display = 'none'; });
+    document.querySelectorAll('.z-meter-labels .highlight').forEach(el => { el.textContent = 'Selected event Z-score: —'; });
+    clearDetectiveCharts();
+  }
+
+  function clearDetectiveCharts() {
+    ['spreadChartCanvas', 'volumeOIChartCanvas'].forEach(id => {
+      const chart = typeof Chart !== 'undefined' ? Chart.getChart(id) : null;
+      if (!chart) return;
+      chart.data.labels = [];
+      chart.data.datasets.forEach(dataset => { dataset.data = []; });
+      chart.update();
+    });
+  }
+
+  function isValidDetectiveEvent(evt) {
+    const evidence = evt?.evidence;
+    const finite = value => value !== null && value !== undefined && Number.isFinite(Number(value));
+    const actionable = ['investigate', 'watch', 'cost-blocked', 'expiry-risk'];
+    return Boolean(
+      evt && typeof evt.event_id === 'string' && evt.event_id.trim() &&
+      typeof evt.pair === 'string' && evt.pair === `${evt.leg_a}-${evt.leg_b}` &&
+      evt.trade_date && evidence && finite(evidence.spread) && finite(evidence.z_score) &&
+      finite(evidence.percentile_rank) && finite(evt.opportunity_score) &&
+      typeof evt.classification === 'string' && actionable.includes(evt.classification.toLowerCase())
+    );
+  }
+
+  function setDetectiveFeedStatus(status) {
+    const element = document.getElementById('detectiveFeedLabel');
+    if (!status) {
+      detectiveFeedLabel = null;
+      if (element) element.textContent = 'Feed status unavailable';
+      return;
+    }
+    const state = String(status.feed_status || 'UNAVAILABLE').toUpperCase();
+    const provenance = status.data_freshness_label || status.data_provenance || 'Market-data provenance unavailable';
+    detectiveFeedLabel = `${state} · ${provenance}`;
+    if (element) element.textContent = detectiveFeedLabel;
+  }
+
+  async function loadDetectiveChartData(evt, days, requestId) {
+    try {
+      const url = `${API_BASE}/api/analytics/spreads?pair=${encodeURIComponent(evt.pair)}&window=${encodeURIComponent(days)}&end_date=${encodeURIComponent(evt.trade_date)}`;
+      const response = await fetch(url);
+      if (requestId !== detectiveRequestId) return;
+      if (!response.ok) throw new Error(`Spread history unavailable (${response.status})`);
+      const json = await response.json();
+      if (requestId !== detectiveRequestId) return;
+      const points = json?.success && Array.isArray(json?.data?.data_points) ? json.data.data_points : [];
+      if (!points.length) {
+        document.querySelectorAll('.chart-footer-metrics .chart-metric-value').forEach(el => { el.textContent = '—'; });
+        return;
+      }
+
+      const chart = typeof Chart !== 'undefined' ? Chart.getChart('spreadChartCanvas') : null;
+      if (chart) {
+        chart.data.labels = points.map(point => point.trade_date);
+        if (chart.data.datasets[3]) chart.data.datasets[3].label = `${evt.pair} normalized spread`;
+        const values = [
+          points.map(point => point.upper_2sigma),
+          points.map(point => point.rolling_mean),
+          points.map(point => point.lower_2sigma),
+          points.map(point => point.spread),
+        ];
+        chart.data.datasets.forEach((dataset, index) => { dataset.data = values[index] || []; });
+        chart.update();
+      }
+      const volumeChart = typeof Chart !== 'undefined' ? Chart.getChart('volumeOIChartCanvas') : null;
+      if (volumeChart) {
+        volumeChart.data.labels = points.map(point => point.trade_date);
+        if (volumeChart.data.datasets[0]) volumeChart.data.datasets[0].label = `${evt.leg_a} Volume`;
+        if (volumeChart.data.datasets[1]) volumeChart.data.datasets[1].label = `${evt.leg_b} Volume`;
+        const values = [
+          points.map(point => point.volume_a),
+          points.map(point => point.volume_b),
+          points.map(point => Number(point.open_interest_a || 0) + Number(point.open_interest_b || 0)),
+        ];
+        volumeChart.data.datasets.forEach((dataset, index) => { dataset.data = values[index] || []; });
+        volumeChart.update();
+      }
+
+      const footer = document.querySelectorAll('.chart-footer-metrics .chart-metric-value');
+      const spreadDescription = document.querySelector('.evidence-column .evidence-panel .panel-title-group p');
+      if (spreadDescription) spreadDescription.textContent = `${evt.pair} · ${days}-observation backend spread history with rolling statistical bands`;
+      const latest = points[points.length - 1];
+      const set = (index, value) => { if (footer[index]) footer[index].textContent = value; };
+      set(0, `₹${Number(evt.evidence.spread).toFixed(2)}`);
+      set(1, evt.evidence.rolling_mean == null ? '—' : `₹${Number(evt.evidence.rolling_mean).toFixed(2)}`);
+      set(2, latest.upper_2sigma == null ? '—' : `₹${Number(latest.upper_2sigma).toFixed(2)}`);
+      set(3, `${Number(evt.evidence.z_score) >= 0 ? '+' : ''}${Number(evt.evidence.z_score).toFixed(2)}σ`);
+      set(4, `${Number(evt.evidence.volume_a || 0).toLocaleString('en-IN')}`);
+      set(5, `${Number(evt.evidence.volume_b || 0).toLocaleString('en-IN')}`);
+      set(6, Number(evt.evidence.volume_a) > 0 ? `${(Number(evt.evidence.volume_b || 0) / Number(evt.evidence.volume_a)).toFixed(3)}` : '—');
+      set(7, `${(Number(evt.evidence.open_interest_a || 0) + Number(evt.evidence.open_interest_b || 0)).toLocaleString('en-IN')}`);
+    } catch (error) {
+      if (requestId === detectiveRequestId) {
+        clearDetectiveCharts();
+        document.querySelectorAll('.chart-footer-metrics .chart-metric-value').forEach(el => { el.textContent = '—'; });
+        console.warn('AURORA: Detective chart history unavailable:', error);
+      }
+    }
+  }
+
+  async function setupMarketDetectiveSync() {
+    setDetectiveFeedStatus(null);
+    setDetectiveUnavailable('Loading backend investigation data…');
+    const requestId = detectiveRequestId;
+    try {
+      const [statusRes, eventsRes] = await Promise.all([
+        fetch(`${API_BASE}/api/market/status`),
+        fetch(`${API_BASE}/api/analytics/events?limit=30`),
+      ]);
+      if (requestId !== detectiveRequestId) return;
+      let statusJson = null;
+      if (statusRes.ok) statusJson = await statusRes.json();
+      if (requestId !== detectiveRequestId) return;
+      const mode = statusJson?.data?.data_mode;
+      if (!statusJson?.success || !statusJson.data) {
+        setDetectiveFeedStatus(null);
+        setDetectiveUnavailable('Market status is unavailable; investigation data cannot be verified.');
+        return;
+      }
+      setDetectiveFeedStatus(statusJson.data);
+      if (['test_data', 'demo_synthetic'].includes(mode)) {
+        setDetectiveUnavailable(mode === 'test_data' || mode === 'demo_synthetic'
+          ? 'Test/demo data is excluded from investigations.'
+          : 'Market status is unavailable; investigation data cannot be verified.');
+        return;
+      }
+      window.AURORA_EVENT_PROVENANCE = statusJson.data.data_provenance || statusJson.data.data_freshness_label || 'Backend market observations';
+      if (!eventsRes.ok) {
+        setDetectiveUnavailable('Investigation data is unavailable. Check the backend connection or upload historical CSV data.');
+        return;
+      }
+      const json = await eventsRes.json();
+      if (requestId !== detectiveRequestId) return;
+      const events = json?.success && Array.isArray(json?.data?.items)
+        ? json.data.items.filter(isValidDetectiveEvent)
+        : [];
+      if (!events.length) {
+        setDetectiveUnavailable('No backend investigations are available for the current data.');
+        return;
+      }
+
       const selector = document.getElementById('eventSelector');
       if (!selector) return;
 
+      selector.disabled = false;
+      selector.replaceChildren();
+      const grid = document.querySelector('.investigation-grid');
+      if (grid) {
+        grid.hidden = false;
+        grid.style.display = '';
+      }
+      const summary = document.querySelector('.ai-explanation-panel');
+      if (summary) { summary.hidden = false; summary.style.display = ''; }
+      document.querySelectorAll('[data-detective-action]').forEach(button => {
+        button.disabled = false;
+        button.setAttribute('aria-disabled', 'false');
+      });
+      const notice = document.getElementById('detectiveDataNotice');
+      if (notice) notice.remove();
       window.AURORA_LIVE_EVENTS = {};
       const optGroup = document.createElement('optgroup');
-      optGroup.label = '⚡ Live MCX Relative-Value Investigations';
+      optGroup.label = 'Backend events · observation date shown (historical events may differ from the latest radar snapshot)';
 
       events.forEach((evt, idx) => {
         window.AURORA_LIVE_EVENTS[evt.event_id] = evt;
         const opt = document.createElement('option');
         opt.value = evt.event_id;
-        opt.textContent = `${evt.event_id} — ${evt.pair} (${evt.classification} | Z=${evt.evidence.z_score >= 0 ? '+' : ''}${evt.evidence.z_score}σ)`;
+        opt.textContent = `${evt.trade_date} · ${evt.event_id} — ${evt.pair} (${evt.classification} | Z=${evt.evidence.z_score >= 0 ? '+' : ''}${evt.evidence.z_score}σ)`;
         if (idx === 0) opt.selected = true;
         optGroup.appendChild(opt);
       });
 
       selector.insertBefore(optGroup, selector.firstChild);
 
-      selector.addEventListener('change', (e) => {
-        const evtId = e.target.value;
-        if (window.AURORA_LIVE_EVENTS && window.AURORA_LIVE_EVENTS[evtId]) {
-          renderLiveEventDossier(window.AURORA_LIVE_EVENTS[evtId]);
-        }
-      });
-
+      selector.onchange = (e) => window.handleEventSwitch?.(e.target.value);
+      window.AURORA_INVALIDATE_DETECTIVE = setDetectiveUnavailable;
+      window.AURORA_RENDER_DETECTIVE_EVENT = renderLiveEventDossier;
+      window.AURORA_REFRESH_DETECTIVE_CHARTS = days => {
+        if (!selectedDetectiveEvent) return;
+        const chartRequestId = ++detectiveRequestId;
+        clearDetectiveCharts();
+        loadDetectiveChartData(selectedDetectiveEvent, days, chartRequestId);
+      };
       renderLiveEventDossier(events[0]);
     } catch (e) {
       console.warn('AURORA: Error loading live detective events:', e);
+      setDetectiveUnavailable('Investigation data is unavailable. Check the backend connection or upload historical CSV data.');
     }
   }
 
   async function renderLiveEventDossier(evt) {
-    if (!evt) return;
+    if (!isValidDetectiveEvent(evt) || window.AURORA_LIVE_EVENTS?.[evt.event_id] !== evt) {
+      setDetectiveUnavailable('No backend investigations are available for the current data.');
+      return;
+    }
+    const requestId = ++detectiveRequestId;
+    selectedDetectiveEvent = evt;
+    window.AURORA_SELECTED_EVENT = evt;
+    clearDetectiveCharts();
+    document.querySelectorAll('.chart-footer-metrics .chart-metric-value').forEach(el => { el.textContent = '—'; });
+    const legALabel = document.getElementById('volumeLegALabel');
+    const legBLabel = document.getElementById('volumeLegBLabel');
+    if (legALabel) legALabel.textContent = evt.leg_a;
+    if (legBLabel) legBLabel.textContent = evt.leg_b;
+    const liquidityDescription = document.querySelector('#volumeOIChartCanvas')?.closest('.evidence-panel')?.querySelector('.panel-title-group p');
+    if (liquidityDescription) liquidityDescription.textContent = `Contracts traded vs. Open Commitment · ${evt.leg_a} / ${evt.leg_b}`;
+    const stepStates = ['EVENT DATA', 'NORMALIZED EVENT', 'BACKEND SPREAD', 'BACKEND STATISTICS', 'BACKEND LIQUIDITY', 'BACKEND EXPIRY', 'BACKEND COST', 'NOT RETURNED'];
+    document.querySelectorAll('.investigation-grid .step-badge').forEach((el, index) => {
+      el.textContent = stepStates[index] || 'BACKEND DATA';
+    });
 
     const scoreVal = document.getElementById('verdictScoreVal');
     const badgeText = document.getElementById('verdictBadgeText');
@@ -1331,38 +1949,37 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     const circle = document.getElementById('scoreProgressCircle');
 
     if (scoreVal) scoreVal.textContent = Math.round(evt.opportunity_score);
+    const scoreLabel = document.querySelector('.verdict-header-row > div:last-child > span');
+    if (scoreLabel) scoreLabel.textContent = 'OPPORTUNITY SCORE · BACKEND';
+    const verdictMeta = document.querySelectorAll('.verdict-header-row > div:last-child > div');
+    if (verdictMeta[0]) verdictMeta[0].textContent = `${Number(evt.opportunity_score).toFixed(0)} / 100`;
+    if (verdictMeta[1]) verdictMeta[1].textContent = 'Execution assessment not returned by backend';
     if (badgeText) badgeText.textContent = evt.classification.toUpperCase();
+    const stepsBadge = document.getElementById('stepsCountBadge'); if (stepsBadge) stepsBadge.textContent = `BACKEND EVENT · ${evt.event_id}`;
     if (circle) {
       const offset = 240 - (240 * (evt.opportunity_score / 100));
       circle.style.strokeDashoffset = String(offset);
     }
-    if (keyFinding) {
-      keyFinding.innerHTML = `<strong>${evt.pair}</strong> spread dislocated to <strong>₹${evt.evidence.spread.toFixed(2)}/10g</strong> (${evt.evidence.z_score >= 0 ? '+' : ''}${evt.evidence.z_score}σ, ${evt.evidence.percentile_rank}th %ile). Rule triggered: ${evt.evidence.rule_triggered}`;
-    }
+    if (keyFinding) keyFinding.textContent = `${evt.pair} · ${Number(evt.evidence.spread).toFixed(2)} per 10g · ${Number(evt.evidence.z_score) >= 0 ? '+' : ''}${Number(evt.evidence.z_score).toFixed(2)}σ · ${Number(evt.evidence.percentile_rank).toFixed(1)}th percentile. ${evt.evidence.rule_triggered || ''}`;
     if (recommendation) {
-      if (evt.classification === 'Investigate') {
-        recommendation.innerHTML = `<strong>Actionable Opportunity:</strong> Spread divergence survives estimated transaction friction (Net Edge: ₹${(evt.evidence.net_edge || 0).toFixed(2)}/10g). Maintain active surveillance.`;
-      } else if (evt.classification === 'Cost-Blocked') {
-        recommendation.innerHTML = `<strong>Cost Trap Warning:</strong> Gross edge (₹${(evt.evidence.gross_edge || 0).toFixed(2)}/10g) is below the ₹${evt.evidence.cost_hurdle.toFixed(2)}/10g execution hurdle. Dismiss execution.`;
-      } else if (evt.classification === 'Expiry-Risk') {
-        recommendation.innerHTML = `<strong>Lifecycle Boundary:</strong> Contract is entering delivery roll period. Physical delivery and tender noise dominate spread. Avoid position.`;
-      } else {
-        recommendation.innerHTML = `<strong>Watch Status:</strong> Spread deviation under active algorithmic observation. Awaiting liquidity confirmation.`;
-      }
+      recommendation.textContent = `${evt.classification}: ${evt.summary || evt.evidence.rule_triggered || 'Backend classification returned.'}`;
     }
 
     const s1 = document.getElementById('step1Card');
     if (s1) {
       const vals = s1.querySelectorAll('.detail-val');
-      if (vals.length >= 2) vals[1].textContent = evt.trade_date;
+      if (vals.length >= 2) {
+        vals[0].textContent = window.AURORA_EVENT_PROVENANCE || 'Backend observations';
+        vals[1].textContent = evt.trade_date;
+      }
     }
 
     const s2 = document.getElementById('step2Card');
     if (s2) {
       const vals = s2.querySelectorAll('.detail-val.gold');
       if (vals.length >= 2) {
-        vals[0].textContent = `${evt.leg_a} Standardized`;
-        vals[1].textContent = `${evt.leg_b} Standardized`;
+        vals[0].textContent = `${evt.leg_a} · ${evt.evidence.benchmark_basis || 'normalized basis'}`;
+        vals[1].textContent = `${evt.leg_b} · ${evt.evidence.benchmark_basis || 'normalized basis'}`;
       }
     }
 
@@ -1371,10 +1988,7 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       const rawVal = s3.querySelector('.detail-val.gold');
       if (rawVal) rawVal.textContent = `₹${evt.evidence.spread.toFixed(2)} / 10g`;
       const allVals = s3.querySelectorAll('.detail-val');
-      if (allVals.length >= 2) {
-        const pct = ((evt.evidence.spread / 62500) * 100).toFixed(3);
-        allVals[1].textContent = `${pct}%`;
-      }
+      if (allVals.length >= 2) allVals[1].textContent = 'Not returned by backend';
     }
 
     const s4 = document.getElementById('step4Card');
@@ -1384,11 +1998,18 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         goldVals[0].textContent = `${evt.evidence.z_score >= 0 ? '+' : ''}${evt.evidence.z_score.toFixed(2)}σ (30d)`;
         goldVals[1].textContent = `${evt.evidence.percentile_rank.toFixed(1)}%`;
       }
+      const allVals = s4.querySelectorAll('.detail-val');
+      if (allVals.length >= 4) {
+        allVals[2].textContent = 'Not returned by backend';
+        allVals[3].textContent = 'Not returned by backend';
+      }
       const meterFill = s4.querySelector('.z-meter-fill');
       if (meterFill) {
         const pctPos = Math.min(100, Math.max(0, ((evt.evidence.z_score + 3) / 6) * 100));
         meterFill.style.width = `${pctPos}%`;
       }
+      const actualLabel = s4.querySelector('.z-meter-labels .highlight');
+      if (actualLabel) actualLabel.textContent = `Selected event: ${Number(evt.evidence.z_score) >= 0 ? '+' : ''}${Number(evt.evidence.z_score).toFixed(2)}σ`;
     }
 
     const s5 = document.getElementById('step5Card');
@@ -1415,65 +2036,494 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       const warnVal = s7.querySelector('.detail-val.warn');
       if (warnVal) warnVal.textContent = `₹${evt.evidence.cost_hurdle.toFixed(2)} / 10g`;
       const goldVal = s7.querySelector('.detail-val.gold');
-      if (goldVal) goldVal.textContent = `₹${(evt.evidence.net_edge || 0).toFixed(2)} / 10g`;
+      if (goldVal) goldVal.textContent = evt.evidence.net_edge == null ? 'Not returned by backend' : `₹${Number(evt.evidence.net_edge).toFixed(2)} / 10g`;
     }
+
+    const step8 = document.querySelectorAll('#step8Card .detail-val');
+    step8.forEach(el => { el.textContent = 'Not returned by backend'; });
+    const caveats = Array.isArray(evt.evidence.caveats) ? evt.evidence.caveats.filter(Boolean) : [];
+    document.querySelectorAll('.warning-callout').forEach((el, index) => {
+      if (!caveats.length || index > 0) { el.hidden = true; el.style.display = 'none'; return; }
+      el.hidden = false;
+      el.style.display = '';
+      const text = el.querySelector('span');
+      if (text) text.textContent = caveats.join(' ');
+    });
 
     const aiText = document.getElementById('aiParagraphText');
     if (aiText) {
-      aiText.innerHTML = `
-        <p>
-          Quantitative surveillance of MCX gold derivatives has detected a relative-value event for <strong>${evt.pair}</strong> on <strong>${evt.trade_date}</strong>. Following fine-gold purity normalization to a 995 benchmark basis, the normalized spread closed at <strong>₹${evt.evidence.spread.toFixed(2)} per 10g</strong> against a 30-day rolling mean of <strong>₹${(evt.evidence.rolling_mean || 0).toFixed(2)}</strong>.
-        </p>
-        <p>
-          This represents a gross dislocation of <strong>₹${(evt.evidence.gross_edge || 0).toFixed(2)}/10g</strong>, placing the pair at <strong>${evt.evidence.z_score >= 0 ? '+' : ''}${evt.evidence.z_score.toFixed(2)} standard deviations</strong> (${evt.evidence.percentile_rank.toFixed(1)}th empirical percentile). Transaction cost modeling calculates round-trip trading friction (STT, exchange turnover fees, SEBI charges, and bid-ask slippage) at <strong>₹${evt.evidence.cost_hurdle.toFixed(2)} per 10g</strong>. Estimated net edge is <strong>₹${(evt.evidence.net_edge || 0).toFixed(2)}/10g</strong>. Event classification: <strong style="color:var(--gold-bright);">${evt.classification}</strong>.
-        </p>
-      `;
+      const p = document.createElement('p');
+      p.textContent = evt.summary || `${evt.event_id} · ${evt.pair} · ${evt.trade_date} · ${evt.classification}`;
+      const details = document.createElement('p');
+      details.textContent = `Spread ₹${Number(evt.evidence.spread).toFixed(2)} / 10g · Z-score ${Number(evt.evidence.z_score) >= 0 ? '+' : ''}${Number(evt.evidence.z_score).toFixed(2)} · Percentile ${Number(evt.evidence.percentile_rank).toFixed(1)}%. Cost hurdle ${evt.evidence.cost_hurdle == null ? 'not returned' : `₹${Number(evt.evidence.cost_hurdle).toFixed(2)} / 10g`}. Historical analogues are not provided by this endpoint.`;
+      aiText.replaceChildren(p, details);
     }
+    const confidence = document.querySelector('.ai-confidence-pill span');
+    if (confidence) confidence.textContent = `OPPORTUNITY SCORE: ${Math.round(Number(evt.opportunity_score))}/100`;
+    const signalConfidence = document.getElementById('detectiveSignalConfidence');
+    if (signalConfidence) signalConfidence.textContent = 'Not returned by backend';
+    const executionState = document.getElementById('detectiveExecutionState');
+    if (executionState) executionState.textContent = `Backend classification: ${evt.classification}`;
+    const caveatsNode = document.getElementById('verdictCaveats');
+    if (caveatsNode) caveatsNode.textContent = Array.isArray(evt.evidence.caveats) && evt.evidence.caveats.length
+      ? evt.evidence.caveats.join(' ')
+      : 'No additional caveats were returned for this event.';
+    const source = document.querySelector('.ai-source-row span');
+    if (source) source.textContent = `Backend event ${evt.event_id} · ${evt.trade_date} · ${window.AURORA_EVENT_PROVENANCE || 'market-data provenance unavailable'}.`;
 
     const rawPre = document.getElementById('rawPayloadBlock');
     if (rawPre) {
       rawPre.textContent = JSON.stringify(evt, null, 2);
     }
+    const rawNotice = document.getElementById('rawPayloadNotice');
+    if (rawNotice) rawNotice.textContent = `Backend analytics event ${evt.event_id} · ${evt.trade_date} · ${window.AURORA_EVENT_PROVENANCE || 'market-data provenance unavailable'}.`;
 
-    try {
-      const spreadRes = await fetch(`${API_BASE}/api/analytics/spreads?pair=${encodeURIComponent(evt.pair)}&window=30`);
-      if (spreadRes.ok) {
-        const spreadJson = await spreadRes.json();
-        if (spreadJson.success && spreadJson.data && spreadJson.data.data_points) {
-          const pts = spreadJson.data.data_points;
-          const chart = Chart.getChart('spreadChartCanvas');
-          if (chart && pts.length > 0) {
-            chart.data.labels = pts.map(p => p.trade_date);
-            if (chart.data.datasets[0]) chart.data.datasets[0].data = pts.map(p => p.upper_2sigma);
-            if (chart.data.datasets[1]) chart.data.datasets[1].data = pts.map(p => p.rolling_mean);
-            if (chart.data.datasets[2]) chart.data.datasets[2].data = pts.map(p => p.lower_2sigma);
-            if (chart.data.datasets[3]) chart.data.datasets[3].data = pts.map(p => p.spread);
-            chart.update();
-          }
+    loadDetectiveChartData(evt, 30, requestId);
+  }
 
-          const voiChart = Chart.getChart('volumeOIChartCanvas');
-          if (voiChart && pts.length > 0) {
-            voiChart.data.labels = pts.map(p => p.trade_date);
-            if (voiChart.data.datasets[0]) voiChart.data.datasets[0].data = pts.map(p => p.volume_a);
-            if (voiChart.data.datasets[1]) voiChart.data.datasets[1].data = pts.map(p => p.volume_b);
-            voiChart.update();
-          }
+  function renderRadarPair(pair) {
+    selectedRadarPairKey = pair.pair;
+    const title = document.querySelector('.headline-pair-title');
+    if (title) title.textContent = `${pair.leg_a} vs ${pair.leg_b}`;
+    const classification = document.getElementById('radarClassification');
+    if (classification) classification.textContent = pair.classification || 'No signal';
+    const snapshotDate = document.getElementById('radarSnapshotDate');
+    if (snapshotDate) snapshotDate.textContent = `As of ${pair.trade_date || '—'} · Expiry ${pair.expiry_date || '—'}`;
+    const spread = document.getElementById('radarHeroSpread');
+    if (spread) spread.textContent = `${Number(pair.spread) >= 0 ? '+' : ''}₹${Number(pair.spread).toFixed(2)}/10g`;
+    const values = document.querySelectorAll('.headline-metric-cell .value');
+    if (values.length >= 3) {
+      values[0].textContent = pair.z_score == null ? '—' : `${Number(pair.z_score) >= 0 ? '+' : ''}${Number(pair.z_score).toFixed(2)}σ`;
+      values[1].textContent = pair.percentile_rank == null ? '—' : `${Number(pair.percentile_rank).toFixed(1)}%`;
+      values[2].textContent = pair.opportunity_score == null ? '—' : `${Math.round(Number(pair.opportunity_score))}/100`;
+    }
+    const badge = document.getElementById('radarPairStatusBadge');
+    const validPairs = new Set(Object.values(radarPairMap)
+      .filter(item => item.spread != null)
+      .map(item => [item.leg_a, item.leg_b].sort().join('-')));
+    if (badge) badge.textContent = `${validPairs.size}/6 matched`;
+    syncRadarSelectionFilterState();
+    const deepDive = document.getElementById('radarDeepDiveButton');
+    if (deepDive) { deepDive.disabled = false; deepDive.setAttribute('onclick', `openInvestigationModal('${pair.pair}')`); }
+    const watch = document.getElementById('radarWatchButton');
+    if (watch) { watch.disabled = false; watch.setAttribute('onclick', `triggerToast('Added ${pair.pair} to high-priority watchlist')`); }
+  }
+
+  function selectRadarPairFromUi(pairKey) {
+    const pair = radarPairMap[pairKey];
+    if (pair && pair.spread != null) {
+      renderRadarPair(pair);
+      return;
+    }
+    renderUnavailableRadarPair(pairKey, pair);
+  }
+
+  function renderUnavailableRadarPair(pairKey, pair = null) {
+    selectedRadarPairKey = pairKey;
+    const [legA, legB] = pairKey.split('-');
+    const title = document.querySelector('.headline-pair-title');
+    if (title) title.textContent = `${legA} vs ${legB}`;
+    const classification = document.getElementById('radarClassification');
+    if (classification) classification.textContent = 'No synchronized snapshot';
+    const snapshotDate = document.getElementById('radarSnapshotDate');
+    if (snapshotDate) snapshotDate.textContent = 'Current snapshot · unavailable';
+    const spread = document.getElementById('radarHeroSpread');
+    if (spread) spread.textContent = '—';
+    document.querySelectorAll('.headline-metric-cell .value').forEach(node => { node.textContent = '—'; });
+    const deepDive = document.getElementById('radarDeepDiveButton');
+    if (deepDive) deepDive.disabled = true;
+    const watch = document.getElementById('radarWatchButton');
+    if (watch) watch.disabled = true;
+    const badge = document.getElementById('radarPairStatusBadge');
+    if (badge) badge.title = pair?.reason || 'No current synchronized same-date, same-expiry snapshot is available.';
+    syncRadarSelectionFilterState();
+  }
+
+  function syncRadarSelectionFilterState() {
+    const notice = document.getElementById('radarSelectionFilterNotice');
+    if (!notice) return;
+    if (!selectedRadarPairKey) {
+      notice.hidden = true;
+      notice.textContent = '';
+      return;
+    }
+    const pair = radarPairMap[selectedRadarPairKey];
+    const reverseKey = selectedRadarPairKey.split('-').reverse().join('-');
+    const card = document.querySelector(`.signal-card[data-pair="${selectedRadarPairKey}"]`) ||
+      document.querySelector(`.signal-card[data-pair="${reverseKey}"]`);
+    if (!pair || pair.spread == null || !card) {
+      notice.textContent = 'This pair has no current synchronized snapshot. Historical distribution uses eligible observations separately.';
+      notice.hidden = false;
+      return;
+    }
+    if (card.style.display === 'none') {
+      notice.textContent = 'Selected pair is outside the active Status / Severity filters. The hero and history show this selection; cards show only matching pairs.';
+      notice.hidden = false;
+      return;
+    }
+    notice.hidden = true;
+    notice.textContent = '';
+  }
+
+  function orientRadarPair(pair, requestedPair) {
+    if (!pair || pair.pair === requestedPair) return pair;
+    if (pair.pair !== requestedPair.split('-').reverse().join('-')) return pair;
+    return {
+      ...pair,
+      pair: requestedPair,
+      leg_a: pair.leg_b,
+      leg_b: pair.leg_a,
+      spread: pair.spread == null ? null : -Number(pair.spread),
+      rolling_mean: pair.rolling_mean == null ? null : -Number(pair.rolling_mean),
+      z_score: pair.z_score == null ? null : -Number(pair.z_score),
+      percentile_rank: pair.percentile_rank == null ? null : 100 - Number(pair.percentile_rank),
+      gross_edge: pair.gross_edge == null ? null : -Number(pair.gross_edge),
+      net_edge: pair.net_edge == null ? null : -Number(pair.net_edge),
+    };
+  }
+
+  function updateRadarSignalCards(pairs) {
+    pairs.forEach(pair => {
+      const card = document.querySelector(`.signal-card[data-pair="${pair.pair}"]`) ||
+        document.querySelector(`.signal-card[data-pair="${pair.pair.split('-').reverse().join('-')}"]`);
+      if (!card) return;
+      const displayPair = orientRadarPair(pair, card.getAttribute('data-pair'));
+      const unavailableReason = card.querySelector('.pair-data-reason');
+      if (displayPair.spread == null) {
+        const reason = displayPair.reason || 'No synchronized snapshot is available for this pair.';
+        const pill = card.querySelector('.severity-pill');
+        if (pill) {
+          pill.textContent = 'NO SYNCHRONIZED SNAPSHOT';
+          pill.className = 'severity-pill';
+          pill.title = reason;
+        }
+        if (unavailableReason) {
+          unavailableReason.textContent = reason;
+          unavailableReason.hidden = false;
+        }
+        card.querySelectorAll('.stat-num, .radial-text').forEach(el => { el.textContent = '—'; });
+        card.querySelectorAll('.v-status').forEach(el => { el.textContent = 'Unavailable'; });
+        card.querySelectorAll('button').forEach(button => { button.disabled = true; });
+        card.classList.remove('critical', 'high', 'medium');
+        card.setAttribute('data-severity', 'unavailable');
+        card.dataset.hasSnapshot = 'false';
+        card.dataset.classification = 'unavailable';
+        card.dataset.zScore = '';
+        card.dataset.liquidityTrap = 'false';
+        card.dataset.costBlocked = 'false';
+        card.dataset.expiryRisk = 'false';
+        return;
+      }
+      if (unavailableReason) unavailableReason.hidden = true;
+      const statValues = card.querySelectorAll('.stat-num');
+      if (statValues[0]) statValues[0].innerHTML = `${Number(displayPair.spread) >= 0 ? '+' : ''}₹${Number(displayPair.spread).toFixed(2)} <span class="stat-subtext">/ 10g</span>`;
+      if (statValues[1]) statValues[1].textContent = displayPair.z_score == null ? '—' : `${Number(displayPair.z_score) >= 0 ? '+' : ''}${Number(displayPair.z_score).toFixed(2)}σ`;
+      if (statValues[2]) statValues[2].textContent = displayPair.percentile_rank == null ? '—' : `${Number(displayPair.percentile_rank).toFixed(1)}%`;
+      if (statValues[3]) statValues[3].textContent = '—'; // No duration metric is returned by the API.
+      const pairName = card.querySelector('.pair-symbols > span:first-child');
+      if (pairName) pairName.textContent = `${displayPair.leg_a} vs ${displayPair.leg_b}`;
+      const specs = card.querySelector('.pair-specs-sub');
+      if (specs) specs.textContent = `Synchronized historical snapshot · ${displayPair.trade_date || 'date unavailable'} · expiry ${displayPair.expiry_date || 'unavailable'}`;
+      const direction = card.querySelector('.pair-direction-tag');
+      if (direction) direction.textContent = `${Number(displayPair.spread) >= 0 ? displayPair.leg_a : displayPair.leg_b} normalized premium`;
+      const scoreAvailable = displayPair.opportunity_score != null && Number.isFinite(Number(displayPair.opportunity_score));
+      const score = scoreAvailable ? Math.round(Number(displayPair.opportunity_score)) : null;
+      const radial = card.querySelector('.radial-text');
+      if (radial) radial.textContent = score == null ? '—' : `${score}%`;
+      const radialCircle = card.querySelector('.circle-val');
+      if (radialCircle) radialCircle.setAttribute('stroke-dasharray', `${score ?? 0}, 100`);
+      const scoreNote = card.querySelector('.confidence-radial-box > div:last-child span:last-child');
+      if (scoreNote) scoreNote.textContent = score == null ? 'Unavailable' : `${score}%`;
+      const confidenceBox = card.querySelector('.confidence-radial-box');
+      if (confidenceBox) confidenceBox.title = `Opportunity score ${score == null ? 'unavailable' : `${score}/100 (Heuristic ranking score, not win probability)`} · Trap risk ${displayPair.trap_risk_score == null ? 'unavailable' : `${Math.round(Number(displayPair.trap_risk_score))}/100`} · Status: ${displayPair.classification || 'No Signal'}`;
+      const pill = card.querySelector('.severity-pill');
+      if (pill) {
+        pill.textContent = String(displayPair.classification || 'No Signal').toUpperCase();
+        pill.className = `severity-pill ${displayPair.classification === 'Investigate' ? 'pill-critical' : ['Cost-Blocked', 'Expiry-Risk'].includes(displayPair.classification) ? 'pill-high' : 'pill-medium'}`;
+      }
+      if (radialCircle) {
+        radialCircle.classList.remove('circle-val-critical', 'circle-val-high', 'circle-val-medium');
+        radialCircle.classList.add(displayPair.classification === 'Investigate' ? 'circle-val-critical' : ['Cost-Blocked', 'Expiry-Risk'].includes(displayPair.classification) ? 'circle-val-high' : 'circle-val-medium');
+      }
+      card.classList.remove('critical', 'high', 'medium');
+      if (displayPair.classification === 'Investigate') card.classList.add('critical');
+      else if (['Cost-Blocked', 'Expiry-Risk'].includes(displayPair.classification)) card.classList.add('high');
+      else card.classList.add('medium');
+      const absZ = displayPair.z_score == null ? null : Math.abs(Number(displayPair.z_score));
+      card.dataset.zScore = absZ == null || !Number.isFinite(absZ) ? '' : String(absZ);
+      card.setAttribute('data-severity', absZ == null || !Number.isFinite(absZ) ? 'unavailable' : absZ >= 2 ? 'critical' : absZ >= 1.5 ? 'high' : absZ >= 1 ? 'medium' : 'low');
+      const validationValues = card.querySelectorAll('.v-status');
+      const liquidityKnown = displayPair.min_volume != null && displayPair.min_open_interest != null;
+      const checks = [
+        !liquidityKnown ? 'Volume/OI unavailable' : displayPair.is_liquidity_trap ? 'Below volume/OI threshold' : 'Volume/OI threshold met',
+        !liquidityKnown ? 'Liquidity unassessed' : displayPair.is_liquidity_trap ? 'Liquidity risk' : 'Liquidity threshold met',
+        displayPair.is_cost_blocked ? 'Cost-blocked' : 'Cost hurdle passed',
+      ];
+      validationValues.forEach((node, index) => { node.textContent = checks[index] || '—'; });
+      const investButton = card.querySelector('.card-investigate-btn');
+      if (investButton) {
+        investButton.disabled = false;
+        investButton.textContent = displayPair.classification === 'Investigate' ? 'Review investigation →' : 'View pair details →';
+        investButton.setAttribute('onclick', `openInvestigationModal('${displayPair.pair}')`);
+      }
+      const bookmarkButton = card.querySelector('.card-footer-actions .clay-btn-outline');
+      if (bookmarkButton) { bookmarkButton.disabled = false; bookmarkButton.setAttribute('onclick', `triggerToast('Added ${displayPair.pair} to high-priority watchlist')`); }
+      card.dataset.hasSnapshot = 'true';
+      card.dataset.classification = displayPair.classification || 'No Signal';
+      card.dataset.liquidityTrap = String(Boolean(displayPair.is_liquidity_trap));
+      card.dataset.costBlocked = String(Boolean(displayPair.is_cost_blocked));
+      card.dataset.expiryRisk = String(Boolean(displayPair.is_expiry_risk));
+      loadRadarSparkline(displayPair, card);
+    });
+  }
+
+  function ensureRadarSignalCards(pairs) {
+    const grid = document.querySelector('.signals-grid');
+    const template = grid?.querySelector('.signal-card');
+    if (!grid || !template) return;
+
+    pairs.forEach(pair => {
+      const reverse = pair.pair.split('-').reverse().join('-');
+      if (grid.querySelector(`.signal-card[data-pair="${pair.pair}"]`) ||
+          grid.querySelector(`.signal-card[data-pair="${reverse}"]`)) return;
+
+      const card = template.cloneNode(true);
+      const canvas = card.querySelector('canvas');
+      const pairId = pair.pair.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      card.dataset.pair = pair.pair;
+      card.dataset.severity = 'unavailable';
+      card.dataset.hasSnapshot = 'false';
+      card.dataset.classification = 'unavailable';
+      card.classList.remove('critical', 'high', 'medium');
+      const pairName = card.querySelector('.pair-symbols > span:first-child');
+      if (pairName) pairName.textContent = `${pair.leg_a} vs ${pair.leg_b}`;
+      const specs = card.querySelector('.pair-specs-sub');
+      if (specs) specs.textContent = 'Waiting for a synchronized historical snapshot';
+      card.querySelectorAll('button').forEach(button => { button.disabled = true; });
+      grid.appendChild(card);
+      if (canvas) {
+        canvas.id = `sparkline-${pairId}`;
+        if (typeof window.createSparkline === 'function') {
+          window.createSparkline(canvas.id, [], '#c9a650', 'rgba(201, 166, 80, 0.15)');
         }
       }
-    } catch (e) {
-      console.warn('AURORA: Error updating detective chart series:', e);
+    });
+  }
+
+  async function loadRadarSparkline(pair, card) {
+    const canvas = card.querySelector('.sparkline-box canvas');
+    if (!canvas || typeof Chart === 'undefined') return;
+    const chart = Chart.getChart(canvas);
+    if (!chart) return;
+    const requestId = (sparklineRequestIds.get(pair.pair) || 0) + 1;
+    sparklineRequestIds.set(pair.pair, requestId);
+    chart.data.labels = [];
+    chart.data.datasets.forEach(dataset => { dataset.data = []; });
+    chart.update();
+    try {
+      const response = await fetch(`${API_BASE}/api/analytics/spreads?pair=${encodeURIComponent(pair.pair)}&window=14&end_date=${encodeURIComponent(pair.trade_date)}`);
+      if (sparklineRequestIds.get(pair.pair) !== requestId || !response.ok) return;
+      const json = await response.json();
+      if (sparklineRequestIds.get(pair.pair) !== requestId) return;
+      const points = json?.success && Array.isArray(json?.data?.data_points) ? json.data.data_points : [];
+      chart.data.labels = points.map(point => point.trade_date);
+      chart.data.datasets.forEach(dataset => { dataset.data = points.map(point => point.spread); });
+      chart.update();
+    } catch (error) {
+      if (sparklineRequestIds.get(pair.pair) === requestId) console.warn(`AURORA: ${pair.pair} spread history unavailable:`, error);
     }
   }
 
-  function ensureLiveBadge() {
-    if (document.querySelector('.live-radar-badge')) return;
-    const headerRight = document.querySelector('.header-right');
-    if (headerRight) {
-      const badge = document.createElement('div');
-      badge.className = 'live-radar-badge';
-      badge.style.cssText = 'display:inline-flex; align-items:center; gap:6px; font-size:11.5px; padding:5px 12px; border-radius:20px; background:rgba(16,185,129,0.14); border:1px solid rgba(16,185,129,0.35); color:#34d399; font-family:var(--font-mono); font-weight:600;';
-      badge.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;"></span>RV ENGINE SYNCED (6 PAIRS)';
-      headerRight.insertBefore(badge, headerRight.firstChild);
+  function renderRadarFunnel(pairs) {
+    const totalPairs = pairs.length || 6;
+    const observedPairs = pairs.filter(pair => pair && pair.spread != null && Number.isFinite(Number(pair.spread)));
+    const observed = observedPairs.length;
+    const unavailable = Math.max(0, pairs.length - observed);
+    const liquidityAssessed = observedPairs.filter(pair => pair.min_volume != null && pair.min_open_interest != null && pair.is_liquidity_trap != null);
+    const liquidPairs = liquidityAssessed.filter(pair => pair.is_liquidity_trap === false);
+    const expiryAssessed = liquidPairs.filter(pair => pair.dte_min != null && pair.is_expiry_risk != null);
+    const expiryPairs = expiryAssessed.filter(pair => pair.is_expiry_risk === false);
+    const costAssessed = expiryPairs.filter(pair => pair.gross_edge != null && pair.estimated_cost_hurdle != null && pair.is_cost_blocked != null);
+    const costPairs = costAssessed.filter(pair => pair.is_cost_blocked === false);
+    const liquid = liquidPairs.length;
+    const expiry = expiryPairs.length;
+    const cost = costPairs.length;
+    const investigate = costPairs.filter(pair => pair.classification === 'Investigate').length;
+    const liquidityUnassessed = observed - liquidityAssessed.length;
+    const expiryUnassessed = liquidPairs.length - expiryAssessed.length;
+    const costUnassessed = expiryPairs.length - costAssessed.length;
+    const set = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    const pct = count => observed ? `${(count / observed * 100).toFixed(0)}%` : '—';
+    const counts = [observed, liquid, expiry, cost, investigate];
+    const names = ['Matched pairs', 'Liquidity pass', 'Expiry pass', 'Cost pass', 'Investigate'];
+    const summary = document.getElementById('radarPipelineSummary');
+    if (summary) summary.textContent = `${observed}/${totalPairs} matched · ${unavailable} unavailable → ${names.slice(1).map((name, i) => `${name} ${observed ? counts[i + 1] : '—'}`).join(' → ')}`;
+    set('radarStageObserved', `${observed}/${totalPairs} matched`);
+    set('radarStageLiquidity', `${observed ? liquid : '—'} Passed`);
+    set('radarStageLiquidityDrop', `${observed ? liquidityAssessed.length - liquid : '—'} flagged · ${observed ? liquidityUnassessed : '—'} unassessed`);
+    set('radarStageExpiry', `${observed ? expiry : '—'} Passed`);
+    set('radarStageExpiryDrop', `${observed ? expiryAssessed.length - expiry : '—'} flagged · ${observed ? expiryUnassessed : '—'} unassessed`);
+    set('radarStageCost', `${observed ? cost : '—'} Passed`);
+    set('radarStageCostDrop', `${observed ? costAssessed.length - cost : '—'} flagged · ${observed ? costUnassessed : '—'} unassessed`);
+    set('radarStageInvestigate', `${observed ? investigate : '—'} Investigate`);
+    set('radarFunnelObserved', `${observed ? observed : '—'} pairs (${observed ? '100%' : '—'})`);
+    set('radarFunnelLiquidity', `${observed ? liquid : '—'} pairs (${observed ? pct(liquid) : '—'})`);
+    set('radarFunnelExpiry', `${observed ? expiry : '—'} pairs (${observed ? pct(expiry) : '—'})`);
+    set('radarFunnelCost', `${observed ? cost : '—'} pairs (${observed ? pct(cost) : '—'})`);
+    set('radarFunnelInvestigate', `${observed ? investigate : '—'} pairs (${observed ? pct(investigate) : '—'})`);
+    const setTag = (id, text, isReject, isNeutral) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'trap-tag-eliminated' + (isReject ? '' : isNeutral ? ' trap-tag-neutral' : ' trap-tag-pass');
+    };
+    const setRowState = (rowId, hasFlag) => {
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      row.style.borderLeftColor = hasFlag ? 'var(--danger-red, #ef4444)' : 'var(--success-green, #10b981)';
+    };
+    const liqFlagged = observedPairs.filter(p => p.is_liquidity_trap === true).length;
+    const expFlagged = observedPairs.filter(p => p.is_expiry_risk === true).length;
+    const costFlagged = observedPairs.filter(p => p.is_cost_blocked === true).length;
+    const noSigCount = observedPairs.filter(p => p.classification === 'No Signal').length;
+    set('radarDiagnosticLiquidity', observed ? (liqFlagged + ' flagged · ' + liquidityUnassessed + ' unassessed') : '—');
+    set('radarDiagnosticExpiry', observed ? (expFlagged + ' flagged · ' + observedPairs.filter(p => p.dte_min == null || p.is_expiry_risk == null).length + ' unassessed') : '—');
+    set('radarDiagnosticCost', observed ? (costFlagged + ' flagged · ' + observedPairs.filter(p => p.gross_edge == null || p.estimated_cost_hurdle == null || p.is_cost_blocked == null).length + ' unassessed') : '—');
+    set('radarDiagnosticNoSignal', observed ? String(noSigCount) : '—');
+    if (observed) {
+      setTag('radarTagLiquidity', liqFlagged > 0 ? ('Stage 2: ' + liqFlagged + ' Flagged') : 'Stage 2: 0 Flagged (Pass)', liqFlagged > 0, false);
+      setTag('radarTagExpiry', expFlagged > 0 ? ('Stage 3: ' + expFlagged + ' Flagged') : 'Stage 3: 0 Flagged (Pass)', expFlagged > 0, false);
+      setTag('radarTagCost', costFlagged > 0 ? ('Stage 4: ' + costFlagged + ' Flagged') : 'Stage 4: 0 Flagged (Pass)', costFlagged > 0, false);
+      setTag('radarTagNoSignal', noSigCount > 0 ? ('Stage 5: ' + noSigCount + ' Inactive') : 'Stage 5: 0 Inactive', false, noSigCount > 0);
+      setRowState('radarRowLiquidity', liqFlagged > 0);
+      setRowState('radarRowExpiry', expFlagged > 0);
+      setRowState('radarRowCost', costFlagged > 0);
+    } else {
+      setTag('radarTagLiquidity', 'Stage 2: —', false, true);
+      setTag('radarTagExpiry', 'Stage 3: —', false, true);
+      setTag('radarTagCost', 'Stage 4: —', false, true);
+      setTag('radarTagNoSignal', 'Stage 5: —', false, true);
     }
+    document.querySelectorAll('.funnel-fill').forEach((bar, index) => { bar.style.width = observed ? `${counts[index] / observed * 100}%` : '0%'; });
+  }
+
+
+  function updateRadarFreshnessIndicator(statusData, errorMsg) {
+    const banner = document.getElementById('radarFreshnessBanner');
+    if (!banner) return;
+
+    const datasetEl = document.getElementById('radarFreshnessDataset');
+    const dateEl = document.getElementById('radarLatestObsDate');
+    const ageEl = document.getElementById('radarObsAgeBadge');
+    const feedStatusEl = document.getElementById('radarFeedStatus');
+    const warningEl = document.getElementById('radarStaleWarning');
+    const warningTextEl = document.getElementById('radarStaleWarningText');
+    const dotEl = banner.querySelector('.freshness-pulse-dot');
+    const sidebarTime = document.getElementById('live-sidebar-time');
+
+    if (!statusData) {
+      if (datasetEl) datasetEl.textContent = 'Historical Dataset';
+      if (dateEl) dateEl.textContent = 'Unavailable';
+      if (ageEl) {
+        ageEl.textContent = 'Age -';
+        ageEl.className = 'freshness-age-badge';
+      }
+      if (feedStatusEl) {
+        feedStatusEl.textContent = 'UNAVAILABLE';
+        feedStatusEl.className = '';
+      }
+      if (warningEl) {
+        warningEl.style.display = 'flex';
+        if (warningTextEl) {
+          warningTextEl.textContent = errorMsg || 'Market status unavailable. Live feed disconnected.';
+        }
+      }
+      if (dotEl) dotEl.className = 'freshness-pulse-dot stale';
+      return;
+    }
+
+    const isLive = statusData.feed_status === 'LIVE' && statusData.is_live_connected === true;
+    const latestDateStr = statusData.latest_trade_date;
+    const dataMode = statusData.data_mode;
+
+    // 1. Clearly label dataset provenance (Historical CSV vs Live)
+    let datasetLabel = 'Historical CSV Data (Not Live)';
+    if (isLive) {
+      datasetLabel = 'Verified Live MCX Feed';
+    } else if (dataMode === 'test_data') {
+      datasetLabel = 'Test Data (Excluded from Analysis)';
+    } else if (dataMode === 'demo_synthetic') {
+      datasetLabel = 'Synthetic Demo Data (Excluded)';
+    } else if (statusData.data_freshness_label && statusData.data_freshness_label.includes('User-imported historical CSV')) {
+      datasetLabel = 'Historical CSV Data (Bhavcopy)';
+    }
+    if (datasetEl) datasetEl.textContent = datasetLabel;
+
+    // 2. Display latest available market observation date
+    if (dateEl) {
+      dateEl.textContent = latestDateStr ? latestDateStr : 'No observation dates';
+    }
+    if (sidebarTime && latestDateStr) {
+      sidebarTime.textContent = latestDateStr + ' (Close)';
+    }
+
+    // 3. Calculate and display age of latest observation in calendar days
+    let ageDays = null;
+    if (latestDateStr) {
+      try {
+        const obsDate = new Date(latestDateStr + 'T00:00:00Z');
+        const refDate = statusData.server_time ? new Date(statusData.server_time) : new Date();
+        const diffMs = refDate.getTime() - obsDate.getTime();
+        ageDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+      } catch (e) {
+        ageDays = null;
+      }
+    }
+
+    // Daily MCX settlement is expected within 1 calendar/business day
+    const isStale = !isLive && (ageDays === null || ageDays >= 1);
+
+    if (ageEl) {
+      if (ageDays !== null) {
+        ageEl.textContent = ageDays === 0 ? 'Today (<24h)' : (ageDays + ' calendar day' + (ageDays === 1 ? '' : 's') + ' old');
+        ageEl.className = 'freshness-age-badge' + (isStale ? ' stale' : '');
+      } else {
+        ageEl.textContent = 'Age unknown';
+        ageEl.className = 'freshness-age-badge';
+      }
+    }
+
+    // 4. Feed status: never imply feed is live or snapshot is live opportunity
+    if (feedStatusEl) {
+      feedStatusEl.textContent = statusData.feed_status || 'UNAVAILABLE';
+      feedStatusEl.className = isLive ? 'live' : '';
+    }
+
+    if (dotEl) {
+      dotEl.className = 'freshness-pulse-dot ' + (isLive ? 'live' : isStale ? 'stale' : '');
+    }
+
+    // 5. Stale-data warning when older than expected reporting period
+    if (warningEl) {
+      if (isStale || !isLive) {
+        warningEl.style.display = 'flex';
+        let notice = '';
+        if (ageDays !== null && ageDays > 0) {
+          notice = 'Stale Data Warning: Latest observation is ' + ageDays + ' calendar day' + (ageDays === 1 ? '' : 's') + ' old (' + latestDateStr + '). ';
+        } else {
+          notice = 'Historical Snapshot: ';
+        }
+        notice += 'Feed is UNAVAILABLE. Spreads reflect historical settlement, not live execution opportunities.';
+        if (warningTextEl) warningTextEl.textContent = notice;
+      } else {
+        warningEl.style.display = 'none';
+      }
+    }
+  }
+
+  function ensureLiveBadge(pairCount) {
+    const badge = document.querySelector('.live-radar-badge');
+    const total = Math.max(6, document.querySelectorAll('.matrix-table tbody tr').length);
+    if (badge) badge.textContent = `Historical data · ${pairCount}/${total} pairs with matched snapshots`;
   }
 })();

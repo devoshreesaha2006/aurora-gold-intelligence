@@ -6,7 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from backend.app.config import settings
-from backend.app.database import engine, Base, SessionLocal
+from backend.app.database import engine, Base, SessionLocal, upgrade_provider_timestamp_column
 import backend.app.models  # Register all models on Base.metadata
 from backend.app.services.contract_service import seed_default_contracts
 from backend.app.api.router import api_router
@@ -21,6 +21,7 @@ async def lifespan(app: FastAPI):
     2. Seeds official MCX Gold contract specifications.
     """
     Base.metadata.create_all(bind=engine)
+    upgrade_provider_timestamp_column()
     db = SessionLocal()
     try:
         seed_default_contracts(db)

@@ -110,7 +110,7 @@ def get_relative_value_events(
 @router.get("/distribution", response_model=StandardResponse[DistributionResponse])
 def get_spread_distribution(
     pair: str = Query("GOLDM-GOLDPETAL", description="Pair name"),
-    window: int = Query(365, ge=5, le=1000, description="Lookback window in days"),
+    window: int = Query(365, ge=5, le=1000, description="Maximum synchronized trading observations"),
     bins: int = Query(15, ge=5, le=50, description="Histogram bins count"),
     db: Session = Depends(get_db)
 ):

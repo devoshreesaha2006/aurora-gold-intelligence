@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market Detective â€” AURORA MCX Gold Intelligence</title>
+  <title>Market Detective — AURORA MCX Gold Intelligence</title>
   
   <!-- Google Fonts: Inter & Orbitron & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1035,7 +1035,7 @@
       position: absolute;
       left: 50%;
       height: 100%;
-      width: 41%; /* maps +2.47Ïƒ on a -3Ïƒ to +3Ïƒ span */
+      width: 0%; /* Set from the selected backend event. */
       background: var(--gold-gradient);
       border-radius: 4px;
       box-shadow: 0 0 8px var(--gold-glow);
@@ -1228,7 +1228,7 @@
       gap: 18px;
     }
 
-    /* Circular Progress Score 78/100 */
+    /* Backend-provided opportunity score */
     .score-circle-wrapper {
       position: relative;
       width: 86px;
@@ -1253,7 +1253,7 @@
       stroke-width: 7;
       stroke-linecap: round;
       stroke-dasharray: 238; /* 2 * PI * 38 approx */
-      stroke-dashoffset: 52; /* 78% filled */
+      stroke-dashoffset: 240; /* Empty until a backend event is selected. */
       filter: drop-shadow(0 0 6px var(--gold-glow));
       transition: stroke-dashoffset 1.5s ease-out;
     }
@@ -1681,10 +1681,11 @@
     }
   </style>
   <script src="auth.js"></script>
-  <script src="aurora-pipeline.js"></script>
+  <script src="aurora-pipeline.js?v=detective-feed-events-20261023"></script>
   <script src="aurora-nav.js"></script>
+  <link rel="stylesheet" href="analytics-premium.css">
 </head>
-<body>
+<body class="aurora-market-detective">
 
   <!-- ==========================================================================
        SIDEBAR NAVIGATION
@@ -1693,7 +1694,7 @@
     <!-- Brand -->
     <div class="brand-section">
       <div class="brand-logo-3d">
-        <i class="fa-solid fa-gem"></i>
+        <img class="aurora-brand-image" src="aurora-mark.png" alt="">
       </div>
       <div class="brand-text">
         <h1>AURORA</h1>
@@ -1724,7 +1725,7 @@
       <a href="market-detective.html" class="nav-item active">
         <i class="fa-solid fa-magnifying-glass-chart"></i>
         <span>Market Detective</span>
-        <span class="nav-badge">LIVE</span>
+        <span class="nav-badge">AUDIT</span>
       </a>
 
       <div class="nav-label" style="margin-top: 10px;">Quantitative Labs</div>
@@ -1810,7 +1811,7 @@
         <div class="live-status-pill">
           <span class="indicator"></span>
           <span class="tag">MCX DATA:</span>
-          <span class="date">OCT 12, 2026 â€¢ 17:30 IST</span>
+          <span class="date" id="detectiveFeedLabel">Feed status unavailable</span>
         </div>
 
         <!-- Audio Alert Feedback Toggle -->
@@ -1819,7 +1820,7 @@
         </button>
 
         <!-- Notifications -->
-        <button class="header-btn" title="Live Anomalies" onclick="showToast('Active surveillance: 3 pairs currently under statistical observation')">
+        <button class="header-btn" title="Backend Notifications" onclick="showToast('Notifications reflect investigations returned by the backend.')">
           <i class="fa-solid fa-bell"></i>
           <span class="badge-dot"></span>
         </button>
@@ -1857,22 +1858,19 @@
 
         <div class="event-selector-cluster">
           <div class="clay-select-wrapper">
-            <select id="eventSelector" onchange="handleEventSwitch(this.value)">
-              <option value="247" selected>Event #247 â€” GOLDM vs GOLDPETAL Spread Anomaly</option>
-              <option value="246">Event #246 â€” GOLD vs GOLDM Contango Inversion</option>
-              <option value="245">Event #245 â€” GOLDGUINEA Purity Basis Disparity</option>
-              <option value="248">Event #248 â€” GOLDPETAL Nov vs Dec Calendar Spread</option>
+            <select id="eventSelector" disabled>
+              <option value="" selected>No backend investigations loaded</option>
             </select>
             <i class="fa-solid fa-chevron-down clay-select-icon"></i>
           </div>
 
           <!-- Quick Action Buttons -->
-          <button class="btn-clay" onclick="openRawModal()" title="View Bhavcopy Payload">
+          <button class="btn-clay" data-detective-action disabled onclick="openRawModal()" title="View backend investigation payload">
             <i class="fa-solid fa-code"></i>
             <span>Raw Data</span>
           </button>
 
-          <button class="btn-clay btn-clay-gold" onclick="exportDossier()" title="Download PDF Investigation Dossier">
+          <button class="btn-clay btn-clay-gold" data-detective-action disabled onclick="exportDossier()" title="Download PDF Investigation Dossier">
             <i class="fa-solid fa-file-pdf"></i>
             <span>Export Dossier</span>
           </button>
@@ -1882,7 +1880,7 @@
       <!-- ==========================================================================
            INVESTIGATION GRID (42% TIMELINE | 58% EVIDENCE DASHBOARD)
            ========================================================================== -->
-      <div class="investigation-grid">
+      <div class="investigation-grid" hidden style="display:none">
 
         <!-- ======================================================================
              COLUMN 1: INVESTIGATION TIMELINE (8 VERTICAL GLASSMORPHISM STEPS)
@@ -1890,7 +1888,7 @@
         <div class="timeline-column">
           <div class="section-headline-box">
             <h3><i class="fa-solid fa-list-check"></i> Investigation Timeline</h3>
-            <span class="badge-count" id="stepsCountBadge">8 STEPS VERIFIED</span>
+            <span class="badge-count" id="stepsCountBadge">AWAITING BACKEND DATA</span>
           </div>
 
           <div class="stepper-container" id="stepperContainer">
@@ -1905,28 +1903,28 @@
                   <span class="step-number">Step 01</span>
                   <span class="step-name">Data Validation</span>
                 </div>
-                <span class="step-badge badge-pass"><i class="fa-solid fa-circle-check"></i> PASSED</span>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-circle-check"></i> AWAITING DATA</span>
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row">
                   <span class="detail-label">Source:</span>
-                  <span class="detail-val">MCX Bhavcopy</span>
+                  <span class="detail-val">Awaiting backend provenance</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Date:</span>
-                  <span class="detail-val">Oct 12, 2026</span>
+                  <span class="detail-val">—</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Records Validated:</span>
-                  <span class="detail-val success">4/4 contracts</span>
+                  <span class="detail-val success">—</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Missing Data:</span>
-                  <span class="detail-val success">None (0.0%)</span>
+                  <span class="detail-val success">—</span>
                 </div>
                 <div class="step-detail-row full-width">
                   <span class="detail-label">Data Freshness:</span>
-                  <span class="detail-val gold">T+0 (Same day, 17:30 IST settlement)</span>
+                  <span class="detail-val gold">—</span>
                 </div>
               </div>
             </div>
@@ -1941,25 +1939,25 @@
                   <span class="step-number">Step 02</span>
                   <span class="step-name">Normalization</span>
                 </div>
-                <span class="step-badge badge-pass"><i class="fa-solid fa-circle-check"></i> 995 BASIS</span>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-circle-check"></i> BACKEND DATA</span>
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row full-width">
-                  <span class="detail-label">GOLDM (100g):</span>
-                  <span class="detail-val gold">â‚¹62,450 â†’ â‚¹62,892.46 / 10g</span>
+                  <span class="detail-label">Leg A:</span>
+                  <span class="detail-val gold">—</span>
                 </div>
                 <div class="step-detail-row full-width">
-                  <span class="detail-label">GOLDPETAL (1g):</span>
-                  <span class="detail-val gold">â‚¹6,310 â†’ â‚¹63,015.08 / 10g</span>
+                  <span class="detail-label">Leg B:</span>
+                  <span class="detail-val gold">—</span>
                 </div>
                 <div class="step-detail-row full-width">
                   <span class="detail-label">Basis Purity:</span>
-                  <span class="detail-val">995 Fine Gold Benchmark</span>
+                  <span class="detail-val">Backend basis unavailable</span>
                 </div>
               </div>
               <div class="formula-tag">
                 <i class="fa-solid fa-square-root-variable"></i>
-                <span>Formula: P_norm = (P_quoted / Lot_g) Ã— 10 Ã— (995 / Purity_std)</span>
+                <span>Formula: P_norm = (P_quoted / Lot_g) × 10 × (995 / Purity_std)</span>
               </div>
             </div>
 
@@ -1973,20 +1971,20 @@
                   <span class="step-number">Step 03</span>
                   <span class="step-name">Spread Calculation</span>
                 </div>
-                <span class="step-badge badge-pass"><i class="fa-solid fa-arrows-split-up-and-left"></i> COMPUTED</span>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-arrows-split-up-and-left"></i> AWAITING DATA</span>
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row">
                   <span class="detail-label">Raw Spread:</span>
-                  <span class="detail-val gold">â‚¹122.62 / 10g</span>
+                  <span class="detail-val gold">—</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Percentage:</span>
-                  <span class="detail-val gold">0.195%</span>
+                  <span class="detail-val gold">—</span>
                 </div>
                 <div class="step-detail-row full-width">
                   <span class="detail-label">Spread Direction:</span>
-                  <span class="detail-val warn"><i class="fa-solid fa-arrow-trend-up"></i> GOLDPETAL trading at premium</span>
+                  <span class="detail-val warn"><i class="fa-solid fa-arrow-trend-up"></i> —</span>
                 </div>
               </div>
             </div>
@@ -2001,34 +1999,34 @@
                   <span class="step-number">Step 04</span>
                   <span class="step-name">Statistical Analysis</span>
                 </div>
-                <span class="step-badge badge-pass"><i class="fa-solid fa-chart-simple"></i> ANOMALOUS</span>
+                <span class="step-badge badge-pass"><i class="fa-solid fa-chart-simple"></i> AWAITING DATA</span>
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row">
                   <span class="detail-label">Z-Score:</span>
-                  <span class="detail-val gold">2.47Ïƒ (60d window)</span>
+                  <span class="detail-val gold">—</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Percentile:</span>
-                  <span class="detail-val gold">97.3%</span>
+                  <span class="detail-val gold">—</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Mean Reversion:</span>
-                  <span class="detail-val success">73% Probable</span>
+                  <span class="detail-val success">Not returned by backend</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Market Regime:</span>
-                  <span class="detail-val">Normal Volatility</span>
+                  <span class="detail-val">Not returned by backend</span>
                 </div>
               </div>
               <!-- Z-Score Visual Gauge -->
               <div class="z-meter-wrap">
                 <div class="z-meter-labels">
-                  <span>-3.0Ïƒ</span>
-                  <span>-2.0Ïƒ</span>
-                  <span>0.0Ïƒ</span>
-                  <span>+2.0Ïƒ [Cutoff]</span>
-                  <span class="highlight">+2.47Ïƒ (Actual)</span>
+                  <span>-3.0σ</span>
+                  <span>-2.0σ</span>
+                  <span>0.0σ</span>
+                  <span>+2.0σ [Cutoff]</span>
+                  <span class="highlight">Selected event: —</span>
                 </div>
                 <div class="z-meter-bar">
                   <div class="z-meter-fill"></div>
@@ -2050,16 +2048,16 @@
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row">
-                  <span class="detail-label">GOLDM Volume:</span>
-                  <span class="detail-val success">12,450 lots âœ“</span>
+                  <span class="detail-label">Leg A Volume:</span>
+                  <span class="detail-val success">—</span>
                 </div>
                 <div class="step-detail-row">
-                  <span class="detail-label">GOLDPETAL Vol:</span>
-                  <span class="detail-val warn">890 lots âš ï¸ (Low)</span>
+                  <span class="detail-label">Leg B Volume:</span>
+                  <span class="detail-val warn">—</span>
                 </div>
                 <div class="step-detail-row full-width">
                   <span class="detail-label">Combined Open Interest:</span>
-                  <span class="detail-val">36,907 contracts</span>
+                  <span class="detail-val">—</span>
                 </div>
               </div>
               <div class="warning-callout">
@@ -2082,16 +2080,16 @@
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row">
-                  <span class="detail-label">GOLDM Expiry:</span>
-                  <span class="detail-val success">15 days (Safe)</span>
+                  <span class="detail-label">Leg A Expiry:</span>
+                  <span class="detail-val success">—</span>
                 </div>
                 <div class="step-detail-row">
-                  <span class="detail-label">GOLDPETAL Expiry:</span>
-                  <span class="detail-val success">21 days (Safe)</span>
+                  <span class="detail-label">Leg B Expiry:</span>
+                  <span class="detail-val success">—</span>
                 </div>
                 <div class="step-detail-row full-width">
                   <span class="detail-label">Calendar Roll Risk:</span>
-                  <span class="detail-val success">Low (No immediate delivery tender)</span>
+                  <span class="detail-val success">Not returned by backend</span>
                 </div>
               </div>
             </div>
@@ -2106,20 +2104,20 @@
                   <span class="step-number">Step 07</span>
                   <span class="step-name">Transaction Cost Analysis</span>
                 </div>
-                <span class="step-badge badge-warn"><i class="fa-solid fa-triangle-exclamation"></i> HIGH COST</span>
+                <span class="step-badge badge-warn"><i class="fa-solid fa-triangle-exclamation"></i> AWAITING DATA</span>
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row">
                   <span class="detail-label">Round-Trip Cost:</span>
-                  <span class="detail-val warn">â‚¹85 â€“ â‚¹110 / 10g</span>
+                  <span class="detail-val warn">—</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Spread Post-Costs:</span>
-                  <span class="detail-val gold">â‚¹12.62 â€“ â‚¹37.62</span>
+                  <span class="detail-val gold">—</span>
                 </div>
                 <div class="step-detail-row full-width">
                   <span class="detail-label">Cost-to-Spread Ratio:</span>
-                  <span class="detail-val warn" style="font-weight: 800;">69% â€“ 90% consumed</span>
+                  <span class="detail-val warn" style="font-weight: 800;">—</span>
                 </div>
               </div>
               <div class="warning-callout">
@@ -2138,24 +2136,24 @@
                   <span class="step-number">Step 08</span>
                   <span class="step-name">Historical Memory</span>
                 </div>
-                <span class="step-badge badge-analogue"><i class="fa-solid fa-clock-rotate-left"></i> 7 ANALOGUES</span>
+                <span class="step-badge badge-analogue"><i class="fa-solid fa-clock-rotate-left"></i> NOT RETURNED</span>
               </div>
               <div class="step-body-grid">
                 <div class="step-detail-row">
                   <span class="detail-label">Analogues Found:</span>
-                  <span class="detail-val gold">7 matching events</span>
+                  <span class="detail-val gold">Not returned by backend</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Most Recent:</span>
-                  <span class="detail-val">Aug 03, 2026</span>
+                  <span class="detail-val">Not returned by backend</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Avg Resolution:</span>
-                  <span class="detail-val success">4.2 trading days</span>
+                  <span class="detail-val success">Not returned by backend</span>
                 </div>
                 <div class="step-detail-row">
                   <span class="detail-label">Mean Reversion:</span>
-                  <span class="detail-val success">5/7 cases (71.4%)</span>
+                  <span class="detail-val success">Not returned by backend</span>
                 </div>
               </div>
             </div>
@@ -2177,14 +2175,14 @@
                 </div>
                 <div>
                   <h4>Panel A: Normalized Spread Chart</h4>
-                  <p>GOLDM vs GOLDPETAL spread (â‚¹/10g) over 60 rolling days with statistical Â±1Ïƒ / Â±2Ïƒ bands</p>
+              <p>Backend spread observations (₹/10g) with rolling statistical bands</p>
                 </div>
               </div>
               <div class="panel-controls">
                 <button class="chip-btn" onclick="updateSpreadTimeframe(30, this)">30D</button>
                 <button class="chip-btn active" onclick="updateSpreadTimeframe(60, this)">60D</button>
                 <button class="chip-btn" onclick="updateSpreadTimeframe(90, this)">90D</button>
-                <button class="chip-btn" id="toggleBandsBtn" onclick="toggleBands()">Â±2Ïƒ Bands</button>
+                <button class="chip-btn" id="toggleBandsBtn" onclick="toggleBands()">±2σ Bands</button>
               </div>
             </div>
 
@@ -2197,19 +2195,19 @@
             <div class="chart-footer-metrics">
               <div class="chart-metric-item">
                 <span class="chart-metric-label">Current Spread</span>
-                <span class="chart-metric-value" style="color: var(--gold-bright);">+â‚¹122.62</span>
+                <span class="chart-metric-value" style="color: var(--gold-bright);">—</span>
               </div>
               <div class="chart-metric-item">
                 <span class="chart-metric-label">60d Rolling Mean</span>
-                <span class="chart-metric-value">â‚¹14.18</span>
+                <span class="chart-metric-value">—</span>
               </div>
               <div class="chart-metric-item">
-                <span class="chart-metric-label">+2.0Ïƒ Threshold</span>
-                <span class="chart-metric-value" style="color: var(--amber-warning);">â‚¹99.30</span>
+                <span class="chart-metric-label">+2.0σ Threshold</span>
+                <span class="chart-metric-value" style="color: var(--amber-warning);">—</span>
               </div>
               <div class="chart-metric-item">
                 <span class="chart-metric-label">Current Deviation</span>
-                <span class="chart-metric-value" style="color: var(--gold-bright);">+2.47Ïƒ</span>
+                <span class="chart-metric-value" style="color: var(--gold-bright);">—</span>
               </div>
             </div>
           </div>
@@ -2228,9 +2226,9 @@
               </div>
               <div class="panel-controls">
                 <span style="font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
-                  <span style="color: #06B6D4;">â– </span> GOLDM &nbsp; 
-                  <span style="color: #F59E0B;">â– </span> GOLDPETAL &nbsp; 
-                  <span style="color: #FCD34D;">â€•</span> Total OI
+                  <span style="color: #06B6D4;">■</span> <span id="volumeLegALabel">Leg A</span> &nbsp;
+                  <span style="color: #F59E0B;">■</span> <span id="volumeLegBLabel">Leg B</span> &nbsp;
+                  <span style="color: #FCD34D;">—</span> Total OI
                 </span>
               </div>
             </div>
@@ -2243,20 +2241,20 @@
             <!-- Footer Liquidity Context -->
             <div class="chart-footer-metrics">
               <div class="chart-metric-item">
-                <span class="chart-metric-label">GOLDM Vol (Lots)</span>
-                <span class="chart-metric-value" style="color: #06B6D4;">12,450</span>
+                <span class="chart-metric-label">Leg A Volume (Lots)</span>
+                <span class="chart-metric-value" style="color: #06B6D4;">—</span>
               </div>
               <div class="chart-metric-item">
-                <span class="chart-metric-label">GOLDPETAL Vol (Lots)</span>
-                <span class="chart-metric-value" style="color: #F59E0B;">890</span>
+                <span class="chart-metric-label">Leg B Volume (Lots)</span>
+                <span class="chart-metric-value" style="color: #F59E0B;">—</span>
               </div>
               <div class="chart-metric-item">
                 <span class="chart-metric-label">Vol Ratio (PETAL/M)</span>
-                <span class="chart-metric-value" style="color: var(--amber-warning);">0.071 (Imbalanced)</span>
+                <span class="chart-metric-value" style="color: var(--amber-warning);">—</span>
               </div>
               <div class="chart-metric-item">
                 <span class="chart-metric-label">Combined Open Interest</span>
-                <span class="chart-metric-value" style="color: var(--gold-bright);">36,907</span>
+                <span class="chart-metric-value" style="color: var(--gold-bright);">—</span>
               </div>
             </div>
           </div>
@@ -2280,7 +2278,7 @@
                     <circle class="circle-progress" id="scoreProgressCircle" cx="43" cy="43" r="38"></circle>
                   </svg>
                   <div class="score-text-inner">
-                    <span class="score-number" id="verdictScoreVal">78</span>
+                    <span class="score-number" id="verdictScoreVal">—</span>
                     <span class="score-denom">/ 100</span>
                   </div>
                 </div>
@@ -2296,11 +2294,11 @@
 
               <div style="text-align: right;">
                 <span style="font-size: 11px; color: var(--text-muted); font-family: 'Orbitron', monospace;">SIGNAL CONFIDENCE</span>
-                <div style="font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; color: var(--gold-bright); margin-top: 2px;">
-                  HIGH (STATISTICAL)
+                <div id="detectiveSignalConfidence" style="font-family: 'Orbitron', monospace; font-size: 15px; font-weight: 700; color: var(--gold-bright); margin-top: 2px;">
+                  UNAVAILABLE
                 </div>
-                <div style="font-size: 10px; color: var(--amber-warning); margin-top: 2px;">
-                  EXECUTION GATED BY COSTS
+                <div id="detectiveExecutionState" style="font-size: 10px; color: var(--amber-warning); margin-top: 2px;">
+                  No backend execution assessment
                 </div>
               </div>
             </div>
@@ -2314,7 +2312,7 @@
                   <span>Key Investigation Finding</span>
                 </div>
                 <div class="finding-body" id="verdictKeyFinding">
-                  Statistically significant spread deviation detected (<strong>+2.47Ïƒ</strong>, 97.3rd percentile). However, estimated transaction costs consume <strong>69â€“90%</strong> of the apparent spread. GOLDPETAL trading liquidity is below the preferred institutional execution threshold.
+                  A current backend event summary will appear here when an eligible investigation is selected.
                 </div>
               </div>
 
@@ -2325,7 +2323,7 @@
                   <span>Desk Recommendation</span>
                 </div>
                 <div class="recommendation-body" id="verdictRecommendation">
-                  <strong>Monitor for spread widening or cost reduction.</strong> Not actionable at current parameters under standard execution fees. Maintain pair in active surveillance watch.
+                  A backend recommendation will appear here when the selected event includes one.
                 </div>
               </div>
 
@@ -2334,7 +2332,7 @@
                 <div class="caveats-text">
                   <i class="fa-solid fa-circle-exclamation"></i>
                   <span id="verdictCaveats">
-                    <strong>Analytical Rigor Note:</strong> Settlement prices from MCX Bhavcopy may not equal executable fills during market hours due to intraday book depth and crossing spreads. This is an objective analytical finding, not an automated trade recommendation.
+                    Backend caveats will appear here when returned for the selected event.
                   </span>
                 </div>
               </div>
@@ -2396,7 +2394,7 @@
       <!-- ==========================================================================
            SECTION 4: AI EXPLANATION PANEL (BOTTOM FULL-WIDTH GLASSMORPHISM)
            ========================================================================== -->
-      <section class="ai-explanation-panel">
+      <section class="ai-explanation-panel" hidden style="display:none">
         <div class="ai-header-row">
           <div class="ai-title-wrap">
             <div class="ai-sparkle-icon">
@@ -2405,7 +2403,7 @@
             <div>
               <h3>AI-Powered Event Summary</h3>
               <p style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">
-                Deterministic financial reasoning synthesized into natural intelligence
+                Backend investigation summary and supporting evidence
               </p>
             </div>
           </div>
@@ -2415,11 +2413,11 @@
               <i class="fa-solid fa-shield-check"></i>
               <span>CONFIDENCE: HIGH</span>
             </div>
-            <button class="btn-clay" onclick="copySummaryText()" style="padding: 6px 12px; font-size: 11px;">
+            <button class="btn-clay" data-detective-action disabled onclick="copySummaryText()" style="padding: 6px 12px; font-size: 11px;">
               <i class="fa-solid fa-copy"></i>
               <span>Copy Memo</span>
             </button>
-            <button class="btn-clay" onclick="simulateEventInPlayground()" style="padding: 6px 12px; font-size: 11px;">
+            <button class="btn-clay" data-detective-action disabled onclick="simulateEventInPlayground()" style="padding: 6px 12px; font-size: 11px;">
               <i class="fa-solid fa-sliders"></i>
               <span>Open in Simulator</span>
             </button>
@@ -2428,12 +2426,8 @@
 
         <!-- Plain English Narrative Paragraph -->
         <div class="ai-paragraph-content" id="aiParagraphText">
-          <p>
-            A pronounced statistical dislocation has emerged between MCX <strong>GOLDM</strong> (100g contract) and <strong>GOLDPETAL</strong> (1g contract). Following standard fine-gold purity normalization to a 995 basis, GOLDPETAL is trading at an implied rate of <strong>â‚¹63,015.08 per 10g</strong> compared to <strong>â‚¹62,892.46 per 10g</strong> for GOLDM. This yields a net nominal divergence of <strong>â‚¹122.62 per 10g (+0.195%)</strong>, placing the spread at <strong>+2.47 standard deviations</strong> above its 60-day rolling mean (97.3rd percentile).
-          </p>
-          <p>
-            Historical pattern-matching across our 5-year MCX archive identified <strong>7 analogue instances</strong> exhibiting comparable magnitude. In 5 out of 7 previous cases (71.4%), the spread mean-reverted toward parity within an average duration of <strong>4.2 trading sessions</strong>. However, critical microstructural headwinds constrain immediate arbitrage feasibility: GOLDPETAL daily volume stands at just <strong>890 lots</strong>, and bidirectional execution friction (comprising MCX turnover fees, SEBI charges, CTT, GST, and conservative execution slippage) totals an estimated <strong>â‚¹85 to â‚¹110 per 10g equivalent</strong>. Because transaction costs absorb approximately <strong>69% to 90%</strong> of the visible spread, immediate positioning offers negligible risk-adjusted edge. The platform recommends maintaining this pair on watch until either the raw spread widens past â‚¹165/10g or GOLDPETAL liquidity deepens.
-          </p>
+          <p id="aiNarrativePrimary">A current backend investigation summary will appear here when eligible observations produce an event.</p>
+          <p id="aiNarrativeSecondary"></p>
         </div>
 
         <!-- Meta Footer & Disclaimers -->
@@ -2441,7 +2435,7 @@
           <div class="ai-source-disclaimer">
             <div class="ai-source-row">
               <i class="fa-solid fa-database"></i>
-              <span><strong>Sources Cited:</strong> Based on Event #247 fields, MCX Bhavcopy data (Oct 12, 2026), 60-day statistical window, and MCX Contract Specifications.</span>
+              <span id="aiSourcesText"><strong>Sources Cited:</strong> Sources will be shown for a selected backend investigation.</span>
             </div>
             <div class="ai-disclaimer-row">
               <i class="fa-solid fa-scale-balanced"></i>
@@ -2451,7 +2445,7 @@
 
           <div class="ai-interactive-actions">
             <span style="font-size: 11px; color: var(--gold-light); font-family: 'Orbitron', monospace;">
-              MODEL: AURORA-QUANT-V3
+              MODEL: DETERMINISTIC BACKEND RULES
             </span>
           </div>
         </div>
@@ -2466,60 +2460,17 @@
   <div class="modal-overlay" id="rawModal" onclick="closeRawModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-terminal" style="margin-right: 8px;"></i>MCX Bhavcopy Raw Normalized Tuple</h3>
+        <h3><i class="fa-solid fa-terminal" style="margin-right: 8px;"></i>Awaiting backend provenance Raw Normalized Tuple</h3>
         <button class="header-btn" onclick="closeRawModal()" style="width: 32px; height: 32px;">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
       <div class="modal-body">
-        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
-          Audit record cryptographically validated from official MCX Bhavcopy settlement dump (Oct 12, 2026):
+        <p id="rawPayloadNotice" style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+          Backend investigation payload appears when a valid event is selected.
         </p>
         <pre class="raw-data-pre" id="rawPayloadBlock">
-{
-  "event_id": 247,
-  "timestamp": "2026-10-12T17:30:00.000Z",
-  "anomaly_class": "SPREAD_CROSS_CONTRACT",
-  "contracts": {
-    "leg_a": {
-      "symbol": "GOLDM",
-      "expiry": "2026-10-27",
-      "days_to_expiry": 15,
-      "settlement_price": 62450.00,
-      "lot_size_grams": 100,
-      "purity_spec": 995,
-      "normalized_10g_price": 62892.46,
-      "volume_lots": 12450,
-      "open_interest": 28450
-    },
-    "leg_b": {
-      "symbol": "GOLDPETAL",
-      "expiry": "2026-11-02",
-      "days_to_expiry": 21,
-      "settlement_price": 6310.00,
-      "lot_size_grams": 1,
-      "purity_spec": 999,
-      "normalized_10g_price": 63015.08,
-      "volume_lots": 890,
-      "open_interest": 8457
-    }
-  },
-  "metrics": {
-    "raw_spread_inr": 122.62,
-    "percentage_spread": 0.195,
-    "z_score_60d": 2.47,
-    "percentile": 97.3,
-    "est_round_trip_cost_inr": 97.50,
-    "spread_post_cost_inr": 25.12,
-    "cost_consumption_pct": 79.5
-  },
-  "verdict": {
-    "status": "UNDER_INVESTIGATION",
-    "score": 78,
-    "actionable": false,
-    "reason": "Statistically elevated spread negated by transaction friction and GOLDPETAL liquidity threshold"
-  }
-}
+No valid backend investigation selected.
         </pre>
       </div>
     </div>
@@ -2590,7 +2541,20 @@
     }
 
     // Modal Handlers
+    function selectedBackendEvent() {
+      const eventId = document.getElementById('eventSelector')?.value;
+      const evt = window.AURORA_SELECTED_EVENT;
+      if (!evt || !eventId || String(evt.event_id) !== String(eventId) || window.AURORA_LIVE_EVENTS?.[eventId] !== evt) {
+        showToast('Select a valid backend investigation first.');
+        return null;
+      }
+      return evt;
+    }
+
     function openRawModal() {
+      const evt = selectedBackendEvent();
+      if (!evt) return;
+      document.getElementById('rawPayloadBlock').textContent = JSON.stringify(evt, null, 2);
       document.getElementById('rawModal').classList.add('active');
       playBlip(523.25, 'sine', 0.08);
     }
@@ -2599,25 +2563,35 @@
     }
 
     function exportDossier() {
+      const evt = selectedBackendEvent();
+      if (!evt) return;
       playBlip(880, 'sine', 0.12);
-      showToast('Generating official PDF Investigation Dossier for Event #247...');
+      showToast(`Preparing investigation dossier for ${evt.event_id}...`);
       setTimeout(() => {
         window.print();
       }, 800);
     }
 
     function copySummaryText() {
+      const evt = selectedBackendEvent();
+      if (!evt) return;
       const text = document.getElementById('aiParagraphText').innerText;
+      if (!text.trim() || !navigator.clipboard?.writeText) {
+        showToast('Investigation memo is unavailable.');
+        return;
+      }
       navigator.clipboard.writeText(text).then(() => {
         showToast('AI Investigation Memo copied to clipboard!');
       }).catch(() => {
-        showToast('Summary copied to clipboard');
+        showToast('Could not copy investigation memo.');
       });
     }
 
     function simulateEventInPlayground() {
+      const evt = selectedBackendEvent();
+      if (!evt) return;
       playBlip(740, 'sine', 0.09);
-      showToast('Routing parameters to Market Simulator module...');
+      showToast(`Opening the simulator for ${evt.pair}...`);
       setTimeout(() => {
         window.location.href = 'backtesting-lab.html';
       }, 1000);
@@ -2632,51 +2606,9 @@
     let showBands = true;
     let currentTimeframe = 60;
 
-    // Synthetic 60-day historical spread data generation with mean-reversion & anomaly at end
+    // Keep the chart empty until an eligible backend time series is received.
     function generateSpreadData(days = 60) {
-      const labels = [];
-      const spreadData = [];
-      const meanData = [];
-      const upper2Sigma = [];
-      const lower2Sigma = [];
-      const upper1Sigma = [];
-      const lower1Sigma = [];
-
-      const baseMean = 14.18;
-      const sigma = 43.9; // Standard deviation
-
-      // Generate dates leading up to Oct 12, 2026
-      const endDate = new Date(2026, 9, 12); // Oct 12, 2026
-
-      for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(endDate);
-        d.setDate(d.getDate() - i);
-        const dayStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-        labels.push(dayStr);
-
-        meanData.push(baseMean);
-        upper2Sigma.push(baseMean + 2 * sigma); // 101.98
-        lower2Sigma.push(baseMean - 2 * sigma); // -73.62
-        upper1Sigma.push(baseMean + sigma);
-        lower1Sigma.push(baseMean - sigma);
-
-        if (i === 0) {
-          // Current Anomaly Day
-          spreadData.push(122.62);
-        } else if (i === 1) {
-          spreadData.push(98.40);
-        } else if (i === 2) {
-          spreadData.push(84.10);
-        } else if (i === 3) {
-          spreadData.push(52.30);
-        } else {
-          // Simulated mean-reverting series around ~14
-          const noise = (Math.sin(i * 0.45) * 22) + (Math.cos(i * 0.18) * 18) + (Math.random() * 12 - 6);
-          spreadData.push(Number((baseMean + noise).toFixed(2)));
-        }
-      }
-
-      return { labels, spreadData, meanData, upper2Sigma, lower2Sigma, upper1Sigma, lower1Sigma };
+      return { labels: [], spreadData: [], meanData: [], upper2Sigma: [], lower2Sigma: [], upper1Sigma: [], lower1Sigma: [] };
     }
 
     // Init Spread Chart
@@ -2699,7 +2631,7 @@
           labels: data.labels,
           datasets: [
             {
-              label: 'Upper +2Ïƒ Cutoff (â‚¹101.98)',
+              label: 'Upper +2σ Cutoff',
               data: data.upper2Sigma,
               borderColor: 'rgba(245, 158, 11, 0.45)',
               borderDash: [5, 5],
@@ -2709,7 +2641,7 @@
               hidden: !showBands
             },
             {
-              label: 'Historical Mean (â‚¹14.18)',
+              label: 'Historical Mean',
               data: data.meanData,
               borderColor: 'rgba(148, 163, 184, 0.4)',
               borderDash: [3, 3],
@@ -2718,7 +2650,7 @@
               pointRadius: 0
             },
             {
-              label: 'Lower -2Ïƒ Cutoff (-â‚¹73.62)',
+              label: 'Lower -2σ Cutoff',
               data: data.lower2Sigma,
               borderColor: 'rgba(245, 158, 11, 0.45)',
               borderDash: [5, 5],
@@ -2728,7 +2660,7 @@
               hidden: !showBands
             },
             {
-              label: 'Normalized Spread (GOLDM vs GOLDPETAL)',
+              label: 'Normalized Spread',
               data: data.spreadData,
               borderColor: '#F5B041',
               backgroundColor: 'rgba(245, 176, 65, 0.08)',
@@ -2768,11 +2700,11 @@
                   const val = context.parsed.y;
                   if (context.datasetIndex === 3) {
                     if (context.dataIndex === context.dataset.data.length - 1) {
-                      return `ðŸš¨ Current Spread: â‚¹${val.toFixed(2)} (+2.47Ïƒ Anomaly)`;
+                      return `Backend spread: ₹${val.toFixed(2)}`;
                     }
-                    return `Spread: â‚¹${val.toFixed(2)}`;
+                    return `Spread: ₹${val.toFixed(2)}`;
                   }
-                  return `${context.dataset.label}: â‚¹${val.toFixed(2)}`;
+                  return `${context.dataset.label}: ₹${val.toFixed(2)}`;
                 }
               }
             }
@@ -2796,7 +2728,7 @@
                 color: '#94A3B8',
                 font: { family: 'JetBrains Mono', size: 10 },
                 callback: function(value) {
-                  return 'â‚¹' + value;
+                  return '₹' + value;
                 }
               }
             }
@@ -2814,7 +2746,7 @@
       });
       btnElement.classList.add('active');
       playBlip(620, 'sine', 0.06);
-      initSpreadChart(days);
+      if (window.AURORA_REFRESH_DETECTIVE_CHARTS) window.AURORA_REFRESH_DETECTIVE_CHARTS(days);
     }
 
     function toggleBands() {
@@ -2834,28 +2766,10 @@
     // Init Volume & Open Interest Dual-Axis Chart
     function initVolumeOIChart() {
       const ctx = document.getElementById('volumeOIChartCanvas').getContext('2d');
-      const days = 14; // Last 14 trading days
       const labels = [];
       const goldmVol = [];
       const petalVol = [];
       const totalOI = [];
-
-      const endDate = new Date(2026, 9, 12);
-      for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(endDate);
-        d.setDate(d.getDate() - i);
-        labels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-        
-        if (i === 0) {
-          goldmVol.push(12450);
-          petalVol.push(890);
-          totalOI.push(36907);
-        } else {
-          goldmVol.push(Math.round(11000 + Math.random() * 3200));
-          petalVol.push(Math.round(750 + Math.random() * 400));
-          totalOI.push(Math.round(35000 + Math.random() * 3000));
-        }
-      }
 
       volumeOIChart = new Chart(ctx, {
         data: {
@@ -2951,96 +2865,22 @@
     // ==========================================================================
     // INTERACTIVE EVENT SWITCHER
     // ==========================================================================
-    const EVENT_PRESETS = {
-      "247": {
-        title: "Event #247 â€” GOLDM vs GOLDPETAL Spread Anomaly",
-        score: 78,
-        scoreOffset: 52, // 78% of 238
-        verdictText: "UNDER INVESTIGATION",
-        verdictColor: "#F59E0B",
-        step1: { source: "MCX Bhavcopy", date: "Oct 12, 2026", valid: "4/4 contracts", miss: "None (0.0%)", fresh: "T+0 (Same day, 17:30 IST settlement)" },
-        step2: { goldm: "â‚¹62,450 â†’ â‚¹62,892.46 / 10g", petal: "â‚¹6,310 â†’ â‚¹63,015.08 / 10g", basis: "995 Fine Gold Benchmark" },
-        step3: { raw: "â‚¹122.62 / 10g", pct: "0.195%", dir: "GOLDPETAL trading at premium" },
-        step4: { z: "2.47Ïƒ (60d window)", pct: "97.3%", rev: "73% Probable", regime: "Normal Volatility" },
-        step5: { volA: "12,450 lots âœ“", volB: "890 lots âš ï¸ (Low)", oi: "36,907 contracts", warn: "Warning: GOLDPETAL liquidity may limit executable size" },
-        step6: { expA: "15 days (Safe)", expB: "21 days (Safe)", roll: "Low (No immediate delivery tender)" },
-        step7: { cost: "â‚¹85 â€“ â‚¹110 / 10g", post: "â‚¹12.62 â€“ â‚¹37.62", ratio: "69% â€“ 90% consumed", warn: "Costs consume 69-90% of apparent edge" },
-        step8: { sim: "7 matching events", recent: "Aug 03, 2026", res: "4.2 trading days", hist: "5/7 cases (71.4%)" },
-        keyFinding: "Statistically significant spread deviation detected (+2.47Ïƒ, 97.3rd percentile). However, transaction costs consume 69â€“90% of the apparent spread. GOLDPETAL liquidity is below preferred threshold.",
-        recommendation: "Monitor for spread widening or cost reduction. Not actionable at current parameters under standard execution fees. Maintain pair in active surveillance watch."
-      },
-      "246": {
-        title: "Event #246 â€” GOLD vs GOLDM Contango Inversion",
-        score: 92,
-        scoreOffset: 19, // 92% of 238
-        verdictText: "ARBITRAGE OPPORTUNITY",
-        verdictColor: "#10B981",
-        step1: { source: "MCX Bhavcopy", date: "Oct 11, 2026", valid: "4/4 contracts", miss: "None", fresh: "T+1 Confirmed" },
-        step2: { goldm: "GOLD (1kg): â‚¹62,510 â†’ â‚¹62,510 / 10g", petal: "GOLDM (100g): â‚¹62,690 â†’ â‚¹62,690 / 10g", basis: "995 Fine Gold Pure" },
-        step3: { raw: "â‚¹180.00 / 10g", pct: "0.288%", dir: "GOLDM trading at inverted contango" },
-        step4: { z: "3.12Ïƒ (60d window)", pct: "99.1%", rev: "88% Probable", regime: "Normal Volatility" },
-        step5: { volA: "24,800 lots âœ“", volB: "18,200 lots âœ“", oi: "94,120 contracts", warn: "Deep liquidity on both legs; minimal market impact" },
-        step6: { expA: "32 days", expB: "32 days", roll: "Identical Expiry Month" },
-        step7: { cost: "â‚¹38 â€“ â‚¹45 / 10g", post: "â‚¹135.00 â€“ â‚¹142.00", ratio: "21% â€“ 25% consumed", warn: "Clear edge survives transaction friction" },
-        step8: { sim: "11 matching events", recent: "Jun 14, 2026", res: "2.1 trading days", hist: "10/11 cases reverted" },
-        keyFinding: "Substantial 3.12Ïƒ dislocation between benchmark GOLD 1kg and GOLDM. Bidirectional book depth is exceptionally robust with low friction ratio (22%).",
-        recommendation: "Actionable institutional relative-value spread. Favorable risk-reward for paired convergence positioning."
-      },
-      "245": {
-        title: "Event #245 â€” GOLDGUINEA Purity Basis Disparity",
-        score: 41,
-        scoreOffset: 140, // 41% of 238
-        verdictText: "REJECTED (ILLIQUID)",
-        verdictColor: "#EF4444",
-        step1: { source: "MCX Bhavcopy", date: "Oct 08, 2026", valid: "4/4 contracts", miss: "None", fresh: "T+4 Archive" },
-        step2: { goldm: "GOLDGUINEA (8g, 916 pure): â‚¹45,820 â†’ â‚¹62,410 / 10g (995)", petal: "GOLDM: â‚¹62,440", basis: "916 to 995 conversion" },
-        step3: { raw: "â‚¹30.00 / 10g", pct: "0.048%", dir: "Parity within noise threshold" },
-        step4: { z: "0.85Ïƒ", pct: "58.2%", rev: "51% Unpredictable", regime: "Low Volatility" },
-        step5: { volA: "42 lots âŒ", volB: "11,500 lots âœ“", oi: "1,200 contracts", warn: "Extreme illiquidity in GOLDGUINEA; unexecutable" },
-        step6: { expA: "8 days âš ï¸", expB: "22 days", roll: "Asymmetric Expiry" },
-        step7: { cost: "â‚¹140 â€“ â‚¹180 / 10g", post: "-â‚¹110.00 (Negative)", ratio: ">100% (Negative Edge)", warn: "Costs completely overwhelm apparent price gap" },
-        step8: { sim: "3 matching events", recent: "Mar 12, 2026", res: "9.4 days", hist: "1/3 cases reverted" },
-        keyFinding: "Apparent difference is an artifact of conversion noise and severe lack of liquidity in GOLDGUINEA (42 lots). Negative post-cost expectation.",
-        recommendation: "Dismiss event. Do not alert desk. Tagged as microstructural false positive."
-      }
-    };
-
     function handleEventSwitch(eventId) {
-      const preset = EVENT_PRESETS[eventId];
-      if (!preset) return;
-
+      const evt = window.AURORA_LIVE_EVENTS?.[eventId];
+      if (!evt || window.AURORA_LIVE_EVENTS?.[eventId] !== evt) {
+        window.AURORA_INVALIDATE_DETECTIVE?.('Selected investigation is no longer available.');
+        return;
+      }
       playBlip(700, 'sine', 0.1);
-      showToast(`Loading analysis parameters for ${preset.title.split('â€”')[0]}...`);
-
-      // Update Verdict card
-      document.getElementById('verdictScoreVal').textContent = preset.score;
-      document.getElementById('scoreProgressCircle').style.strokeDashoffset = preset.scoreOffset;
-      document.getElementById('verdictBadgeText').textContent = preset.verdictText;
-      document.getElementById('verdictKeyFinding').innerHTML = preset.keyFinding;
-      document.getElementById('verdictRecommendation').innerHTML = preset.recommendation;
-
-      // Update Step values
-      const s3 = document.getElementById('step3Card');
-      s3.querySelector('.detail-val.gold').textContent = preset.step3.raw;
-      s3.querySelectorAll('.detail-val')[1].textContent = preset.step3.pct;
-
-      // Reload chart with subtle variation
-      initSpreadChart(currentTimeframe);
+      window.AURORA_RENDER_DETECTIVE_EVENT?.(evt);
     }
 
     // On Load Initializations
     window.addEventListener('DOMContentLoaded', () => {
       initSpreadChart(60);
       initVolumeOIChart();
-      
-      // Animate score circle
-      setTimeout(() => {
-        const circle = document.getElementById('scoreProgressCircle');
-        if (circle) {
-          circle.style.strokeDashoffset = '52'; // 78% filled
-        }
-      }, 300);
     });
   </script>
+  <script src="aurora-nuggets.js" defer></script>
 </body>
 </html>

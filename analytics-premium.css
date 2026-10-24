@@ -1,0 +1,265 @@
+/* Shared AURORA black-and-champagne surface for internal analytics pages. */
+:root {
+  color-scheme: dark;
+  --aurora-bg: #080806;
+  --aurora-panel: rgba(22, 19, 12, .78);
+  --aurora-border: rgba(214, 179, 99, .16);
+  --aurora-gold: #d6b363;
+  --aurora-gold-bright: #f1d995;
+  --aurora-copy: #f4efe3;
+  --aurora-muted: #b1a996;
+}
+html { background: var(--aurora-bg); color-scheme: dark; }
+body {
+  background: radial-gradient(ellipse at 78% 0%, rgba(124, 84, 22, .14), transparent 34%), var(--aurora-bg) !important;
+  color: var(--aurora-copy) !important;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif !important;
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: .005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+/* Match the readable AURORA interface typography on these older analytics views. */
+body.aurora-contract-explorer { --font-heading: Manrope, Inter, ui-sans-serif, sans-serif; }
+body.aurora-opportunity-radar { --font-display: Manrope, Inter, ui-sans-serif, sans-serif; }
+body.aurora-market-detective .title-texts h2,
+body.aurora-market-detective .section-headline-box h3,
+body.aurora-market-detective .step-name {
+  font-family: Manrope, Inter, ui-sans-serif, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+body.aurora-market-detective .step-number,
+body.aurora-market-detective .step-badge {
+  font-family: Inter, ui-sans-serif, sans-serif !important;
+  letter-spacing: .02em !important;
+}
+body.aurora-market-detective .step-body-grid { font-size: 13.5px; line-height: 1.5; }
+body.aurora-market-detective .detail-label { font-size: 13px; }
+body.aurora-market-detective .detail-val { font-size: 13px; }
+body button, body input, body select, body textarea { font-family: inherit; }
+#aurora-gold-nuggets { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: .48; }
+.sidebar, .main-wrapper, .app-layout, .main-content, .page-container { position: relative; z-index: 1; }
+.sidebar {
+  background: rgba(13, 12, 9, .93) !important;
+  border-color: rgba(220, 190, 120, .12) !important;
+  box-shadow: 12px 0 36px rgba(0,0,0,.26) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.sidebar-brand, .sidebar-header, .sidebar-footer { border-color: rgba(220,190,120,.12) !important; }
+.brand-name, .logo-text, .sidebar-title { color: #f5eedc !important; }
+.nav-section-label, .sidebar-section-title { color: #91866f !important; }
+.nav-item, .sidebar-nav a, .sidebar-link { color: #b7ae9a !important; border-radius: 10px; transition: color .18s ease, background .18s ease, border-color .18s ease; }
+.nav-item:hover, .sidebar-nav a:hover, .sidebar-link:hover { color: #f7edcf !important; background: rgba(214,179,99,.08) !important; }
+.nav-item.active, .sidebar-nav a.active, .sidebar-link.active { color: #f4dfaa !important; background: linear-gradient(90deg,rgba(211,175,87,.16),rgba(211,175,87,.035)) !important; border-color: rgba(211,175,87,.19) !important; }
+.top-header, header.topbar {
+  background: rgba(10,9,7,.84) !important;
+  border-color: rgba(220,190,120,.14) !important;
+  color: #eee7d6 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.main-wrapper { background: transparent !important; }
+.main-content, .content-area, .page-content { color: var(--aurora-copy); }
+@media (min-width: 901px) {
+  /* These shells already place the sidebar in their flex row; the legacy
+     margin duplicated its width and left an empty gutter on desktop. */
+  .app-container > .main-wrapper { margin-left: 0 !important; }
+  body:has(> .sidebar + .main-wrapper) > .main-wrapper { margin-left: 0 !important; }
+}
+.panel, .card, .chart-section, .metric-card, .stat-card, .section-card, .analytics-card, .radar-card, .filter-panel, .table-container, .chart-container-wrapper, .chart-container-box {
+  color: var(--aurora-copy) !important;
+  background: linear-gradient(145deg, rgba(31,27,19,.8), rgba(16,15,11,.9)) !important;
+  border: 1px solid var(--aurora-border) !important;
+  border-radius: 17px;
+  box-shadow: 0 16px 42px rgba(0,0,0,.26), inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+h1, h2, h3, h4, .page-title, .section-title { color: #f5efdf !important; }
+p, .subtitle, .description, .text-muted, .metric-label, .chart-subtitle { color: var(--aurora-muted); }
+button, .btn, .range-btn, input, select, textarea {
+  font: inherit;
+}
+button, .btn, .range-btn {
+  border-color: rgba(214,179,99,.22) !important;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease;
+}
+button:hover, .btn:hover, .range-btn:hover { border-color: rgba(229,204,139,.48) !important; transform: translateY(-1px); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #e4c873 !important; outline-offset: 3px; }
+input, select, textarea, .search-input, .filter-select {
+  color: #f1ead9 !important;
+  background-color: rgba(255,255,255,.035) !important;
+  border-color: rgba(214,179,99,.17) !important;
+}
+input::placeholder, textarea::placeholder { color: #867c67 !important; }
+table { color: #e9e2d3; }
+th { color: #a99c7d !important; border-color: rgba(214,179,99,.14) !important; }
+td { border-color: rgba(214,179,99,.09) !important; }
+tr:hover td { background: rgba(214,179,99,.045) !important; }
+.range-btn.active, .time-pill-btn.active, .btn-primary, .primary-btn, .gold-button {
+  color: #171208 !important;
+  background: linear-gradient(135deg,#f0dfaa,#c6a04e) !important;
+  border-color: #d6b363 !important;
+}
+.chart-container-wrapper, .chart-container-box, .radar-chart-wrapper, .distribution-chart-container { min-width: 0; }
+#particles-canvas { opacity: .14 !important; }
+/* Older internal pages use their own claymorphic navy surfaces; carry the
+   same warm glass treatment across those page-specific component names. */
+.quick-stats-ribbon .stat-chip, .contract-card, .price-hero-box,
+.normalization-sandbox, .comparison-section, .step-box, .formula-card, .spec-item,
+.page-header-card, .section-headline-box, .step-card, .evidence-panel,
+.verdict-clay-card, .verdict-box, .ai-explanation-panel, .config-card,
+.results-section, .kpi-card, .chart-panel, .robustness-panel,
+.methodology-card, .meth-box, .limitations-alert-box {
+  color: var(--aurora-copy) !important;
+  background: linear-gradient(145deg, rgba(31,27,19,.84), rgba(14,13,10,.93)) !important;
+  border-color: var(--aurora-border) !important;
+  box-shadow: 0 16px 42px rgba(0,0,0,.3), inset 0 1px rgba(255,255,255,.035) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.stat-chip-label, .contract-fullname, .price-label, .subtitle, .chart-subtitle,
+.section-description, .step-card p, .config-card p, .methodology-card p { color: var(--aurora-muted) !important; }
+.contract-symbol-icon, .stat-chip-icon, .panel-icon-circle {
+  background: linear-gradient(145deg,rgba(214,179,99,.16),rgba(27,23,15,.82)) !important;
+  border-color: rgba(214,179,99,.22) !important;
+}
+.filter-pill, .timeframe-btn, .toggle-btn, .toolbar-btn, .secondary-btn {
+  color: #ded5c1 !important;
+  background-color: rgba(255,255,255,.035) !important;
+  border-color: rgba(214,179,99,.17) !important;
+}
+.filter-pills-bar, .filter-bar, .filter-tabs, .tab-control-group {
+  background: rgba(15,13,9,.82) !important;
+  border-color: rgba(214,179,99,.16) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.filter-pill.active, .timeframe-btn.active, .toggle-btn.active, .toolbar-btn.active {
+  color: #171208 !important;
+  background: linear-gradient(135deg,#f0dfaa,#c6a04e) !important;
+}
+.page-title, .contract-symbol-title, .stat-chip-value, .kpi-value { color: #f2e5c4 !important; }
+@media (max-width: 1050px) {
+  .contracts-grid { grid-template-columns: minmax(0,1fr) !important; }
+}
+@media (max-width: 800px) {
+  .main-content, .content-area, .page-content { padding-left: 16px !important; padding-right: 16px !important; }
+  .sidebar { background: rgba(13,12,9,.98) !important; }
+  .chart-stats-row { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  #aurora-gold-nuggets, #particles-canvas { display: none !important; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .sidebar, .top-header, .panel, .card, .chart-section, .metric-card, .stat-card, .section-card, .analytics-card, .radar-card, .filter-panel, .table-container, .chart-container-wrapper, .chart-container-box { backdrop-filter: none; -webkit-backdrop-filter: none; background: #14120d !important; }
+}
+
+/* Shared warm charcoal palette. Page data and layout stay untouched. */
+:root {
+  --bg-dark:#080806; --bg-deep:#080806; --bg-space:#0b0a08; --bg-midnight:#0b0a08;
+  --bg-surface:#11100c; --bg-surface-elevated:#17150f; --bg-glass:rgba(25,22,16,.82);
+  --bg-glass-card:rgba(20,18,13,.78); --bg-card:rgba(20,18,13,.78);
+  --bg-card-elevated:rgba(27,24,17,.88); --bg-card-hover:rgba(34,29,19,.92);
+  --bg-clay:rgba(23,20,14,.86); --bg-input:rgba(10,9,7,.82);
+  --clay-surface:#17150f; --clay-surface-raised:#211c12; --clay-shadow-light:rgba(191,153,66,.1);
+  --navy-deep:#0b0a08; --navy-card:#17150f; --navy-border:rgba(214,179,99,.17);
+  --cyan-accent:#c6a95f; --cyan-glow:rgba(198,169,95,.18); --cyan-bg:rgba(198,169,95,.1); --cyan-border:rgba(198,169,95,.26);
+  --blue-accent:#b9a16b; --medium-blue:#b9a16b; --medium-glow:rgba(185,161,107,.18); --purple-accent:#9d8757;
+  --gold-primary:#d6b363; --gold-bright:#f1d995; --gold-light:#ead184;
+  --color-info:#c6a95f; --color-info-bg:rgba(198,169,95,.1);
+  --text-primary:#f0eadc; --text-main:#f0eadc; --text-secondary:#b6ae9c; --text-muted:#8e8778; --text-dim:#716b5e;
+  --border-glass:rgba(214,179,99,.14); --border-subtle:rgba(255,255,255,.07);
+}
+html,body { background-color:#080806 !important; }
+body { background-image:radial-gradient(ellipse at 76% 5%,rgba(153,112,35,.13),transparent 37%),radial-gradient(ellipse at 14% 88%,rgba(109,77,24,.09),transparent 42%),linear-gradient(180deg,#080806,#0c0b09 55%,#080806) !important; background-attachment:fixed !important; }
+#particles-canvas { opacity:.055 !important; }
+.app-container,.main-wrapper,.main-content,.content-area,.page-content,.page-container,.main-container,.nav-menu,.nav-list { background-color:transparent !important; }
+.sidebar { background:linear-gradient(180deg,rgba(15,14,11,.97),rgba(9,9,8,.98)) !important; border-right-color:rgba(214,179,99,.14) !important; }
+.brand-logo-container,.brand-logo-gem,.brand-logo-3d,.brand-icon-box { background:linear-gradient(145deg,rgba(38,32,20,.92),rgba(13,12,9,.98)) !important; border-color:rgba(214,179,99,.33) !important; box-shadow:0 7px 22px rgba(0,0,0,.38),0 0 16px rgba(193,151,57,.08),inset 0 1px rgba(255,255,255,.06) !important; }
+.aurora-brand-image { display:block; width:100%; height:100%; object-fit:contain; border-radius:inherit; }
+.panel,.card,.chart-section,.metric-card,.stat-card,.section-card,.analytics-card,.radar-card,.filter-panel,.table-container,.chart-container-wrapper,.chart-container-box,.contract-card,.price-hero-box,.normalization-sandbox,.comparison-section,.step-box,.formula-card,.spec-item,.page-header-card,.section-headline-box,.step-card,.evidence-panel,.verdict-clay-card,.verdict-box,.ai-explanation-panel,.config-card,.results-section,.kpi-card,.chart-panel,.robustness-panel,.methodology-card,.meth-box,.limitations-alert-box,.contract-detail-card,.spread-card,.signal-card,.event-card,.table-responsive {
+ color:#f0eadc !important; background:linear-gradient(145deg,rgba(30,27,20,.9),rgba(15,14,11,.94)) !important;
+ border-color:rgba(214,179,99,.16) !important; box-shadow:0 16px 42px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.045) !important;
+}
+.glass-panel,.health-card,.radar-container-card,.radar-summary-panel,.hero-stat-claybox,.pairwise-matrix-card,.signals-section,.trap-filter-panel,.distribution-panel,.traps-list-box,.funnel-visual-box,.modal-box,.modal-math-box,.modal-breakdown-card,.engine-status-box,.normalization-panel,.formula-showcase-box,.flow-card,.flow-input-box,.system-health-card,.normalization-panel,.flow-card,.chart-container-box {
+ color:#f0eadc !important; background:linear-gradient(145deg,rgba(30,27,20,.9),rgba(15,14,11,.94)) !important; border-color:rgba(214,179,99,.16) !important; box-shadow:0 16px 42px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.045) !important;
+}
+.card-investigate-btn { background:linear-gradient(120deg,#f0dda0,#c9a24a 56%,#9e782d) !important; border-color:rgba(241,217,149,.58) !important; color:#18140a !important; }
+.filter-pills-bar,.filter-bar,.filter-tabs,.tab-control-group,.filter-row,.toolbar,.table-toolbar { background:rgba(17,15,11,.9) !important; border-color:rgba(214,179,99,.15) !important; }
+input,select,textarea,.search-input,.filter-select { background-color:rgba(8,8,7,.78) !important; color:#f0eadc !important; border-color:rgba(214,179,99,.2) !important; }
+th { color:#c8b987 !important; } td { color:#e5dece; } tr:hover td { background:rgba(214,179,99,.055) !important; }
+.brand-title,.brand-text h1,.brand-info h1,.brand-name,.golden-text { color:#f2e5c4 !important; }
+.brand-name,.brand-title,.brand-text h1,.brand-info h1 { font-family:Inter,Manrope,ui-sans-serif,system-ui,sans-serif !important; font-weight:750 !important; letter-spacing:.12em !important; line-height:1.12 !important; }
+.brand-subtitle,.brand-text span,.brand-info span { color:#aa9b76 !important; font-family:Inter,Manrope,ui-sans-serif,system-ui,sans-serif !important; font-size:9px !important; font-weight:600 !important; letter-spacing:.08em !important; line-height:1.35 !important; }
+.brand-section,.brand-section .brand-text-container,.brand-section .brand-text { min-width:0; }
+.brand-section .brand-text-container,.brand-section .brand-text { overflow:visible; }
+.nav-item.active,.nav-item[aria-current="page"] { color:#f1dda8 !important; background:linear-gradient(90deg,rgba(214,179,99,.16),rgba(214,179,99,.035)) !important; border-color:rgba(214,179,99,.24) !important; }
+.nav-item.active i,.nav-item:hover i { color:#dfc477 !important; }
+.aurora-modal-backdrop { background:rgba(4,4,3,.8) !important; }
+.aurora-modal-card { background:linear-gradient(145deg,rgba(29,26,19,.98),rgba(10,10,8,.99)) !important; border-color:rgba(214,179,99,.24) !important; color:#eee8d9 !important; }
+.aurora-modal-body [style*="56, 189, 248"],.aurora-modal-body [style*="#38bdf8"],.aurora-modal-body [style*="#38BDF8"] { background-color:rgba(174,139,60,.1) !important; border-color:rgba(214,179,99,.23) !important; color:#ddc276 !important; }
+.aurora-modal-body strong[style*="#38bdf8"],.aurora-modal-body strong[style*="#38BDF8"] { color:#e0c77e !important; }
+.aurora-badge-blue { color:#dec57d !important; background:rgba(174,139,60,.12) !important; border-color:rgba(214,179,99,.27) !important; }
+.aurora-modal-body [style*="background: rgba(5, 8, 24"],.aurora-modal-body [style*="background: rgba(10, 14, 39"],.aurora-modal-body [style*="background: rgba(12, 22, 48"] { background:rgba(9,9,7,.76) !important; border-color:rgba(214,179,99,.18) !important; }
+@media (max-width:800px) { .sidebar { background:rgba(11,10,8,.99) !important; } }
+@media (prefers-reduced-transparency:reduce) { .panel,.card,.chart-section,.metric-card,.stat-card,.section-card,.analytics-card,.radar-card,.filter-panel,.table-container,.chart-container-wrapper,.chart-container-box,.sidebar,.top-header { background:#14120d !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; } }
+
+/* Replace legacy cyan accents with AURORA champagne while retaining red/green risk states. */
+.matrix-table td.cell-normal { color:#d8c27f !important; background:rgba(184,151,76,.12) !important; border-color:rgba(214,179,99,.24) !important; }
+.signal-card.medium { border-color:rgba(198,169,95,.65) !important; box-shadow:0 14px 40px rgba(0,0,0,.6),0 0 18px rgba(198,169,95,.12),inset 0 1px 1px rgba(255,255,255,.08) !important; }
+.pill-medium,.card-note-pill.info { color:#d9c78d !important; background:rgba(184,151,76,.1) !important; border-color:rgba(214,179,99,.25) !important; }
+.funnel-1 { background:linear-gradient(90deg,#8c713a,#c6a95f) !important; }
+.funnel-2 { background:linear-gradient(90deg,#a88c4e,#d6bd79) !important; }
+[style*="color:#38bdf8"],[style*="color: #38bdf8"],[style*="color:#38BDF8"],[style*="color: #38BDF8"] { color:#d9c78d !important; }
+[style*="background:#38bdf8"],[style*="background: #38bdf8"],[style*="background:#38BDF8"],[style*="background: #38BDF8"] { background:#c9a650 !important; }
+[style*="background: rgba(56, 189, 248"],[style*="background:rgba(56, 189, 248"] { background:rgba(184,151,76,.1) !important; border-color:rgba(214,179,99,.24) !important; }
+
+/* Near-black crystal glass surfaces shared by the analytics destinations. */
+:root { --aurora-bg:#020202; --aurora-panel:rgba(22,24,26,.46); --aurora-border:rgba(230,232,233,.15); }
+html,body { background-color:#020202 !important; }
+body { background-image:radial-gradient(ellipse at 73% 3%,rgba(199,161,72,.045),transparent 35%),radial-gradient(ellipse at 17% 83%,rgba(255,255,255,.018),transparent 42%),linear-gradient(180deg,#020202 0%,#050606 58%,#020202 100%) !important; }
+.sidebar { background:rgba(3,4,5,.91) !important; border-right-color:rgba(228,220,198,.14) !important; backdrop-filter:blur(24px) saturate(135%) !important; -webkit-backdrop-filter:blur(24px) saturate(135%) !important; }
+.top-header,header.topbar { background:rgba(6,7,8,.76) !important; border-color:rgba(228,220,198,.14) !important; backdrop-filter:blur(24px) saturate(140%) !important; -webkit-backdrop-filter:blur(24px) saturate(140%) !important; }
+.contract-top-header { gap:12px; padding-inline:20px; }
+.contract-top-header .header-left { flex:0 0 auto; min-width:0; }
+.contract-top-header .breadcrumb { gap:6px; white-space:nowrap; font-size:12px; }
+.contract-top-header .header-ticker { flex:1 1 620px; min-width:0; max-width:min(47vw,760px); gap:8px; padding:6px 10px; overflow-x:auto; scrollbar-width:none; }
+.contract-top-header .header-ticker::-webkit-scrollbar { display:none; }
+.contract-top-header .ticker-chip { flex:0 0 auto; gap:4px; white-space:nowrap; font-size:10px; }
+.contract-top-header .header-right { flex:0 0 auto; gap:8px; }
+.contract-top-header .aurora-pipeline-btn { flex:0 0 auto; gap:6px; padding:7px 10px; white-space:nowrap; font-size:11px; }
+.contract-top-header .market-badge { padding:6px 10px; white-space:nowrap; font-size:10px; }
+.contract-top-header .header-btn { flex:0 0 36px; width:36px; height:36px; }
+.contract-top-header .user-profile-badge { flex:0 0 auto; gap:7px; padding:4px 9px 4px 5px; white-space:nowrap; }
+@media(max-width:1500px) { .contract-top-header .header-ticker { display:none; } }
+@media(max-width:900px) { .contract-top-header { padding-inline:12px; gap:8px; } .contract-top-header .header-right { gap:6px; } .contract-top-header .user-info { display:none; } .contract-top-header .aurora-pipeline-btn span { display:none; } .contract-top-header .aurora-pipeline-btn { width:36px; height:36px; justify-content:center; padding:0; } }
+.panel,.card,.chart-section,.metric-card,.stat-card,.section-card,.analytics-card,.radar-card,.filter-panel,.table-container,.chart-container-wrapper,.chart-container-box,.contract-card,.price-hero-box,.normalization-sandbox,.comparison-section,.step-box,.formula-card,.spec-item,.page-header-card,.section-headline-box,.step-card,.evidence-panel,.verdict-clay-card,.verdict-box,.ai-explanation-panel,.config-card,.results-section,.kpi-card,.chart-panel,.robustness-panel,.methodology-card,.meth-box,.limitations-alert-box,.contract-detail-card,.spread-card,.signal-card,.event-card,.table-responsive,.glass-panel,.health-card,.radar-container-card,.radar-summary-panel,.hero-stat-claybox,.pairwise-matrix-card,.signals-section,.trap-filter-panel,.distribution-panel,.traps-list-box,.funnel-visual-box,.modal-box,.modal-math-box,.modal-breakdown-card,.engine-status-box,.normalization-panel,.formula-showcase-box,.flow-card,.flow-input-box,.system-health-card {
+  background:linear-gradient(132deg,rgba(255,255,255,.075),rgba(255,255,255,.018) 27%,transparent 58%),linear-gradient(145deg,rgba(38,40,42,.48),rgba(9,10,11,.58)),rgba(8,9,10,.34) !important;
+  border-color:rgba(226,228,230,.15) !important;
+  box-shadow:0 20px 52px rgba(0,0,0,.46),inset 0 1px rgba(255,255,255,.11),inset 0 0 0 1px rgba(214,179,99,.035) !important;
+  backdrop-filter:blur(24px) saturate(138%) !important;
+  -webkit-backdrop-filter:blur(24px) saturate(138%) !important;
+}
+.filter-pills-bar,.filter-bar,.filter-tabs,.tab-control-group,.filter-row,.toolbar,.table-toolbar { background:rgba(12,13,14,.68) !important; border-color:rgba(226,228,230,.13) !important; backdrop-filter:blur(18px) !important; -webkit-backdrop-filter:blur(18px) !important; }
+input,select,textarea,.search-input,.filter-select { background:rgba(5,6,7,.64) !important; border-color:rgba(226,228,230,.16) !important; }
+.aurora-modal-card { background:linear-gradient(132deg,rgba(255,255,255,.065),transparent 38%),linear-gradient(145deg,rgba(30,32,34,.9),rgba(5,6,7,.94)) !important; border-color:rgba(226,228,230,.18) !important; backdrop-filter:blur(24px) !important; -webkit-backdrop-filter:blur(24px) !important; }
+@media (prefers-reduced-transparency:reduce) {
+  .sidebar,.top-header,header.topbar,.panel,.card,.chart-section,.metric-card,.stat-card,.section-card,.analytics-card,.radar-card,.filter-panel,.table-container,.chart-container-wrapper,.chart-container-box,.contract-card,.price-hero-box,.normalization-sandbox,.comparison-section,.step-box,.formula-card,.spec-item,.page-header-card,.section-headline-box,.step-card,.evidence-panel,.verdict-clay-card,.verdict-box,.ai-explanation-panel,.config-card,.results-section,.kpi-card,.chart-panel,.robustness-panel,.methodology-card,.meth-box,.limitations-alert-box,.contract-detail-card,.spread-card,.signal-card,.event-card,.table-responsive { background:#111112 !important; backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
+}
+
+/* Let the shared moving gold facets remain visible through the glass surfaces. */
+#aurora-gold-nuggets { opacity:.78 !important; }
+.panel,.card,.chart-section,.metric-card,.stat-card,.section-card,.analytics-card,.radar-card,.filter-panel,.table-container,.chart-container-wrapper,.chart-container-box,.contract-card,.price-hero-box,.normalization-sandbox,.comparison-section,.step-box,.formula-card,.spec-item,.page-header-card,.section-headline-box,.step-card,.evidence-panel,.verdict-clay-card,.verdict-box,.ai-explanation-panel,.config-card,.results-section,.kpi-card,.chart-panel,.robustness-panel,.methodology-card,.meth-box,.limitations-alert-box,.contract-detail-card,.spread-card,.signal-card,.event-card,.table-responsive,.glass-panel,.health-card,.radar-container-card,.radar-summary-panel,.hero-stat-claybox,.pairwise-matrix-card,.signals-section,.trap-filter-panel,.distribution-panel,.traps-list-box,.funnel-visual-box,.modal-box,.modal-math-box,.modal-breakdown-card,.engine-status-box,.normalization-panel,.formula-showcase-box,.flow-card,.flow-input-box,.system-health-card {
+  background:linear-gradient(132deg,rgba(255,255,255,.065),rgba(255,255,255,.012) 27%,transparent 58%),linear-gradient(145deg,rgba(29,30,30,.2),rgba(7,8,9,.28)),rgba(5,6,7,.14) !important;
+  backdrop-filter:blur(12px) saturate(124%) !important;
+  -webkit-backdrop-filter:blur(12px) saturate(124%) !important;
+}
+@media(max-width:700px){#aurora-gold-nuggets{opacity:.54!important}}
+@media(prefers-reduced-motion:reduce){#aurora-gold-nuggets{display:block!important;opacity:.4!important}}

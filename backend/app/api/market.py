@@ -8,6 +8,7 @@ from backend.app.schemas.common import StandardResponse, PaginationMeta
 from backend.app.schemas.market import MarketStatusRead, MarketPriceItem, MarketPriceList
 from backend.app.providers import get_market_provider
 from backend.app.models.market_observation import MarketObservation
+from backend.app.services.data_provenance import eligible_analytics_observations_query
 
 router = APIRouter(prefix="/market", tags=["Market Data"])
 
@@ -40,7 +41,9 @@ def get_market_prices(
     Returns historical observations with both quoted prices and fine-gold normalized metrics.
     Supports filtering by contract symbol and trade date bounds.
     """
-    query = db.query(MarketObservation)
+    # Preserve stored observations for auditability while applying the shared
+    # analytics eligibility policy to market results.
+    query = eligible_analytics_observations_query(db)
 
     if symbol:
         clean_symbol = symbol.strip().upper()

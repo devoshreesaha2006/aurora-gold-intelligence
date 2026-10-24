@@ -14,7 +14,7 @@
         for (var k = 0; k < count; k++) {
           var x = (k - (count - 1) / 2) * (W + G);
           bars += '<div class="bar" style="--x:' + x + 'px;--y:' + y + 'px">' +
-            '<div class="f front"><span>FINE GOLD 999.9</span></div><div class="f back"></div>' +
+            '<div class="f front"><span>AURORA · 995 BASIS</span></div><div class="f back"></div>' +
             '<div class="f left"></div><div class="f right"></div>' +
             '<div class="f top"><span>AURORA</span><i class="shine" style="--sd:' + (n * 0.7) + 's"></i></div><div class="f bottom"></div></div>';
           n++;
@@ -32,22 +32,39 @@
   function dust() {
     var c = document.createElement('canvas'); c.id = 'dust'; c.setAttribute('aria-hidden', 'true'); document.body.appendChild(c);
     var ctx = c.getContext('2d'), w, h, dpr = Math.min(window.devicePixelRatio || 1, 2), pts = [];
+    if (!ctx) { c.hidden = true; return function () {}; }
     function size() { w = innerWidth; h = innerHeight; c.width = w * dpr; c.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
     size(); addEventListener('resize', size);
-    var N = w < 700 ? 45 : 95;
-    for (var i = 0; i < N; i++) pts.push({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random(), s: .15 + Math.random() * .35, p: Math.random() * 6.28 });
+    var isLanding = document.body.classList.contains('landing-page');
+    var N = w < 700 ? (isLanding ? 48 : 45) : (isLanding ? 118 : 95);
+    for (var i = 0; i < N; i++) pts.push({
+      x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random(),
+      s: .15 + Math.random() * .35, p: Math.random() * 6.28,
+      flake: isLanding && Math.random() < .24, angle: Math.random() * 6.28,
+      spin: (Math.random() - .5) * .0018, sway: Math.random() * 6.28
+    });
     function frame(t) {
       ctx.clearRect(0, 0, w, h);
       for (var i = 0; i < pts.length; i++) {
         var p = pts[i];
-        if (!reduce) { p.y -= p.s * 0.0009 * (1 + p.z); if (p.y < -1.1) { p.y = 1.1; p.x = Math.random() * 2 - 1; } }
+        if (!reduce) {
+          p.y += p.s * (p.flake ? 0.00042 : -0.0009) * (1 + p.z);
+          if (p.flake) { p.x += Math.sin(t / 1400 + p.sway) * 0.00012; p.angle += p.spin * 16; }
+          if (p.y < -1.1 || p.y > 1.1) { p.y = p.y < 0 ? 1.1 : -1.1; p.x = Math.random() * 2 - 1; }
+        }
         var depth = 0.25 + p.z * 0.75;
         var px = w / 2 + (p.x * w / 2) * 1.05 - smooth.x * 38 * depth;
         var py = h / 2 + (p.y * h / 2) * 1.05 - smooth.y * 24 * depth;
-        var r = 0.6 + depth * 2.1, tw = .55 + .45 * Math.sin(t / 900 + p.p);
+        var r = (p.flake ? 1.1 : 0.6) + depth * (p.flake ? 1.5 : 2.1), tw = .55 + .45 * Math.sin(t / 900 + p.p);
         var g = ctx.createRadialGradient(px, py, 0, px, py, r * 4);
-        g.addColorStop(0, 'rgba(255,224,110,' + (0.75 * depth * tw) + ')'); g.addColorStop(1, 'rgba(240,185,11,0)');
+        g.addColorStop(0, 'rgba(255,224,110,' + ((p.flake ? 0.52 : 0.75) * depth * tw) + ')'); g.addColorStop(1, 'rgba(240,185,11,0)');
         ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, r * 4, 0, 6.283); ctx.fill();
+        if (p.flake) {
+          ctx.save(); ctx.translate(px, py); ctx.rotate(p.angle);
+          ctx.globalAlpha = .28 + .38 * depth * tw; ctx.fillStyle = '#ffe9a0';
+          ctx.beginPath(); ctx.moveTo(0, -r * 1.8); ctx.lineTo(r * .56, 0); ctx.lineTo(0, r * 1.8); ctx.lineTo(-r * .56, 0); ctx.closePath(); ctx.fill();
+          ctx.restore();
+        }
       }
     }
     return frame;
@@ -82,6 +99,7 @@
 
     if (fine && !reduce) addEventListener('mousemove', function (e) { mouse.x = e.clientX / innerWidth * 2 - 1; mouse.y = e.clientY / innerHeight * 2 - 1; });
 
+    var frameId = 0;
     function loop(t) {
       smooth.x += (mouse.x - smooth.x) * 0.06; smooth.y += (mouse.y - smooth.y) * 0.06;
       scenes.forEach(function (s) { s.style.setProperty('--mx', smooth.x.toFixed(3)); s.style.setProperty('--my', smooth.y.toFixed(3)); });
@@ -94,9 +112,17 @@
         deck.style.setProperty('--dty', (30 * e).toFixed(1) + 'px');
       }
       dustFrame(t);
-      requestAnimationFrame(loop);
+      if (!document.hidden) frameId = requestAnimationFrame(loop);
     }
-    requestAnimationFrame(loop);
+    if (reduce) {
+      dustFrame(0);
+    } else {
+      frameId = requestAnimationFrame(loop);
+      document.addEventListener('visibilitychange', function () {
+        if (document.hidden) cancelAnimationFrame(frameId);
+        else frameId = requestAnimationFrame(loop);
+      });
+    }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();

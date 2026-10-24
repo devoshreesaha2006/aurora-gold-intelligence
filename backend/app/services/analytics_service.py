@@ -7,6 +7,7 @@ import numpy as np
 
 from backend.app.models.market_observation import MarketObservation
 from backend.app.models.contract import Contract
+from backend.app.services.data_provenance import eligible_analytics_observations_query
 from backend.app.schemas.analytics import (
     PairSpreadPoint, PairSpreadResponse, CostHurdleAssumptions,
     PairRadarItem, RadarResponse, RelativeValueEvent, EventsResponse,
@@ -88,33 +89,38 @@ class RelativeValueAnalyticsService:
         end_date: Optional[date] = None
     ) -> List[Tuple[MarketObservation, MarketObservation]]:
         """
-        Retrieves synchronized daily observations where BOTH leg A and leg B have records
-        on the exact same trade_date. Avoids forward-filling or fabricated quotes.
+        Retrieves synchronized observations where both legs match on trade_date AND
+        expiry_date. Avoids pairing different contract expiries, forward-filling, or
+        fabricated quotes.
         """
         # Fetch Leg A observations
-        query_a = self.db.query(MarketObservation).filter(MarketObservation.symbol == leg_a)
+        query_a = eligible_analytics_observations_query(self.db).filter(MarketObservation.symbol == leg_a)
         if start_date:
             query_a = query_a.filter(MarketObservation.trade_date >= start_date)
         if end_date:
             query_a = query_a.filter(MarketObservation.trade_date <= end_date)
-        obs_a = query_a.order_by(MarketObservation.trade_date.asc()).all()
+        obs_a = query_a.order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc()).all()
 
         # Fetch Leg B observations
-        query_b = self.db.query(MarketObservation).filter(MarketObservation.symbol == leg_b)
+        query_b = eligible_analytics_observations_query(self.db).filter(MarketObservation.symbol == leg_b)
         if start_date:
             query_b = query_b.filter(MarketObservation.trade_date >= start_date)
         if end_date:
             query_b = query_b.filter(MarketObservation.trade_date <= end_date)
-        obs_b = query_b.order_by(MarketObservation.trade_date.asc()).all()
+        obs_b = query_b.order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc()).all()
 
-        # Map by trade_date
-        map_b = {b.trade_date: b for b in obs_b}
-        synchronized: List[Tuple[MarketObservation, MarketObservation]] = []
+        # An instrument can have multiple listed expiries on one trade date. Pair only
+        # the same dated contract; a date-only map silently crossed those contracts.
+        map_b = {(b.trade_date, b.expiry_date): b for b in obs_b}
+        synchronized_by_date: Dict[date, Tuple[MarketObservation, MarketObservation]] = {}
         for a in obs_a:
-            if a.trade_date in map_b:
-                synchronized.append((a, map_b[a.trade_date]))
+            key = (a.trade_date, a.expiry_date)
+            if key in map_b:
+                # When more than one common expiry is present, use the nearest
+                # available common expiry (front contract) once per session.
+                synchronized_by_date.setdefault(a.trade_date, (a, map_b[key]))
 
-        return synchronized
+        return [synchronized_by_date[trade_day] for trade_day in sorted(synchronized_by_date)]
 
     def calculate_pairwise_spread_series(
         self,
@@ -168,6 +174,7 @@ class RelativeValueAnalyticsService:
                 # Insufficient history for sample variance
                 data_points.append(PairSpreadPoint(
                     trade_date=oa.trade_date,
+                    expiry_date=oa.expiry_date,
                     spread=spread_val,
                     price_a=oa.normalized_price_10g_basis if not invert_spread else ob.normalized_price_10g_basis,
                     price_b=ob.normalized_price_10g_basis if not invert_spread else oa.normalized_price_10g_basis,
@@ -181,10 +188,10 @@ class RelativeValueAnalyticsService:
                     lower_2sigma=None,
                     upper_1sigma=None,
                     lower_1sigma=None,
-                    volume_a=oa.volume if not invert_spread else ob.volume,
-                    volume_b=ob.volume if not invert_spread else oa.volume,
-                    open_interest_a=oa.open_interest if not invert_spread else ob.open_interest,
-                    open_interest_b=ob.open_interest if not invert_spread else oa.open_interest,
+                    volume_a=(oa.volume if oa.volume_observed else None) if not invert_spread else (ob.volume if ob.volume_observed else None),
+                    volume_b=(ob.volume if ob.volume_observed else None) if not invert_spread else (oa.volume if oa.volume_observed else None),
+                    open_interest_a=(oa.open_interest if oa.open_interest_observed else None) if not invert_spread else (ob.open_interest if ob.open_interest_observed else None),
+                    open_interest_b=(ob.open_interest if ob.open_interest_observed else None) if not invert_spread else (oa.open_interest if oa.open_interest_observed else None),
                     dte_a=dte_a if not invert_spread else dte_b,
                     dte_b=dte_b if not invert_spread else dte_a,
                     status="insufficient_history"
@@ -197,6 +204,7 @@ class RelativeValueAnalyticsService:
                     # Zero variance in window
                     data_points.append(PairSpreadPoint(
                         trade_date=oa.trade_date,
+                        expiry_date=oa.expiry_date,
                         spread=spread_val,
                         price_a=oa.normalized_price_10g_basis if not invert_spread else ob.normalized_price_10g_basis,
                         price_b=ob.normalized_price_10g_basis if not invert_spread else oa.normalized_price_10g_basis,
@@ -210,10 +218,10 @@ class RelativeValueAnalyticsService:
                         lower_2sigma=round(mean_val, 2),
                         upper_1sigma=round(mean_val, 2),
                         lower_1sigma=round(mean_val, 2),
-                        volume_a=oa.volume if not invert_spread else ob.volume,
-                        volume_b=ob.volume if not invert_spread else oa.volume,
-                        open_interest_a=oa.open_interest if not invert_spread else ob.open_interest,
-                        open_interest_b=ob.open_interest if not invert_spread else oa.open_interest,
+                        volume_a=(oa.volume if oa.volume_observed else None) if not invert_spread else (ob.volume if ob.volume_observed else None),
+                        volume_b=(ob.volume if ob.volume_observed else None) if not invert_spread else (oa.volume if oa.volume_observed else None),
+                        open_interest_a=(oa.open_interest if oa.open_interest_observed else None) if not invert_spread else (ob.open_interest if ob.open_interest_observed else None),
+                        open_interest_b=(ob.open_interest if ob.open_interest_observed else None) if not invert_spread else (oa.open_interest if oa.open_interest_observed else None),
                         dte_a=dte_a if not invert_spread else dte_b,
                         dte_b=dte_b if not invert_spread else dte_a,
                         status="zero_variance"
@@ -228,6 +236,7 @@ class RelativeValueAnalyticsService:
 
                     data_points.append(PairSpreadPoint(
                         trade_date=oa.trade_date,
+                        expiry_date=oa.expiry_date,
                         spread=spread_val,
                         price_a=oa.normalized_price_10g_basis if not invert_spread else ob.normalized_price_10g_basis,
                         price_b=ob.normalized_price_10g_basis if not invert_spread else oa.normalized_price_10g_basis,
@@ -241,10 +250,10 @@ class RelativeValueAnalyticsService:
                         lower_2sigma=round(mean_val - 2 * std_val, 2),
                         upper_1sigma=round(mean_val + std_val, 2),
                         lower_1sigma=round(mean_val - std_val, 2),
-                        volume_a=oa.volume if not invert_spread else ob.volume,
-                        volume_b=ob.volume if not invert_spread else oa.volume,
-                        open_interest_a=oa.open_interest if not invert_spread else ob.open_interest,
-                        open_interest_b=ob.open_interest if not invert_spread else oa.open_interest,
+                        volume_a=(oa.volume if oa.volume_observed else None) if not invert_spread else (ob.volume if ob.volume_observed else None),
+                        volume_b=(ob.volume if ob.volume_observed else None) if not invert_spread else (oa.volume if oa.volume_observed else None),
+                        open_interest_a=(oa.open_interest if oa.open_interest_observed else None) if not invert_spread else (ob.open_interest if ob.open_interest_observed else None),
+                        open_interest_b=(ob.open_interest if ob.open_interest_observed else None) if not invert_spread else (oa.open_interest if oa.open_interest_observed else None),
                         dte_a=dte_a if not invert_spread else dte_b,
                         dte_b=dte_b if not invert_spread else dte_a,
                         status="valid"
@@ -266,15 +275,15 @@ class RelativeValueAnalyticsService:
         z_score: Optional[float],
         percentile: Optional[float],
         dte_min: Optional[int],
-        min_volume: int,
-        min_open_interest: int,
+        min_volume: Optional[int],
+        min_open_interest: Optional[int],
         cost_hurdle: float = 25.0,
         z_investigate_threshold: float = 1.5,
         z_watch_threshold: float = 1.0,
         expiry_risk_days: int = 5,
         min_liquidity_volume: int = 100,
         min_liquidity_oi: int = 500
-    ) -> Tuple[str, float, float, bool, bool, bool, Optional[float], Optional[float], str]:
+    ) -> Tuple[str, Optional[float], Optional[float], bool, bool, bool, Optional[float], Optional[float], str]:
         """
         Applies transparent decision logic to classify the state into:
         - Expiry-Risk: Contract in roll window / tender delivery period (DTE <= 5 days).
@@ -286,17 +295,17 @@ class RelativeValueAnalyticsService:
         Returns:
         (classification, opportunity_score, trap_risk_score, is_expiry_risk, is_cost_blocked, is_liquidity_trap, gross_edge, net_edge, reason)
         """
-        if spread is None or rolling_mean is None:
+        if spread is None or rolling_mean is None or z_score is None:
             return (
-                "Watch",
-                0.0,
-                50.0,
-                False,
-                False,
-                True,
+                "No Signal",
                 None,
                 None,
-                "Insufficient observation history to establish statistical baseline."
+                False,
+                False,
+                False,
+                None,
+                None,
+                "Insufficient synchronized history to calculate a statistical baseline."
             )
 
         gross_edge = round(abs(spread - rolling_mean), 2)
@@ -304,7 +313,10 @@ class RelativeValueAnalyticsService:
 
         is_expiry_risk = (dte_min is not None and dte_min <= expiry_risk_days)
         is_cost_blocked = (gross_edge <= cost_hurdle)
-        is_liquidity_trap = (min_volume < min_liquidity_volume or min_open_interest < min_liquidity_oi)
+        liquidity_known = min_volume is not None and min_open_interest is not None
+        is_liquidity_trap = liquidity_known and (
+            min_volume < min_liquidity_volume or min_open_interest < min_liquidity_oi
+        )
 
         # Trap Risk Score (0-100)
         trap_score = 0.0
@@ -320,7 +332,7 @@ class RelativeValueAnalyticsService:
 
         if is_liquidity_trap:
             trap_score += 25.0
-        elif min_volume < 300:
+        elif min_volume is not None and min_volume < 300:
             trap_score += 10.0
 
         trap_risk_score = min(100.0, max(0.0, trap_score))
@@ -353,6 +365,9 @@ class RelativeValueAnalyticsService:
         elif abs_z >= z_investigate_threshold and is_liquidity_trap:
             classification = "Watch"
             reason = f"Statistical dislocation (|Z|={abs_z:.2f}σ) detected, but secondary leg liquidity (Vol={min_volume}, OI={min_open_interest}) fails depth threshold."
+        elif abs_z >= z_investigate_threshold and not liquidity_known:
+            classification = "Watch"
+            reason = f"Statistical dislocation (|Z|={abs_z:.2f}σ) detected, but liquidity is unassessed because volume or open interest was not supplied."
         elif abs_z >= z_investigate_threshold and net_edge > 0:
             classification = "Investigate"
             reason = f"Confirmed statistical dislocation (|Z|={abs_z:.2f}σ, Percentile={percentile:.1f}%) with positive net edge (₹{net_edge}/10g after friction)."
@@ -362,6 +377,9 @@ class RelativeValueAnalyticsService:
         else:
             classification = "No Signal"
             reason = f"Spread is within normal historical equilibrium (|Z|={abs_z:.2f}σ < {z_watch_threshold}σ)."
+
+        if not liquidity_known and "liquidity is unassessed" not in reason.lower():
+            reason += " Liquidity is unassessed because volume or open interest was not supplied."
 
         return (
             classification,
@@ -392,7 +410,9 @@ class RelativeValueAnalyticsService:
         expiry_risk_count = 0
         watch_count = 0
 
-        latest_date = evaluation_date
+        latest_date = evaluation_date or eligible_analytics_observations_query(self.db).with_entities(
+            func.max(MarketObservation.trade_date)
+        ).scalar()
 
         for leg_a, leg_b in VALID_PAIRS:
             pair_name = f"{leg_a}-{leg_b}"
@@ -400,37 +420,72 @@ class RelativeValueAnalyticsService:
                 leg_a=leg_a,
                 leg_b=leg_b,
                 window_days=window_days,
-                end_date=evaluation_date
+                end_date=latest_date
             )
+            full_pair_history = series_resp.data_points
+
+            # A snapshot is only comparable when every pair uses the same session.
+            # Missing pair observations remain empty instead of carrying stale data.
+            if latest_date is not None:
+                series_resp.data_points = [point for point in series_resp.data_points if point.trade_date == latest_date]
 
             if not series_resp.data_points:
-                # No data available for this pair
+                # Explain why this pair has no point on the common snapshot date.
+                reason = "No eligible synchronized observations are available for this pair."
+                if latest_date is not None:
+                    latest_rows = eligible_analytics_observations_query(self.db).filter(
+                        MarketObservation.symbol.in_((leg_a, leg_b)),
+                        MarketObservation.trade_date == latest_date
+                    ).all()
+                    expiries_by_symbol = {
+                        symbol: sorted({row.expiry_date for row in latest_rows if row.symbol == symbol and row.expiry_date})
+                        for symbol in (leg_a, leg_b)
+                    }
+                    expiries_a, expiries_b = expiries_by_symbol[leg_a], expiries_by_symbol[leg_b]
+                    if expiries_a and expiries_b and not set(expiries_a).intersection(expiries_b):
+                        fmt = lambda values: ", ".join(value.isoformat() for value in values)
+                        reason = (
+                            f"No same-expiry contracts for {pair_name} on evaluation date {latest_date}; "
+                            f"{leg_a} expiries: {fmt(expiries_a)}; {leg_b} expiries: {fmt(expiries_b)}. "
+                            "Different expiries are not paired."
+                        )
+                    elif not expiries_a or not expiries_b:
+                        missing = leg_a if not expiries_a else leg_b
+                        reason = f"No {missing} observation is available on evaluation date {latest_date}."
+                    if full_pair_history:
+                        latest_match = full_pair_history[-1]
+                        reason += (
+                            f" Latest exact shared-expiry history: {latest_match.trade_date} "
+                            f"(expiry {latest_match.expiry_date}; {len(full_pair_history)} observations); "
+                            "it is not a current snapshot."
+                        )
                 items.append(PairRadarItem(
                     pair=pair_name,
                     leg_a=leg_a,
                     leg_b=leg_b,
                     trade_date=None,
+                    expiry_date=None,
                     spread=None,
                     rolling_mean=None,
                     rolling_std=None,
                     z_score=None,
                     percentile_rank=None,
-                    deviation_intensity=0.0,
-                    historical_norm=25.0,
-                    friction_boundary=40.0,
+                    deviation_intensity=None,
+                    historical_norm=None,
+                    friction_boundary=None,
                     classification="No Signal",
-                    opportunity_score=0.0,
-                    trap_risk_score=0.0,
+                    opportunity_score=None,
+                    trap_risk_score=None,
                     is_expiry_risk=False,
                     is_cost_blocked=False,
-                    is_liquidity_trap=True,
+                    is_liquidity_trap=False,
                     dte_min=None,
-                    min_volume=0,
-                    min_open_interest=0,
+                    min_volume=None,
+                    min_open_interest=None,
                     estimated_cost_hurdle=cost_hurdle,
                     gross_edge=None,
                     net_edge=None,
-                    reason="No synchronized trade data available."
+                    reason=reason
                 ))
                 continue
 
@@ -446,8 +501,8 @@ class RelativeValueAnalyticsService:
             elif last_pt.dte_b is not None:
                 dte_min = last_pt.dte_b
 
-            min_vol = min(last_pt.volume_a, last_pt.volume_b)
-            min_oi = min(last_pt.open_interest_a, last_pt.open_interest_b)
+            min_vol = min(last_pt.volume_a, last_pt.volume_b) if last_pt.volume_a is not None and last_pt.volume_b is not None else None
+            min_oi = min(last_pt.open_interest_a, last_pt.open_interest_b) if last_pt.open_interest_a is not None and last_pt.open_interest_b is not None else None
 
             (
                 classification,
@@ -480,22 +535,34 @@ class RelativeValueAnalyticsService:
                 watch_count += 1
 
             # Map Z to 0-100 radar deviation intensity
-            abs_z = abs(last_pt.z_score) if last_pt.z_score is not None else 0.0
-            dev_intensity = round(min(100.0, (abs_z / 2.5) * 100.0), 1)
+            abs_z = abs(last_pt.z_score) if last_pt.z_score is not None else None
+            dev_intensity = round(min(100.0, (abs_z / 2.5) * 100.0), 1) if abs_z is not None else None
+            prior_intensities = [
+                min(100.0, abs(point.z_score) / 2.5 * 100.0)
+                for point in full_pair_history
+                if point.trade_date < last_pt.trade_date and point.z_score is not None
+            ]
+            historical_norm = round(float(np.median(prior_intensities)), 1) if prior_intensities else None
+            friction_boundary = (
+                round(min(100.0, cost_hurdle / last_pt.rolling_std / 2.5 * 100.0), 1)
+                if last_pt.rolling_std is not None and last_pt.rolling_std > 0
+                else None
+            )
 
             items.append(PairRadarItem(
                 pair=pair_name,
                 leg_a=leg_a,
                 leg_b=leg_b,
                 trade_date=last_pt.trade_date,
+                expiry_date=last_pt.expiry_date,
                 spread=last_pt.spread,
                 rolling_mean=last_pt.rolling_mean,
                 rolling_std=last_pt.rolling_std,
                 z_score=last_pt.z_score,
                 percentile_rank=last_pt.percentile_rank,
                 deviation_intensity=dev_intensity,
-                historical_norm=28.0,
-                friction_boundary=40.0,
+                historical_norm=historical_norm,
+                friction_boundary=friction_boundary,
                 classification=classification,
                 opportunity_score=opp_score,
                 trap_risk_score=trap_score,
@@ -556,8 +623,8 @@ class RelativeValueAnalyticsService:
                     continue
 
                 dte_min = min(pt.dte_a, pt.dte_b) if (pt.dte_a and pt.dte_b) else (pt.dte_a or pt.dte_b)
-                min_vol = min(pt.volume_a, pt.volume_b)
-                min_oi = min(pt.open_interest_a, pt.open_interest_b)
+                min_vol = min(pt.volume_a, pt.volume_b) if pt.volume_a is not None and pt.volume_b is not None else None
+                min_oi = min(pt.open_interest_a, pt.open_interest_b) if pt.open_interest_a is not None and pt.open_interest_b is not None else None
 
                 (
                     classification,
@@ -650,7 +717,10 @@ class RelativeValueAnalyticsService:
     ) -> DistributionResponse:
         """
         Calculates empirical distribution and Gaussian theoretical normal curve
-        for the specified pair over the available history.
+        for the specified pair over the available history. Each point pairs the
+        same trade date and expiry; when multiple shared expiries exist, the
+        nearest shared expiry is selected for that session. Expiry can therefore
+        roll between historical points, but never within one paired observation.
         """
         try:
             leg_a, leg_b, is_inverted = parse_pair(pair)
@@ -677,10 +747,13 @@ class RelativeValueAnalyticsService:
                 status="insufficient_history"
             )
 
-        spreads = [p.spread for p in series.data_points]
+        # `window_days` is the existing API parameter name; distribution windows
+        # are bounded by synchronized trading observations, not calendar dates.
+        points = series.data_points[-window_days:]
+        spreads = [p.spread for p in points]
         sample_size = len(spreads)
         current_spread = spreads[-1]
-        last_point = series.data_points[-1]
+        last_point = points[-1]
 
         mean_val = float(np.mean(spreads))
         sigma_val = float(np.std(spreads, ddof=1)) if sample_size > 1 else 0.0
@@ -726,6 +799,12 @@ class RelativeValueAnalyticsService:
             pair=pair,
             window_days=window_days,
             sample_size=sample_size,
+            expiry_policy=(
+                "Each point matches the same trade date and expiry; the nearest "
+                "shared expiry is selected per session, so expiry can roll across history."
+            ),
+            evaluation_date=last_point.trade_date,
+            expiry_date=last_point.expiry_date,
             mean=round(mean_val, 2),
             sigma=round(sigma_val, 2),
             median=round(median_val, 2),

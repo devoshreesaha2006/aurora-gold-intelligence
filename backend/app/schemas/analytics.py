@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 class PairSpreadPoint(BaseModel):
     trade_date: date
+    expiry_date: Optional[date] = Field(None, description="Shared contract expiry matched across both pair legs")
     spread: float = Field(..., description="Normalized Spread (Leg A - Leg B) in ₹ per 10g benchmark basis")
     price_a: float = Field(..., description="Leg A normalized price (₹ per 10g)")
     price_b: float = Field(..., description="Leg B normalized price (₹ per 10g)")
@@ -22,10 +23,10 @@ class PairSpreadPoint(BaseModel):
     lower_2sigma: Optional[float] = None
     upper_1sigma: Optional[float] = None
     lower_1sigma: Optional[float] = None
-    volume_a: int = 0
-    volume_b: int = 0
-    open_interest_a: int = 0
-    open_interest_b: int = 0
+    volume_a: Optional[int] = None
+    volume_b: Optional[int] = None
+    open_interest_a: Optional[int] = None
+    open_interest_b: Optional[int] = None
     dte_a: Optional[int] = Field(None, description="Leg A days to expiry")
     dte_b: Optional[int] = Field(None, description="Leg B days to expiry")
     status: str = Field("valid", description="Calculation status: 'valid', 'insufficient_history', 'zero_variance'")
@@ -57,23 +58,24 @@ class PairRadarItem(BaseModel):
     leg_a: str
     leg_b: str
     trade_date: Optional[date] = None
+    expiry_date: Optional[date] = None
     spread: Optional[float] = None
     rolling_mean: Optional[float] = None
     rolling_std: Optional[float] = None
     z_score: Optional[float] = None
     percentile_rank: Optional[float] = None
-    deviation_intensity: float = Field(0.0, description="0-100 scale for radar visualization (|Z| mapped to 0-100)")
-    historical_norm: float = Field(25.0, description="Baseline expected deviation intensity (0-100)")
-    friction_boundary: float = Field(40.0, description="Cost hurdle mapped to deviation scale (0-100)")
+    deviation_intensity: Optional[float] = Field(None, description="0-100 scale for radar visualization (|Z| mapped to 0-100); null without eligible observations")
+    historical_norm: Optional[float] = Field(None, description="Median prior-session deviation intensity (0-100), when history exists")
+    friction_boundary: Optional[float] = Field(None, description="Cost hurdle mapped to current rolling standard deviation (0-100), when defined")
     classification: str = Field(..., description="Investigate, Watch, Cost-Blocked, Expiry-Risk, or No Signal")
-    opportunity_score: float = Field(..., description="0-100 composite opportunity rating")
-    trap_risk_score: float = Field(..., description="0-100 composite execution/trap risk rating")
+    opportunity_score: Optional[float] = Field(None, description="0-100 composite opportunity rating; null without an analyzable observation")
+    trap_risk_score: Optional[float] = Field(None, description="0-100 composite execution/trap risk rating; null without an analyzable observation")
     is_expiry_risk: bool = False
     is_cost_blocked: bool = False
     is_liquidity_trap: bool = False
     dte_min: Optional[int] = None
-    min_volume: int = 0
-    min_open_interest: int = 0
+    min_volume: Optional[int] = None
+    min_open_interest: Optional[int] = None
     estimated_cost_hurdle: float
     gross_edge: Optional[float] = None
     net_edge: Optional[float] = None
@@ -141,6 +143,9 @@ class DistributionResponse(BaseModel):
     pair: str
     window_days: int
     sample_size: int
+    expiry_policy: str = "Each point matches the same trade date and expiry; the nearest shared expiry is selected per session, so expiry can roll across history."
+    evaluation_date: Optional[date] = None
+    expiry_date: Optional[date] = None
     mean: Optional[float] = None
     sigma: Optional[float] = None
     median: Optional[float] = None

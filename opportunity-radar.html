@@ -381,16 +381,15 @@
       filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.6));
     }
 
-    .nav-badge-live {
-      background: linear-gradient(135deg, var(--critical-red), #c0392b);
-      color: white;
+    .nav-badge-count {
+      background: rgba(212, 175, 55, 0.12);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      color: var(--gold-bright);
       font-size: 0.68rem;
-      font-family: var(--font-display);
+      font-family: var(--font-mono);
       font-weight: 700;
       padding: 2px 7px;
       border-radius: 20px;
-      box-shadow: 0 0 10px rgba(255, 71, 87, 0.6);
-      animation: pulseAlert 2s infinite;
     }
 
     /* Sidebar System Health Card */
@@ -461,17 +460,22 @@
 
     /* Top Navigation Header */
     .top-header {
-      height: 70px;
+      min-height: 70px;
+      height: auto;
       background: rgba(8, 14, 30, 0.7);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-glass);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding: 10px 32px;
       position: sticky;
       top: 0;
       z-index: 90;
+      /* Prevent ticker from causing page-level horizontal scroll */
+      overflow: hidden;
     }
 
     .header-breadcrumbs {
@@ -481,6 +485,8 @@
       font-size: 0.8rem;
       color: var(--text-muted);
       font-family: var(--font-mono);
+      flex-shrink: 0;
+      min-width: 0;
     }
 
     .header-breadcrumbs span.active {
@@ -488,16 +494,51 @@
       font-weight: 600;
     }
 
-    /* Ticker Pill Marquee */
+    /* Ticker Pill — scrollable pill, never causes page overflow */
     .market-ticker-bar {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 16px;
       background: rgba(13, 24, 48, 0.6);
       border: 1px solid rgba(212, 175, 55, 0.2);
       border-radius: 40px;
       padding: 6px 18px;
       box-shadow: var(--shadow-clay);
+      /* Grow into available space but never push siblings off-screen */
+      flex: 1 1 0;
+      min-width: 0;
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .market-ticker-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    @media (max-width: 1100px) {
+      .top-header {
+        padding: 10px 18px;
+      }
+      .market-ticker-bar {
+        /* Own row below breadcrumbs + tools at narrow widths */
+        order: 3;
+        flex: 0 0 100%;
+        max-width: 100%;
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .market-ticker-bar {
+        gap: 10px;
+        padding: 5px 10px;
+      }
+      .ticker-item {
+        font-size: 0.7rem;
+      }
     }
 
     .ticker-item {
@@ -657,6 +698,122 @@
     .filter-select option {
       background: #0d1830;
       color: var(--text-primary);
+    }
+
+    /* Historical Data Freshness Banner */
+    .radar-freshness-banner {
+      margin-bottom: 24px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      background: rgba(13, 24, 48, 0.7);
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      box-shadow: var(--shadow-clay, 0 4px 14px rgba(0,0,0,0.3));
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .freshness-banner-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.82rem;
+    }
+
+    .freshness-indicator-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(209, 173, 94, 0.12);
+      border: 1px solid rgba(209, 173, 94, 0.35);
+      color: var(--gold-light, #ffd700);
+      font-weight: 600;
+      font-size: 0.76rem;
+      letter-spacing: 0.4px;
+    }
+
+    .freshness-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold-light, #ffd700);
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    }
+
+    .freshness-pulse-dot.stale {
+      background: #f59e0b;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+    }
+
+    .freshness-pulse-dot.live {
+      background: #10b981;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    .freshness-date-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary, #e2e8f0);
+    }
+
+    .freshness-date-info i {
+      color: var(--gold-light, #ffd700);
+    }
+
+    .freshness-age-badge {
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.74rem;
+      font-family: var(--font-mono, monospace);
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary, #94a3b8);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .freshness-age-badge.stale {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .freshness-feed-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text-muted, #64748b);
+      font-size: 0.78rem;
+    }
+
+    .freshness-feed-status strong {
+      color: #f87171;
+    }
+
+    .freshness-feed-status strong.live {
+      color: #34d399;
+    }
+
+    .freshness-stale-warning {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+      font-size: 0.76rem;
+      line-height: 1.4;
+    }
+
+    .freshness-stale-warning i {
+      font-size: 0.85rem;
+      flex-shrink: 0;
     }
 
     /* ==========================================================================
@@ -830,6 +987,17 @@
       color: #FFF;
     }
 
+    .radar-selection-filter-notice {
+      margin-top: 8px;
+      padding: 7px 10px;
+      border: 1px solid rgba(212, 175, 55, 0.28);
+      border-radius: 9px;
+      background: rgba(78, 55, 9, 0.2);
+      color: #dfc77f;
+      font-size: 0.74rem;
+      line-height: 1.45;
+    }
+
     .headline-metrics-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -923,7 +1091,15 @@
       animation: pulseAlert 2s infinite;
     }
 
-    .matrix-table td:hover {
+    .matrix-table td.cell-unavailable {
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .matrix-table td:not(.cell-unavailable):not(.cell-self):hover {
       transform: scale(1.08);
       z-index: 10;
     }
@@ -957,6 +1133,15 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 24px;
+    }
+
+    .radar-cards-empty {
+      margin-top: 16px;
+      padding: 18px 20px;
+      color: var(--text-secondary);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 14px;
+      background: rgba(12, 12, 10, 0.68);
     }
 
     @media (max-width: 1080px) {
@@ -1137,6 +1322,13 @@
       font-size: 0.76rem;
       color: var(--text-muted);
       margin-top: 4px;
+    }
+
+    .pair-data-reason {
+      margin-top: 8px;
+      color: #c9b98d;
+      font: 0.76rem/1.45 var(--font-body);
+      overflow-wrap: anywhere;
     }
 
     /* Key Statistics Inset Grid */
@@ -1541,6 +1733,39 @@
       padding: 3px 8px;
       border-radius: 6px;
       white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .trap-tag-pass {
+      color: #34d399 !important;
+      background: rgba(16, 185, 129, 0.15) !important;
+      border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+
+    .trap-tag-neutral {
+      color: var(--high-amber, #f59e0b) !important;
+      background: rgba(255, 165, 2, 0.15) !important;
+      border: 1px solid rgba(245, 158, 11, 0.3) !important;
+    }
+
+    /* Keep background particles and mascot strictly below interactive cards */
+    #aurora-gold-nuggets, #particles-canvas, #dust {
+      z-index: 0 !important;
+      pointer-events: none !important;
+    }
+
+    /* Ensure all interactive content sits above the particle canvas */
+    .radar-container-card, .radar-summary-panel, .signal-card, .glass-panel, .panel, .funnel-visual-box, .traps-list-box,
+    .top-header, .sidebar, .main-wrapper {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Explicitly hide nuggets on narrow mobile to free screen space */
+    @media (max-width: 700px) {
+      #aurora-gold-nuggets, #particles-canvas {
+        display: none !important;
+      }
     }
 
     /* ==========================================================================
@@ -1931,10 +2156,11 @@
 
   </style>
   <script src="auth.js"></script>
-  <script src="aurora-pipeline.js"></script>
+  <script src="aurora-pipeline.js?v=radar-data-safety-20261022"></script>
   <script src="aurora-nav.js"></script>
+  <link rel="stylesheet" href="analytics-premium.css">
 </head>
-<body>
+<body class="aurora-opportunity-radar">
 
   <!-- Particle canvas for deep dynamic 3D space atmosphere -->
   <canvas id="particles-canvas"></canvas>
@@ -1945,7 +2171,7 @@
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-logo-gem">
-        <i class="fa-solid fa-gem"></i>
+        <img class="aurora-brand-image" src="aurora-mark.png" alt="">
       </div>
       <div class="brand-info">
         <h1 class="golden-text">AURORA</h1>
@@ -1977,7 +2203,7 @@
             <i class="fa-solid fa-satellite-dish"></i>
             <span>Opportunity Radar</span>
           </div>
-          <span class="nav-badge-live">3 Live</span>
+          <span class="nav-badge-count" id="radarPairStatusBadge">Loading</span>
         </a>
       </li>
       <li class="nav-item">
@@ -2045,21 +2271,21 @@
     <div class="sidebar-health">
       <div class="health-card">
         <div class="health-status-row">
-          <span style="font-weight: 600; color: #FFF;">
-            <span class="status-dot-pulse"></span> MCX Engine Online
+            <span style="font-weight: 600; color: #FFF;">
+            <span class="status-dot-pulse"></span> Provider status pending
           </span>
-          <span class="mono" style="color: var(--success-green); font-size: 0.74rem;">18ms</span>
+          <span class="mono" style="color: var(--text-muted); font-size: 0.74rem;">—</span>
         </div>
-        <p style="color: var(--text-muted); font-size: 0.7rem;">Continuous 10-tick VWAP synchronization active.</p>
+        <p style="color: var(--text-muted); font-size: 0.7rem;">No verified live provider is connected.</p>
         
         <div class="health-metric-grid">
           <div class="health-stat-item">
-            <span class="label">Pairs Monitored</span>
-            <span class="val">6 Active</span>
+            <span class="label">Supported Pairs</span>
+            <span class="val">6</span>
           </div>
           <div class="health-stat-item">
             <span class="label">Last MCX Sync</span>
-            <span class="val" id="live-sidebar-time">11:24:08 IST</span>
+            <span class="val" id="live-sidebar-time">No provider sync</span>
           </div>
         </div>
       </div>
@@ -2081,29 +2307,12 @@
         <span class="active">OPPORTUNITY RADAR</span>
       </div>
 
-      <!-- Real-time Ticker -->
+      <!-- Latest backend observation ticker (not a real-time feed) -->
       <div class="market-ticker-bar">
-        <div class="ticker-item">
-          <span class="ticker-name">MCX SPOT (999):</span>
-          <span class="ticker-price">₹74,850.00</span>
-          <span class="ticker-tag-up"><i class="fa-solid fa-caret-up"></i> +0.42%</span>
-        </div>
-        <div class="ticker-item">
-          <span class="ticker-name">GOLDM:</span>
-          <span class="ticker-price">₹74,920.00</span>
-        </div>
-        <div class="ticker-item">
-          <span class="ticker-name">GOLDTEN:</span>
-          <span class="ticker-price">₹74,849.65</span>
-        </div>
-        <div class="ticker-item">
-          <span class="ticker-name">GOLDPETAL:</span>
-          <span class="ticker-price">₹7,607.62</span>
-        </div>
-        <div class="ticker-item">
-          <span class="ticker-name">GOLDGUINEA:</span>
-          <span class="ticker-price">₹60,021.34</span>
-        </div>
+        <div class="ticker-item" data-market-symbol="GOLDM"><span class="ticker-name">GOLDM · latest close:</span><span class="ticker-price">—</span></div>
+        <div class="ticker-item" data-market-symbol="GOLDTEN"><span class="ticker-name">GOLDTEN · latest close:</span><span class="ticker-price">—</span></div>
+        <div class="ticker-item" data-market-symbol="GOLDGUINEA"><span class="ticker-name">GOLDGUINEA · latest close:</span><span class="ticker-price">—</span></div>
+        <div class="ticker-item" data-market-symbol="GOLDPETAL"><span class="ticker-name">GOLDPETAL · latest close:</span><span class="ticker-price">—</span></div>
       </div>
 
       <!-- Header Tools -->
@@ -2116,11 +2325,11 @@
         </button>
         <div class="tool-icon-btn" title="Active Anomaly Alerts">
           <i class="fa-solid fa-bell"></i>
-          <span class="badge-count">3</span>
+          <span class="badge-count">—</span>
         </div>
         <div class="clay-chip" style="font-family: var(--font-mono); color: var(--gold-bright);">
           <i class="fa-regular fa-clock"></i>
-          <span id="live-header-clock">11:24:08 IST</span>
+          <span id="live-header-clock">Local time</span>
         </div>
       </div>
     </header>
@@ -2136,7 +2345,7 @@
           <h2 class="golden-text">Opportunity Radar</h2>
           <p>
             <i class="fa-solid fa-shield-halved" style="color: var(--gold-light);"></i>
-            Real-time relative-value anomaly detection across MCX gold contracts
+            Backend relative-value analysis across MCX gold contracts
           </p>
         </div>
 
@@ -2145,10 +2354,10 @@
           <div class="filter-group">
             <span class="filter-label"><i class="fa-solid fa-filter"></i> Status:</span>
             <select class="filter-select" id="statusFilter">
-              <option value="all">All Statuses (12)</option>
-              <option value="active" selected>Active Only (3)</option>
-              <option value="investigating">Investigating (2)</option>
-              <option value="dismissed">Dismissed Traps (7)</option>
+              <option value="active">Active Only</option>
+              <option value="all" selected>All Pair Statuses</option>
+              <option value="investigating">Investigating</option>
+              <option value="risk">Risk / Friction Flags</option>
             </select>
           </div>
 
@@ -2164,13 +2373,13 @@
           </div>
 
           <div class="filter-group">
-            <span class="filter-label"><i class="fa-regular fa-calendar-days"></i> Window:</span>
+            <span class="filter-label"><i class="fa-regular fa-calendar-days"></i> Baseline:</span>
             <select class="filter-select" id="dateRangeFilter">
-              <option value="today" selected>Today (15 Oct 2026)</option>
-              <option value="3d">Last 3 Days</option>
-              <option value="7d">Last 7 Days</option>
-              <option value="14d">Last 14 Days</option>
-              <option value="30d">Last 30 Days</option>
+              <option value="7">7 synchronized sessions</option>
+              <option value="14">14 synchronized sessions</option>
+              <option value="30" selected>30 synchronized sessions</option>
+              <option value="90">90 synchronized sessions</option>
+              <option value="365">365 synchronized sessions</option>
             </select>
           </div>
 
@@ -2179,6 +2388,29 @@
           </button>
         </div>
       </section>
+
+      <!-- Historical Data Freshness & Surveillance Banner -->
+      <div id="radarFreshnessBanner" class="radar-freshness-banner" role="status">
+        <div class="freshness-banner-content">
+          <div class="freshness-indicator-pill">
+            <span class="freshness-pulse-dot"></span>
+            <span id="radarFreshnessDataset">Historical CSV Data</span>
+          </div>
+          <div class="freshness-date-info">
+            <i class="fa-regular fa-calendar-check"></i>
+            <span>Latest Observation: <strong id="radarLatestObsDate">Checking...</strong></span>
+            <span class="freshness-age-badge" id="radarObsAgeBadge">-</span>
+          </div>
+          <div class="freshness-feed-status">
+            <i class="fa-solid fa-tower-broadcast"></i>
+            <span>Market Feed: <strong id="radarFeedStatus">UNAVAILABLE</strong></span>
+          </div>
+        </div>
+        <div id="radarStaleWarning" class="freshness-stale-warning" style="display: none;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span id="radarStaleWarningText">Stale data warning: Latest observation is older than expected reporting period. Historical snapshot only &mdash; not a live market opportunity.</span>
+        </div>
+      </div>
 
       <!-- ==========================================================================
            2. RADAR VISUALIZATION (HERO SECTION)
@@ -2206,7 +2438,7 @@
               </div>
               <div class="legend-indicator">
                 <span class="legend-dot" style="background: rgba(255, 71, 87, 0.7);"></span>
-                <span>Trap / Friction Limit</span>
+                <span>Cost-Hurdle Boundary</span>
               </div>
             </div>
           </div>
@@ -2234,40 +2466,40 @@
           <div class="hero-stat-claybox">
             <div class="stat-headline-row">
               <span class="stat-badge-pulse">
-                <i class="fa-solid fa-bolt"></i> CRITICAL DISLOCATION
+                <i class="fa-solid fa-bolt"></i> <span id="radarClassification">Loading analytics</span>
               </span>
-              <span class="mono" style="font-size: 0.72rem; color: var(--text-muted);">
-                Half-life: ~3.4 Days
-              </span>
+              <span class="mono" id="radarSnapshotDate" style="font-size: 0.72rem; color: var(--text-muted);">As of —</span>
             </div>
 
             <div>
-              <div class="headline-pair-title">GOLDM vs GOLDPETAL</div>
+              <div class="headline-pair-title">Waiting for backend data…</div>
+              <div id="radarSelectionFilterNotice" class="radar-selection-filter-notice" role="status" hidden></div>
               <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
-                Normalized Spread Divergence: <span class="mono" style="color: var(--gold-bright); font-weight: 700;">+₹122.62/10g</span>
+                Normalized Spread Divergence: <span class="mono" id="radarHeroSpread" style="color: var(--gold-bright); font-weight: 700;">—</span>
               </div>
             </div>
 
             <div class="headline-metrics-row">
               <div class="headline-metric-cell">
                 <div class="label">Z-Score</div>
-                <div class="value" style="color: #FF7685;">+2.47σ</div>
+                <div class="value" style="color: #FF7685;">—</div>
               </div>
               <div class="headline-metric-cell">
                 <div class="label">Historical %ile</div>
-                <div class="value">97.3%</div>
+                <div class="value">—</div>
               </div>
               <div class="headline-metric-cell">
-                <div class="label">Exec. Confidence</div>
-                <div class="value">78%</div>
+                <div class="label" title="Relative ranking heuristic (0-100), not execution probability">Opportunity Score (0–100)</div>
+                <div class="value">—</div>
+                <div style="font-size: 0.62rem; color: var(--text-muted); margin-top: 2px;">Rank index · not win %</div>
               </div>
             </div>
 
             <div style="display: flex; gap: 10px;">
-              <button class="clay-btn" style="flex: 1;" onclick="openInvestigationModal('GOLDM-GOLDPETAL')">
+              <button class="clay-btn" id="radarDeepDiveButton" style="flex: 1;" onclick="openInvestigationModal('GOLDM-GOLDPETAL')" disabled>
                 <i class="fa-solid fa-magnifying-glass-chart"></i> Deep Dive Pair
               </button>
-              <button class="clay-btn-outline" onclick="triggerToast('Added GOLDM-GOLDPETAL to high-priority watchlist')">
+              <button class="clay-btn-outline" id="radarWatchButton" onclick="triggerToast('Select a pair with backend data first')" disabled>
                 <i class="fa-regular fa-star"></i>
               </button>
             </div>
@@ -2294,29 +2526,29 @@
                 <tr>
                   <th style="color: var(--gold-light);">GOLDM</th>
                   <td class="cell-self">-</td>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')" title="Spread: ₹70.35 | Z: 1.42σ">+70.35<br><span style="font-size:0.6rem;">1.42σ</span></td>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDGUINEA')" title="Spread: ₹38.20 | Z: 0.88σ">+38.20<br><span style="font-size:0.6rem;">0.88σ</span></td>
-                  <td class="cell-critical" onclick="selectPairFromMatrix('GOLDM-GOLDPETAL')" title="Spread: ₹122.62 | Z: 2.47σ">+122.62<br><span style="font-size:0.6rem;">2.47σ</span></td>
+                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">—</td>
                 </tr>
                 <tr>
                   <th style="color: var(--gold-light);">GOLDTEN</th>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')">-70.35</td>
+                  <td class="cell-unavailable">—</td>
                   <td class="cell-self">-</td>
-                  <td class="cell-high" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDTEN')" title="Spread: ₹141.34 | Z: 1.89σ">+141.34<br><span style="font-size:0.6rem;">1.89σ</span></td>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDTEN-GOLDPETAL')" title="Spread: ₹52.27 | Z: 1.15σ">+52.27<br><span style="font-size:0.6rem;">1.15σ</span></td>
+                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">—</td>
                 </tr>
                 <tr>
                   <th style="color: var(--gold-light);">G-GUINEA</th>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDGUINEA')">-38.20</td>
-                  <td class="cell-high" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDTEN')">-141.34</td>
+                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">—</td>
                   <td class="cell-self">-</td>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDPETAL')" title="Spread: ₹84.42 | Z: 1.28σ">+84.42<br><span style="font-size:0.6rem;">1.28σ</span></td>
+                  <td class="cell-unavailable">—</td>
                 </tr>
                 <tr>
                   <th style="color: var(--gold-light);">G-PETAL</th>
-                  <td class="cell-critical" onclick="selectPairFromMatrix('GOLDM-GOLDPETAL')">-122.62</td>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDTEN-GOLDPETAL')">-52.27</td>
-                  <td class="cell-normal" onclick="selectPairFromMatrix('GOLDGUINEA-GOLDPETAL')">-84.42</td>
+                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">—</td>
                   <td class="cell-self">-</td>
                 </tr>
               </tbody>
@@ -2324,7 +2556,7 @@
 
             <div style="margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
               <span><i class="fa-solid fa-circle-info"></i> Click cell to highlight pair</span>
-              <span class="mono">Fine-Gold 999 Standardized</span>
+              <span class="mono">995 Fine-Gold Basis (₹/10g)</span>
             </div>
           </div>
 
@@ -2338,38 +2570,37 @@
         <div class="section-header-row">
           <div class="section-title">
             <i class="fa-solid fa-wave-square" style="color: var(--gold-light);"></i>
-            Active Spread Signals
+            Pair Snapshot Cards
             <span class="clay-chip" style="font-size: 0.72rem; color: var(--gold-bright); font-family: var(--font-mono);">
-              3 Signals Requiring Attention
+              Waiting for backend analytics
             </span>
           </div>
 
           <div style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">
-            Ranked by Anomaly Severity & Confidence
+            One card per canonical pair · historical snapshots, not live quotes
           </div>
         </div>
 
         <div class="signals-grid">
 
           <!-- ================= SIGNAL CARD 1: CRITICAL ================= -->
-          <div class="signal-card critical tilt-card" data-severity="critical" data-pair="GOLDM-GOLDPETAL">
+          <div class="signal-card tilt-card" data-severity="unavailable" data-pair="GOLDM-GOLDPETAL">
             <div class="card-top-bar">
-              <span class="severity-pill pill-critical">
-                <i class="fa-solid fa-radiation"></i> CRITICAL ANOMALY
+              <span class="severity-pill">
+                <i class="fa-solid fa-radiation"></i> AWAITING BACKEND DATA
               </span>
               
-              <!-- Radial Confidence: 78% -->
-              <div class="confidence-radial-box" title="Signal Confidence Score: 78%">
+              <div class="confidence-radial-box" title="Opportunity score (0–100 heuristic ranking, not win probability)">
                 <div class="radial-svg-wrap">
                   <svg viewBox="0 0 36 36">
                     <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
-                    <circle class="circle-val circle-val-critical" cx="18" cy="18" r="14" stroke-dasharray="88, 100" stroke-dashoffset="0"></circle>
+                    <circle class="circle-val circle-val-critical" cx="18" cy="18" r="14" stroke-dasharray="0, 100" stroke-dashoffset="0"></circle>
                   </svg>
-                  <span class="radial-text">78%</span>
+                  <span class="radial-text">—</span>
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Confidence</span>
-                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--gold-bright);">High Edge</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0–100)</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--gold-bright);">—</span>
                 </div>
               </div>
             </div>
@@ -2379,12 +2610,13 @@
               <div class="pair-symbols">
                 <span>GOLDM vs GOLDPETAL</span>
                 <span class="pair-direction-tag">
-                  <i class="fa-solid fa-arrow-trend-up"></i> GOLDPETAL Premium
+                  <i class="fa-solid fa-arrow-trend-up"></i> —
                 </span>
               </div>
               <div class="pair-specs-sub">
                 MCX Gold Mini (100g 995) vs MCX Gold Petal (1g 999)
               </div>
+              <div class="pair-data-reason" role="status" hidden></div>
             </div>
 
             <!-- Key Metrics Grid -->
@@ -2392,25 +2624,25 @@
               <div class="stat-claycell highlight-cell">
                 <div class="stat-lbl">Normalized Spread</div>
                 <div class="stat-num">
-                  ₹122.62 <span class="stat-subtext">/ 10g</span>
+                  — <span class="stat-subtext">/ 10g</span>
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Z-Score Deviation</div>
                 <div class="stat-num" style="color: #FF7685;">
-                  +2.47σ <span class="stat-subtext">extreme</span>
+                  —
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Hist. Percentile</div>
                 <div class="stat-num">
-                  97.3% <span class="stat-subtext">365d</span>
+                  —
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Anomaly Duration</div>
                 <div class="stat-num">
-                  3 days <span class="stat-subtext">persisting</span>
+                  —
                 </div>
               </div>
             </div>
@@ -2419,15 +2651,15 @@
             <div class="card-validations-row">
               <div class="validation-badge">
                 <span class="v-name">Volume Conf.</span>
-                <span class="v-status status-pass">Yes ✓</span>
+                <span class="v-status">—</span>
               </div>
               <div class="validation-badge">
                 <span class="v-name">Liquidity</span>
-                <span class="v-status status-pass">Passed ✓</span>
+                <span class="v-status">—</span>
               </div>
-              <div class="validation-badge" title="STT & Slippage consume 36% of gross spread">
+              <div class="validation-badge" title="Cost validation is populated from backend analytics">
                 <span class="v-name">Cost Filter</span>
-                <span class="v-status status-warning">Marginal ⚠️</span>
+                <span class="v-status">—</span>
               </div>
             </div>
 
@@ -2439,34 +2671,33 @@
 
             <!-- Footer Action -->
             <div class="card-footer-actions">
-              <button class="clay-btn card-investigate-btn" onclick="openInvestigationModal('GOLDM-GOLDPETAL')">
+              <button class="clay-btn card-investigate-btn" onclick="openInvestigationModal('GOLDM-GOLDPETAL')" disabled>
                 Investigate →
               </button>
-              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDPETAL to active tracker')">
+              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDPETAL to active tracker')" disabled>
                 <i class="fa-regular fa-bookmark"></i>
               </button>
             </div>
           </div>
 
           <!-- ================= SIGNAL CARD 2: HIGH ================= -->
-          <div class="signal-card high tilt-card" data-severity="high" data-pair="GOLDGUINEA-GOLDTEN">
+          <div class="signal-card tilt-card" data-severity="unavailable" data-pair="GOLDGUINEA-GOLDTEN">
             <div class="card-top-bar">
-              <span class="severity-pill pill-high">
-                <i class="fa-solid fa-triangle-exclamation"></i> HIGH SEVERITY
+              <span class="severity-pill">
+                <i class="fa-solid fa-triangle-exclamation"></i> AWAITING BACKEND DATA
               </span>
               
-              <!-- Radial Confidence: 52% -->
-              <div class="confidence-radial-box" title="Signal Confidence Score: 52%">
+              <div class="confidence-radial-box" title="Opportunity score (0–100 heuristic ranking, not win probability)">
                 <div class="radial-svg-wrap">
                   <svg viewBox="0 0 36 36">
                     <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
-                    <circle class="circle-val circle-val-high" cx="18" cy="18" r="14" stroke-dasharray="52, 100" stroke-dashoffset="0"></circle>
+                    <circle class="circle-val circle-val-high" cx="18" cy="18" r="14" stroke-dasharray="0, 100" stroke-dashoffset="0"></circle>
                   </svg>
-                  <span class="radial-text">52%</span>
+                  <span class="radial-text">—</span>
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Confidence</span>
-                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--high-amber);">Trap Risk</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0–100)</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--high-amber);">—</span>
                 </div>
               </div>
             </div>
@@ -2476,12 +2707,13 @@
               <div class="pair-symbols">
                 <span>GOLDGUINEA vs GOLDTEN</span>
                 <span class="pair-direction-tag">
-                  <i class="fa-solid fa-arrow-trend-up"></i> GOLDGUINEA Premium
+                  <i class="fa-solid fa-arrow-trend-up"></i> —
                 </span>
               </div>
               <div class="pair-specs-sub">
                 MCX Gold Guinea (8g 995) vs MCX Gold Ten (10g 999)
               </div>
+              <div class="pair-data-reason" role="status" hidden></div>
             </div>
 
             <!-- Key Metrics Grid -->
@@ -2489,25 +2721,25 @@
               <div class="stat-claycell highlight-cell">
                 <div class="stat-lbl">Normalized Spread</div>
                 <div class="stat-num">
-                  ₹141.34 <span class="stat-subtext">/ 10g</span>
+                  — <span class="stat-subtext">/ 10g</span>
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Z-Score Deviation</div>
                 <div class="stat-num" style="color: var(--high-amber);">
-                  +1.89σ <span class="stat-subtext">elevated</span>
+                  —
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Hist. Percentile</div>
                 <div class="stat-num">
-                  93.1% <span class="stat-subtext">365d</span>
+                  —
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Anomaly Duration</div>
                 <div class="stat-num">
-                  1 day <span class="stat-subtext">fresh</span>
+                  —
                 </div>
               </div>
             </div>
@@ -2516,15 +2748,15 @@
             <div class="card-validations-row">
               <div class="validation-badge">
                 <span class="v-name">Volume Conf.</span>
-                <span class="v-status status-warning">Partial ⚠️</span>
+                <span class="v-status">—</span>
               </div>
-              <div class="validation-badge" title="Thin order book depth in GOLDGUINEA leg">
+              <div class="validation-badge" title="Liquidity validation is populated from backend analytics">
                 <span class="v-name">Liquidity</span>
-                <span class="v-status status-warning">Warning ⚠️</span>
+                <span class="v-status">—</span>
               </div>
-              <div class="validation-badge" title="Fails after ₹148/10g estimated execution drag">
+              <div class="validation-badge" title="Cost validation is populated from backend analytics">
                 <span class="v-name">Cost Filter</span>
-                <span class="v-status status-fail">Not Passed ✗</span>
+                <span class="v-status">—</span>
               </div>
             </div>
 
@@ -2536,34 +2768,33 @@
 
             <!-- Footer Action -->
             <div class="card-footer-actions">
-              <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #FFA502 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDGUINEA-GOLDTEN')">
+              <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #FFA502 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDGUINEA-GOLDTEN')" disabled>
                 Investigate →
               </button>
-              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDGUINEA-GOLDTEN to active tracker')">
+              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDGUINEA-GOLDTEN to active tracker')" disabled>
                 <i class="fa-regular fa-bookmark"></i>
               </button>
             </div>
           </div>
 
           <!-- ================= SIGNAL CARD 3: MEDIUM ================= -->
-          <div class="signal-card medium tilt-card" data-severity="medium" data-pair="GOLDM-GOLDTEN">
+          <div class="signal-card tilt-card" data-severity="unavailable" data-pair="GOLDM-GOLDTEN">
             <div class="card-top-bar">
-              <span class="severity-pill pill-medium">
-                <i class="fa-solid fa-circle-dot"></i> MEDIUM SPREAD
+              <span class="severity-pill">
+                <i class="fa-solid fa-circle-dot"></i> AWAITING BACKEND DATA
               </span>
               
-              <!-- Radial Confidence: 65% -->
-              <div class="confidence-radial-box" title="Signal Confidence Score: 65%">
+              <div class="confidence-radial-box" title="Opportunity score (0–100 heuristic ranking, not win probability)">
                 <div class="radial-svg-wrap">
                   <svg viewBox="0 0 36 36">
                     <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
-                    <circle class="circle-val circle-val-medium" cx="18" cy="18" r="14" stroke-dasharray="65, 100" stroke-dashoffset="0"></circle>
+                    <circle class="circle-val circle-val-medium" cx="18" cy="18" r="14" stroke-dasharray="0, 100" stroke-dashoffset="0"></circle>
                   </svg>
-                  <span class="radial-text">65%</span>
+                  <span class="radial-text">—</span>
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Confidence</span>
-                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--cyan-accent);">Clean Flow</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0–100)</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--cyan-accent);">—</span>
                 </div>
               </div>
             </div>
@@ -2573,12 +2804,13 @@
               <div class="pair-symbols">
                 <span>GOLDM vs GOLDTEN</span>
                 <span class="pair-direction-tag">
-                  <i class="fa-solid fa-arrow-trend-up"></i> GOLDM Premium
+                  <i class="fa-solid fa-arrow-trend-up"></i> —
                 </span>
               </div>
               <div class="pair-specs-sub">
                 MCX Gold Mini (100g 995) vs MCX Gold Ten (10g 999)
               </div>
+              <div class="pair-data-reason" role="status" hidden></div>
             </div>
 
             <!-- Key Metrics Grid -->
@@ -2586,25 +2818,25 @@
               <div class="stat-claycell highlight-cell">
                 <div class="stat-lbl">Normalized Spread</div>
                 <div class="stat-num">
-                  ₹70.35 <span class="stat-subtext">/ 10g</span>
+                  — <span class="stat-subtext">/ 10g</span>
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Z-Score Deviation</div>
                 <div class="stat-num" style="color: var(--cyan-accent);">
-                  +1.42σ <span class="stat-subtext">moderate</span>
+                  —
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Hist. Percentile</div>
                 <div class="stat-num">
-                  84.7% <span class="stat-subtext">365d</span>
+                  —
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Anomaly Duration</div>
                 <div class="stat-num">
-                  5 days <span class="stat-subtext">extended</span>
+                  —
                 </div>
               </div>
             </div>
@@ -2613,15 +2845,15 @@
             <div class="card-validations-row">
               <div class="validation-badge">
                 <span class="v-name">Volume Conf.</span>
-                <span class="v-status status-pass">Yes ✓</span>
+                <span class="v-status">—</span>
               </div>
               <div class="validation-badge">
                 <span class="v-name">Liquidity</span>
-                <span class="v-status status-pass">Passed ✓</span>
+                <span class="v-status">—</span>
               </div>
               <div class="validation-badge" title="High volume contracts with friction of only ₹14.20/10g">
                 <span class="v-name">Cost Filter</span>
-                <span class="v-status status-pass">Passed ✓</span>
+                <span class="v-status">—</span>
               </div>
             </div>
 
@@ -2633,16 +2865,17 @@
 
             <!-- Footer Action -->
             <div class="card-footer-actions">
-              <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #38BDF8 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDM-GOLDTEN')">
+              <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #38BDF8 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDM-GOLDTEN')" disabled>
                 Investigate →
               </button>
-              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDTEN to active tracker')">
+              <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDTEN to active tracker')" disabled>
                 <i class="fa-regular fa-bookmark"></i>
               </button>
             </div>
           </div>
 
         </div>
+        <div id="radarCardsEmpty" class="radar-cards-empty" role="status" hidden>No pairs match the selected status and severity filters.</div>
       </section>
 
       <!-- ==========================================================================
@@ -2658,12 +2891,8 @@
             <p>5-Stage Quantitative Validation Engine — Filtering phantom arbitrage from actionable edge</p>
           </div>
 
-          <div class="pipeline-summary-pill">
-            <span>12 Raw Signals</span> → 
-            <span>8 Passed Liquidity</span> → 
-            <span>6 Passed Expiry</span> → 
-            <span>4 Passed Cost</span> → 
-            <span style="color: #FFF; text-shadow: 0 0 8px var(--gold-bright);">3 Active Investigations</span>
+          <div class="pipeline-summary-pill" id="radarPipelineSummary">
+            <span>Waiting for backend pairs</span> → <span>Liquidity —</span> → <span>Expiry —</span> → <span>Cost —</span> → <span>Investigate —</span>
           </div>
         </div>
 
@@ -2676,12 +2905,12 @@
               <div class="node-icon-box"><i class="fa-solid fa-bolt"></i></div>
               <span class="node-step-tag">STAGE 01</span>
             </div>
-            <div class="node-title">Raw Signal</div>
+            <div class="node-title">Matched Snapshot</div>
             <div class="node-count-badge">
-              <span>12 Signals</span>
-              <span style="font-size: 0.7rem; color: var(--cyan-accent); font-weight: 500;">100%</span>
+              <span id="radarStageObserved">— pairs</span>
+              <span style="font-size: 0.7rem; color: var(--cyan-accent); font-weight: 500;">Backend</span>
             </div>
-            <div class="node-desc">Statistical price dislocation detected (|Z| &gt; 1.2σ threshold).</div>
+            <div class="node-desc">Pairs with synchronized backend spread observations on the shared evaluation date.</div>
           </div>
 
           <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
@@ -2694,10 +2923,10 @@
             </div>
             <div class="node-title">Liquidity Check</div>
             <div class="node-count-badge">
-              <span>8 Passed</span>
-              <span class="node-drop-tag">-4 Traps</span>
+              <span id="radarStageLiquidity">— Passed</span>
+              <span class="node-drop-tag" id="radarStageLiquidityDrop">— flagged</span>
             </div>
-            <div class="node-desc">Bid-Ask spread &lt; 25 bps; Top-5 order book depth &gt; 50 lots.</div>
+            <div class="node-desc">Uses the backend liquidity flags derived from observed volume and open interest.</div>
           </div>
 
           <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
@@ -2710,10 +2939,10 @@
             </div>
             <div class="node-title">Expiry Check</div>
             <div class="node-count-badge">
-              <span>6 Passed</span>
-              <span class="node-drop-tag">-2 Traps</span>
+              <span id="radarStageExpiry">— Passed</span>
+              <span class="node-drop-tag" id="radarStageExpiryDrop">— flagged</span>
             </div>
-            <div class="node-desc">Days to tender &gt; 5; eliminates compulsory physical delivery squeeze.</div>
+            <div class="node-desc">Uses expiry dates matched across both contracts and the configured expiry-risk window.</div>
           </div>
 
           <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
@@ -2726,10 +2955,10 @@
             </div>
             <div class="node-title">Cost Analysis</div>
             <div class="node-count-badge">
-              <span>4 Passed</span>
-              <span class="node-drop-tag">-2 Traps</span>
+              <span id="radarStageCost">— Passed</span>
+              <span class="node-drop-tag" id="radarStageCostDrop">— flagged</span>
             </div>
-            <div class="node-desc">Spread &gt; 2.5× STT (0.01%) + Exchange levy + Slippage model.</div>
+            <div class="node-desc">Compares gross spread edge with the configured round-trip cost hurdle.</div>
           </div>
 
           <div class="pipeline-connector"><i class="fa-solid fa-angles-right"></i></div>
@@ -2744,10 +2973,10 @@
             </div>
             <div class="node-title" style="color: var(--gold-bright);">Active Investigations</div>
             <div class="node-count-badge" style="color: #FFF;">
-              <span>3 Confirmed</span>
-              <span style="font-size: 0.72rem; color: var(--gold-bright);">25% Yield</span>
+              <span id="radarStageInvestigate">— Investigate</span>
+              <span style="font-size: 0.72rem; color: var(--gold-bright);">Backend classification</span>
             </div>
-            <div class="node-desc">Validated executable relative-value opportunities with positive EV.</div>
+            <div class="node-desc">Backend Investigate classifications; this is not an execution guarantee.</div>
           </div>
 
         </div>
@@ -2763,8 +2992,8 @@
 
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
-                <span>1. Raw Signals</span>
-                <span>12 Pairs (100%)</span>
+              <span>1. Matched Snapshots</span>
+                <span id="radarFunnelObserved">—</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-1"></div></div>
             </div>
@@ -2772,7 +3001,7 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
                 <span>2. Liquidity Filter</span>
-                <span>8 Pairs (66.7%)</span>
+                <span id="radarFunnelLiquidity">—</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-2"></div></div>
             </div>
@@ -2780,7 +3009,7 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
                 <span>3. Expiry Calendar</span>
-                <span>6 Pairs (50.0%)</span>
+                <span id="radarFunnelExpiry">—</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-3"></div></div>
             </div>
@@ -2788,64 +3017,64 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
                 <span>4. Transaction Friction</span>
-                <span>4 Pairs (33.3%)</span>
+                <span id="radarFunnelCost">—</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-4"></div></div>
             </div>
 
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
-                <span style="color: var(--gold-bright); font-weight: 700;">5. Final Executable</span>
-                <span style="color: var(--gold-bright); font-weight: 700;">3 Active (25.0%)</span>
+                <span style="color: var(--gold-bright); font-weight: 700;">5. Investigate</span>
+                <span id="radarFunnelInvestigate" style="color: var(--gold-bright); font-weight: 700;">—</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-5"></div></div>
             </div>
 
             <div style="margin-top: 6px; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">
-              * 75% of statistical raw anomalies are classified as structural/execution traps and shielded from trader capital.
+              Missing observations and unassessed checks are shown separately; only backend Investigate classifications reach stage 5.
             </div>
           </div>
 
           <!-- Detailed Trap Rejection Audit -->
           <div class="traps-list-box">
             <div class="funnel-title">
-              <i class="fa-solid fa-triangle-exclamation" style="color: #FF7685;"></i> Why The 9 Phantom Signals Were Rejected (Trap Audit)
+              <i class="fa-solid fa-triangle-exclamation" style="color: #FF7685;"></i> Backend Pair Diagnostics
             </div>
 
-            <div class="trap-item-row">
+            <div class="trap-item-row" id="radarRowLiquidity">
               <i class="fa-solid fa-ban trap-item-icon"></i>
               <div class="trap-item-details">
-                <div class="t-title">Illiquidity Illusion (4 Pairs Filtered)</div>
-                <div class="t-desc">GOLDPETAL far-month contracts displayed ₹85+ spread, but top bid-ask depth was &lt; 2 lots with 45 bps execution slippage.</div>
+                <div class="t-title">Liquidity filter · <span id="radarDiagnosticLiquidity">—</span></div>
+                <div class="t-desc">Backend liquidity flags are based on the available matched volume and open-interest observations.</div>
               </div>
-              <span class="trap-tag-eliminated">Stage 2 Reject</span>
+              <span id="radarTagLiquidity" class="trap-tag-eliminated trap-tag-pass">Stage 2: 0 Flagged (Pass)</span>
             </div>
 
-            <div class="trap-item-row">
+            <div class="trap-item-row" id="radarRowExpiry">
               <i class="fa-solid fa-calendar-xmark trap-item-icon"></i>
               <div class="trap-item-details">
-                <div class="t-title">Physical Delivery Tender Squeeze (2 Pairs Filtered)</div>
-                <div class="t-desc">GOLDGUINEA near contract inside 5-day delivery window; MCX staggered delivery margin ramped from 10% to 50%.</div>
+                <div class="t-title">Expiry proximity · <span id="radarDiagnosticExpiry">—</span></div>
+                <div class="t-desc">Expiry-risk flags use the matched contract expiry dates and the backend's configured risk window.</div>
               </div>
-              <span class="trap-tag-eliminated">Stage 3 Reject</span>
+              <span id="radarTagExpiry" class="trap-tag-eliminated trap-tag-pass">Stage 3: 0 Flagged (Pass)</span>
             </div>
 
-            <div class="trap-item-row">
+            <div class="trap-item-row" id="radarRowCost">
               <i class="fa-solid fa-receipt trap-item-icon"></i>
               <div class="trap-item-details">
-                <div class="t-title">Fee Friction Erosion (2 Pairs Filtered)</div>
-                <div class="t-desc">Nominal spread of ₹34.50 entirely consumed by mandatory roundtrip STT, exchange turnover fees, and clearing costs.</div>
+                <div class="t-title">Transaction-cost filter · <span id="radarDiagnosticCost">—</span></div>
+                <div class="t-desc">Cost-blocked flags compare the calculated spread edge with the configured transaction-cost hurdle.</div>
               </div>
-              <span class="trap-tag-eliminated">Stage 4 Reject</span>
+              <span id="radarTagCost" class="trap-tag-eliminated trap-tag-pass">Stage 4: 0 Flagged (Pass)</span>
             </div>
 
-            <div class="trap-item-row marginal">
+            <div class="trap-item-row marginal" id="radarRowNoSignal">
               <i class="fa-solid fa-clock-rotate-left" style="color: var(--high-amber);"></i>
               <div class="trap-item-details">
-                <div class="t-title">Regime Basis Shift (1 Pair Filtered)</div>
-                <div class="t-desc">Permanent MCX lot specification realignment caused permanent spread shift rather than mean-reverting dislocation.</div>
+                <div class="t-title">Pairs without a current signal · <span id="radarDiagnosticNoSignal">—</span></div>
+                <div class="t-desc">No signal is not an execution recommendation; it reports only the backend pair classification.</div>
               </div>
-              <span class="trap-tag-eliminated" style="color: var(--high-amber); background: rgba(255, 165, 2, 0.15);">Stage 5 Reject</span>
+              <span id="radarTagNoSignal" class="trap-tag-eliminated trap-tag-neutral">Stage 5: 3 Inactive</span>
             </div>
           </div>
 
@@ -2862,19 +3091,28 @@
               <i class="fa-solid fa-chart-area" style="color: var(--gold-light);"></i>
               Historical Spread Distribution &amp; Z-Score Zones
             </h3>
-            <p>Empirical pairwise spread frequency (365 sessions) with Gaussian normal curve overlay</p>
+            <p id="distributionContext">Empirical frequency across up to 365 synchronized observations. Each point matches the same trade date and expiry; nearest shared expiry is selected per session, and expiry may roll across history.</p>
           </div>
 
           <!-- Interactive Pair Selection Tabs -->
           <div class="dist-pair-tabs">
             <button class="dist-tab-btn active" id="tab-goldm-petal" onclick="switchDistributionPair('GOLDM-GOLDPETAL')">
-              GOLDM vs GOLDPETAL (₹122.62)
+              GOLDM vs GOLDPETAL
             </button>
             <button class="dist-tab-btn" id="tab-guinea-ten" onclick="switchDistributionPair('GOLDGUINEA-GOLDTEN')">
-              GOLDGUINEA vs GOLDTEN (₹141.34)
+              GOLDGUINEA vs GOLDTEN
             </button>
             <button class="dist-tab-btn" id="tab-goldm-ten" onclick="switchDistributionPair('GOLDM-GOLDTEN')">
-              GOLDM vs GOLDTEN (₹70.35)
+              GOLDM vs GOLDTEN
+            </button>
+            <button class="dist-tab-btn" id="tab-goldm-guinea" onclick="switchDistributionPair('GOLDM-GOLDGUINEA')">
+              GOLDM vs GOLDGUINEA
+            </button>
+            <button class="dist-tab-btn" id="tab-ten-petal" onclick="switchDistributionPair('GOLDTEN-GOLDPETAL')">
+              GOLDTEN vs GOLDPETAL
+            </button>
+            <button class="dist-tab-btn" id="tab-guinea-petal" onclick="switchDistributionPair('GOLDGUINEA-GOLDPETAL')">
+              GOLDGUINEA vs GOLDPETAL
             </button>
           </div>
         </div>
@@ -2888,27 +3126,27 @@
         <div class="stats-parameter-strip" id="statsParameterStrip">
           <div class="param-chip">
             <div class="p-name">Historical Mean (μ) <i class="fa-solid fa-calculator"></i></div>
-            <div class="p-val" id="stat-mean">₹18.40</div>
+          <div class="p-val" id="stat-mean">—</div>
           </div>
           <div class="param-chip">
             <div class="p-name">Std Deviation (1σ) <i class="fa-solid fa-arrows-split-up-and-left"></i></div>
-            <div class="p-val" id="stat-sigma">₹42.19</div>
+          <div class="p-val" id="stat-sigma">—</div>
           </div>
           <div class="param-chip">
             <div class="p-name">Median Spread <i class="fa-solid fa-grip-lines"></i></div>
-            <div class="p-val" id="stat-median">₹17.85</div>
+          <div class="p-val" id="stat-median">—</div>
           </div>
           <div class="param-chip">
             <div class="p-name">Kurtosis (Fat Tails) <i class="fa-solid fa-mountain"></i></div>
-            <div class="p-val" id="stat-kurtosis">3.14 <span style="font-size: 0.65rem; color: var(--text-muted);">leptokurtic</span></div>
+          <div class="p-val" id="stat-kurtosis">—</div>
           </div>
           <div class="param-chip">
             <div class="p-name">Skewness <i class="fa-solid fa-bezier-curve"></i></div>
-            <div class="p-val" id="stat-skewness">+0.41 <span style="font-size: 0.65rem; color: var(--text-muted);">right-skewed</span></div>
+          <div class="p-val" id="stat-skewness">—</div>
           </div>
           <div class="param-chip highlight-gold">
-            <div class="p-name">Current Z-Score <i class="fa-solid fa-flag"></i></div>
-            <div class="p-val" id="stat-current-z">+2.47σ (97.3%)</div>
+            <div class="p-name">Distribution-Window Z-Score <i class="fa-solid fa-flag"></i></div>
+          <div class="p-val" id="stat-current-z">—</div>
           </div>
         </div>
 
@@ -2945,7 +3183,7 @@
         <div class="modal-title-group">
           <h3 id="modalPairTitle">
             <i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i>
-            Deep-Dive Investigation: GOLDM vs GOLDPETAL
+            Deep-Dive Investigation
           </h3>
           <p id="modalSubtitle">Automated Quantitative Evidence Dossier &amp; Execution Feasibility</p>
         </div>
@@ -2955,72 +3193,7 @@
       </div>
 
       <div class="modal-body">
-        
-        <!-- Fine Gold Normalization Math Formula -->
-        <div class="modal-math-box">
-          <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">
-            Fine-Gold Normalization Formula (MCX Specifications):
-          </div>
-          <div class="formula">
-            Normalized_Price = Quoted_Price × [ 10 / (Contract_Grams × (Purity_Per_Thousand / 999.0)) ]
-          </div>
-          <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 4px;">
-            Spread = Normalized_Price(Leg B) − Normalized_Price(Leg A) = ₹74,920.00 − ₹74,797.38 = <strong style="color: var(--gold-bright);">+₹122.62 / 10g fine</strong>
-          </div>
-        </div>
-
-        <!-- Breakdown Grid -->
-        <div class="modal-details-grid">
-          
-          <!-- Leg 1 Specs & Depth -->
-          <div class="modal-breakdown-card">
-            <h4><i class="fa-solid fa-cube"></i> Leg 1: GOLDM APR26 (100g 995 Fine)</h4>
-            <div class="modal-kv-row"><span class="k">Last Traded Price</span><span class="v">₹74,920 / 10g</span></div>
-            <div class="modal-kv-row"><span class="k">Effective Fine Rate</span><span class="v">₹74,920.00 / 10g (999 eq.)</span></div>
-            <div class="modal-kv-row"><span class="k">Best Bid / Ask</span><span class="v">₹74,918 / ₹74,920 (Spread: ₹2)</span></div>
-            <div class="modal-kv-row"><span class="k">Top-5 Depth</span><span class="v" style="color: var(--success-green);">420 Lots (High Liquidity)</span></div>
-            <div class="modal-kv-row"><span class="k">Open Interest</span><span class="v">18,450 Lots</span></div>
-          </div>
-
-          <!-- Leg 2 Specs & Depth -->
-          <div class="modal-breakdown-card">
-            <h4><i class="fa-solid fa-cube"></i> Leg 2: GOLDPETAL APR26 (1g 999 Fine)</h4>
-            <div class="modal-kv-row"><span class="k">Last Traded Price</span><span class="v">₹7,607.62 / 1g</span></div>
-            <div class="modal-kv-row"><span class="k">Effective Fine Rate</span><span class="v" style="color: var(--gold-bright);">₹76,076.20 / 10g (Rich)</span></div>
-            <div class="modal-kv-row"><span class="k">Best Bid / Ask</span><span class="v">₹7,605 / ₹7,608 (Spread: ₹3)</span></div>
-            <div class="modal-kv-row"><span class="k">Top-5 Depth</span><span class="v" style="color: var(--high-amber);">68 Lots (Moderate)</span></div>
-            <div class="modal-kv-row"><span class="k">Open Interest</span><span class="v">4,910 Lots</span></div>
-          </div>
-
-        </div>
-
-        <!-- Friction & Net EV Breakdown -->
-        <div class="modal-breakdown-card" style="background: rgba(12, 22, 48, 0.75);">
-          <h4><i class="fa-solid fa-receipt"></i> Execution Drag &amp; Net Expected Value (EV) Analysis</h4>
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
-            <div class="stat-claycell">
-              <div class="stat-lbl">Gross Spread</div>
-              <div class="stat-num" style="color: var(--gold-bright);">₹122.62</div>
-            </div>
-            <div class="stat-claycell">
-              <div class="stat-lbl">STT + MCX Charges</div>
-              <div class="stat-num" style="color: #FF7685;">-₹21.40</div>
-            </div>
-            <div class="stat-claycell">
-              <div class="stat-lbl">Est. Bid-Ask Slippage</div>
-              <div class="stat-num" style="color: #FF7685;">-₹22.70</div>
-            </div>
-            <div class="stat-claycell highlight-cell">
-              <div class="stat-lbl">Net Actionable EV</div>
-              <div class="stat-num" style="color: var(--success-green);">+₹78.52</div>
-            </div>
-          </div>
-          <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 10px;">
-            <i class="fa-solid fa-circle-check" style="color: var(--success-green);"></i> 
-            <strong>Recommendation:</strong> Feasible Mean-Reversion Spread Trade. Sell 100 GOLDPETAL vs Buy 1 GOLDM when spread exceeds ₹115. Expected reversion within 3.4 trading days.
-          </div>
-        </div>
-
+        <div class="modal-breakdown-card">Pair details are loaded from matching backend observations when you open an available pair.</div>
       </div>
 
       <div class="modal-footer">
@@ -3121,9 +3294,9 @@
     ];
 
     // Deviation intensity (0-100 scale)
-    const currentDeviationData = [62, 38, 92, 79, 45, 54];
-    const historicalNormData   = [28, 25, 30, 26, 24, 27];
-    const frictionBoundaryData = [40, 40, 40, 40, 40, 40];
+    const currentDeviationData = [];
+    const historicalNormData   = [];
+    const frictionBoundaryData = [];
 
     const radarChart = new Chart(radarCtx, {
       type: 'radar',
@@ -3149,14 +3322,14 @@
             label: '30-Day Historical Norm',
             data: historicalNormData,
             fill: false,
-            borderColor: 'rgba(56, 189, 248, 0.65)',
+            borderColor: 'rgba(201, 166, 80, 0.58)',
             borderWidth: 1.8,
             borderDash: [4, 4],
             pointRadius: 3,
-            pointBackgroundColor: '#38BDF8'
+            pointBackgroundColor: '#c9a650'
           },
           {
-            label: 'Friction Boundary (Noise)',
+            label: 'Cost-Hurdle Boundary (σ-scaled)',
             data: frictionBoundaryData,
             fill: false,
             borderColor: 'rgba(255, 71, 87, 0.45)',
@@ -3273,11 +3446,12 @@
         }
       });
     }
+    window.createSparkline = createSparkline;
 
     // Signal 1 Sparkline (Critical - GOLDM vs GOLDPETAL)
     createSparkline(
       'sparkline-critical',
-      [22, 28, 35, 42, 38, 55, 68, 74, 82, 95, 108, 114, 119, 122.62],
+      [],
       '#FF4757',
       'rgba(255, 71, 87, 0.15)'
     );
@@ -3285,7 +3459,7 @@
     // Signal 2 Sparkline (High - GOLDGUINEA vs GOLDTEN)
     createSparkline(
       'sparkline-high',
-      [35, 40, 48, 52, 60, 58, 70, 85, 92, 110, 124, 135, 138, 141.34],
+      [],
       '#FFA502',
       'rgba(255, 165, 2, 0.15)'
     );
@@ -3293,51 +3467,17 @@
     // Signal 3 Sparkline (Medium - GOLDM vs GOLDTEN)
     createSparkline(
       'sparkline-medium',
-      [18, 22, 20, 26, 32, 40, 45, 52, 58, 62, 65, 68, 69, 70.35],
-      '#38BDF8',
-      'rgba(56, 189, 248, 0.15)'
+      [],
+      '#c9a650',
+      'rgba(201, 166, 80, 0.15)'
     );
 
     /* --------------------------------------------------------------------------
        4. HISTORICAL SPREAD DISTRIBUTION & GAUSSIAN BELL CURVE
        -------------------------------------------------------------------------- */
-    const distData = {
-      'GOLDM-GOLDPETAL': {
-        mean: 18.40,
-        sigma: 42.19,
-        median: 17.85,
-        kurtosis: '3.14 (Fat Tails)',
-        skewness: '+0.41',
-        currentSpread: 122.62,
-        currentZ: '+2.47σ (97.3%)',
-        bins: [-60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150],
-        freqs: [3, 8, 22, 48, 74, 85, 62, 36, 18, 6, 2, 1, 0, 0, 0]
-      },
-      'GOLDGUINEA-GOLDTEN': {
-        mean: 32.10,
-        sigma: 57.80,
-        median: 31.40,
-        kurtosis: '2.89 (Standard)',
-        skewness: '+0.28',
-        currentSpread: 141.34,
-        currentZ: '+1.89σ (93.1%)',
-        bins: [-60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150],
-        freqs: [2, 5, 14, 32, 58, 72, 80, 50, 31, 14, 5, 2, 2, 0, 0]
-      },
-      'GOLDM-GOLDTEN': {
-        mean: 12.50,
-        sigma: 40.74,
-        median: 12.10,
-        kurtosis: '3.42 (High Peak)',
-        skewness: '+0.15',
-        currentSpread: 70.35,
-        currentZ: '+1.42σ (84.7%)',
-        bins: [-60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150],
-        freqs: [4, 9, 28, 65, 92, 78, 48, 24, 11, 4, 0, 0, 0, 0, 0]
-      }
-    };
-
-    let currentSelectedPair = 'GOLDM-GOLDPETAL';
+    // No embedded sample distribution: only the analytics API can populate this view.
+    const distData = {};
+    let currentSelectedPair = null;
     const distCtx = document.getElementById('distributionChartCanvas').getContext('2d');
 
     // Create theoretical bell curve data
@@ -3352,28 +3492,14 @@
     let distributionChart = new Chart(distCtx, {
       type: 'bar',
       data: {
-        labels: distData[currentSelectedPair].bins.map(b => `₹${b}`),
+        labels: [],
         datasets: [
           {
             type: 'bar',
             label: 'Historical Frequency (Trading Days)',
-            data: distData[currentSelectedPair].freqs,
-            backgroundColor: function(context) {
-              const val = distData[currentSelectedPair].bins[context.dataIndex];
-              const cur = distData[currentSelectedPair].currentSpread;
-              if (Math.abs(val - cur) <= 15) {
-                return 'rgba(254, 225, 128, 0.85)'; // Current spread bar glowing gold
-              }
-              if (val > 100) return 'rgba(255, 71, 87, 0.45)'; // Critical tail
-              if (val > 60) return 'rgba(255, 165, 2, 0.35)'; // High tail
-              return 'rgba(56, 189, 248, 0.25)'; // Normal body
-            },
-            borderColor: function(context) {
-              const val = distData[currentSelectedPair].bins[context.dataIndex];
-              const cur = distData[currentSelectedPair].currentSpread;
-              if (Math.abs(val - cur) <= 15) return '#D4AF37';
-              return 'rgba(255, 255, 255, 0.1)';
-            },
+            data: [],
+            backgroundColor: 'rgba(201, 166, 80, 0.45)',
+            borderColor: 'rgba(255, 255, 255, 0.1)',
             borderWidth: 1.5,
             borderRadius: 6,
             barPercentage: 0.8
@@ -3381,7 +3507,7 @@
           {
             type: 'line',
             label: 'Gaussian Theoretical Normal Fit (PDF)',
-            data: generateBellCurve(distData[currentSelectedPair].mean, distData[currentSelectedPair].sigma, distData[currentSelectedPair].bins),
+            data: [],
             borderColor: 'rgba(212, 175, 55, 0.85)',
             borderWidth: 2.5,
             tension: 0.4,
@@ -3432,7 +3558,7 @@
             },
             title: {
               display: true,
-              text: 'Trading Sessions (365d Window)',
+              text: 'Synchronized observations (maximum 365)',
               color: '#64748B',
               font: { size: 10 }
             }
@@ -3442,45 +3568,47 @@
     });
 
     function switchDistributionPair(pairKey) {
-      if (!distData[pairKey]) return;
       currentSelectedPair = pairKey;
       playBeep(640);
+      if (typeof window.AURORA_SELECT_RADAR_PAIR === 'function') window.AURORA_SELECT_RADAR_PAIR(pairKey);
 
       // Update Tab Styles
       document.querySelectorAll('.dist-tab-btn').forEach(btn => btn.classList.remove('active'));
-      if (pairKey === 'GOLDM-GOLDPETAL') document.getElementById('tab-goldm-petal').classList.add('active');
-      if (pairKey === 'GOLDGUINEA-GOLDTEN') document.getElementById('tab-guinea-ten').classList.add('active');
-      if (pairKey === 'GOLDM-GOLDTEN') document.getElementById('tab-goldm-ten').classList.add('active');
+      const pairTabs = {
+        'GOLDM-GOLDPETAL': 'tab-goldm-petal',
+        'GOLDGUINEA-GOLDTEN': 'tab-guinea-ten',
+        'GOLDM-GOLDTEN': 'tab-goldm-ten',
+        'GOLDM-GOLDGUINEA': 'tab-goldm-guinea',
+        'GOLDTEN-GOLDPETAL': 'tab-ten-petal',
+        'GOLDGUINEA-GOLDPETAL': 'tab-guinea-petal'
+      };
+      if (pairTabs[pairKey]) document.getElementById(pairTabs[pairKey])?.classList.add('active');
 
-      const d = distData[pairKey];
-      // Update parameter chips
-      document.getElementById('stat-mean').innerText = `₹${d.mean.toFixed(2)}`;
-      document.getElementById('stat-sigma').innerText = `₹${d.sigma.toFixed(2)}`;
-      document.getElementById('stat-median').innerText = `₹${d.median.toFixed(2)}`;
-      document.getElementById('stat-kurtosis').innerHTML = `${d.kurtosis}`;
-      document.getElementById('stat-skewness').innerHTML = `${d.skewness}`;
-      document.getElementById('stat-current-z').innerText = `${d.currentZ}`;
+      clearDistributionPlaceholders();
+      if (typeof window.AURORA_LOAD_DISTRIBUTION === 'function') window.AURORA_LOAD_DISTRIBUTION(pairKey);
+    }
 
-      // Update chart
-      distributionChart.data.labels = d.bins.map(b => `₹${b}`);
-      distributionChart.data.datasets[0].data = d.freqs;
-      distributionChart.data.datasets[1].data = generateBellCurve(d.mean, d.sigma, d.bins);
-      distributionChart.update();
-      triggerToast(`Loaded distribution dataset for ${pairKey}`);
+    function clearDistributionPlaceholders() {
+      ['stat-mean', 'stat-sigma', 'stat-median', 'stat-kurtosis', 'stat-skewness', 'stat-current-z'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = '—';
+      });
+      if (distributionChart) {
+        distributionChart.data.labels = [];
+        distributionChart.data.datasets.forEach(dataset => { dataset.data = []; });
+        distributionChart.update();
+      }
     }
 
     function selectPairFromMatrix(pairName) {
-      let normalizedKey = pairName;
-      if (pairName.includes('GOLDPETAL') && pairName.includes('GOLDM')) normalizedKey = 'GOLDM-GOLDPETAL';
-      if (pairName.includes('GUINEA') && pairName.includes('GOLDTEN')) normalizedKey = 'GOLDGUINEA-GOLDTEN';
-      if (pairName.includes('GOLDM') && pairName.includes('GOLDTEN')) normalizedKey = 'GOLDM-GOLDTEN';
-
-      if (distData[normalizedKey]) {
-        switchDistributionPair(normalizedKey);
-      }
+      // Preserve the row→column direction selected in the matrix. The
+      // backend accepts either orientation and returns signed spread stats.
+      switchDistributionPair(pairName);
       
       // Scroll to signal card or highlight
-      const targetCard = document.querySelector(`.signal-card[data-pair="${normalizedKey}"]`);
+      const reversePair = pairName.split('-').reverse().join('-');
+      const targetCard = document.querySelector(`.signal-card[data-pair="${pairName}"]`) ||
+        document.querySelector(`.signal-card[data-pair="${reversePair}"]`);
       if (targetCard) {
         targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         targetCard.style.transform = 'scale(1.03)';
@@ -3534,7 +3662,7 @@
         this.vx = (Math.random() - 0.5) * 0.4;
         this.vy = (Math.random() - 0.5) * 0.4;
         this.radius = Math.random() * 2 + 1;
-        this.color = Math.random() > 0.4 ? 'rgba(212, 175, 55, 0.4)' : 'rgba(56, 189, 248, 0.3)';
+        this.color = Math.random() > 0.4 ? 'rgba(212, 175, 55, 0.4)' : 'rgba(201, 166, 80, 0.28)';
       }
       update() {
         this.x += this.vx;
@@ -3584,11 +3712,11 @@
       playBeep(520 + stepNumber * 60);
       const stepNames = [
         "",
-        "Stage 1: Raw Anomaly Signal Generator (|Z| > 1.2σ)",
-        "Stage 2: Liquidity Proxy & Order Depth Screener",
-        "Stage 3: Staggered Expiry & Delivery Risk Checker",
-        "Stage 4: Institutional Trading Friction & STT Hurdle",
-        "Stage 5: Final Confirmed Relative-Value Investigations"
+        "Stage 1: Backend matched pair observations",
+        "Stage 2: Backend volume and open-interest liquidity check",
+        "Stage 3: Matched contract expiry-risk check",
+        "Stage 4: Backend transaction-cost hurdle check",
+        "Stage 5: Backend opportunity classification"
       ];
       triggerToast(stepNames[stepNumber]);
     }
@@ -3601,66 +3729,111 @@
     const dateRangeFilter = document.getElementById('dateRangeFilter');
 
     function applySignalFilters() {
+      const selectedStatus = statusFilter.value;
       const selectedSeverity = severityFilter.value;
       const cards = document.querySelectorAll('.signal-card');
+      let visibleCount = 0;
 
       cards.forEach(card => {
         const sev = card.getAttribute('data-severity');
-        let show = true;
-        if (selectedSeverity !== 'all' && sev !== selectedSeverity) {
-          show = false;
-        }
+        const classification = card.dataset.classification || 'unavailable';
+        const hasSnapshot = card.dataset.hasSnapshot === 'true';
+        const hasRisk = card.dataset.liquidityTrap === 'true' || card.dataset.costBlocked === 'true' || card.dataset.expiryRisk === 'true';
+        const matchesStatus = selectedStatus === 'all' ||
+          (selectedStatus === 'active' && hasSnapshot && ['Investigate', 'Watch', 'Cost-Blocked', 'Expiry-Risk'].includes(classification)) ||
+          (selectedStatus === 'investigating' && classification === 'Investigate') ||
+          (selectedStatus === 'risk' && hasSnapshot && hasRisk);
+        const show = matchesStatus && (selectedSeverity === 'all' || sev === selectedSeverity);
         card.style.display = show ? 'flex' : 'none';
+        if (show) visibleCount += 1;
       });
+      const empty = document.getElementById('radarCardsEmpty');
+      if (empty) empty.hidden = visibleCount > 0;
+      if (typeof window.AURORA_SYNC_RADAR_FILTER_STATE === 'function') window.AURORA_SYNC_RADAR_FILTER_STATE();
 
-      triggerToast(`Filters applied: Severity [${selectedSeverity}]`);
+      triggerToast(`Filters applied: ${selectedStatus} · ${selectedSeverity}`);
     }
 
     statusFilter.addEventListener('change', applySignalFilters);
     severityFilter.addEventListener('change', applySignalFilters);
+    window.applySignalFilters = applySignalFilters;
     dateRangeFilter.addEventListener('change', () => {
-      triggerToast(`Window updated to: ${dateRangeFilter.options[dateRangeFilter.selectedIndex].text}`);
+      triggerToast(`Rolling baseline: ${dateRangeFilter.options[dateRangeFilter.selectedIndex].text}`);
     });
 
     document.getElementById('resetFiltersBtn').addEventListener('click', () => {
-      statusFilter.value = 'active';
+      statusFilter.value = 'all';
       severityFilter.value = 'all';
-      dateRangeFilter.value = 'today';
+      dateRangeFilter.value = '30';
       applySignalFilters();
+      dateRangeFilter.dispatchEvent(new Event('change'));
       triggerToast('All radar filters reset to default');
     });
 
     document.getElementById('refresh-radar-btn').addEventListener('click', function() {
       this.querySelector('i').classList.add('fa-spin');
       playBeep(800, 'sine', 0.2);
-      setTimeout(() => {
-        this.querySelector('i').classList.remove('fa-spin');
-        triggerToast('MCX real-time relative-value feeds re-synchronized (0 latency)');
-      }, 700);
     });
 
     /* --------------------------------------------------------------------------
        9. INVESTIGATION MODAL LOGIC
        -------------------------------------------------------------------------- */
+    let investigationRequestId = 0;
     function openInvestigationModal(pairKey) {
       playBeep(750, 'triangle', 0.15);
       const modal = document.getElementById('investigationModal');
       const title = document.getElementById('modalPairTitle');
       const sub = document.getElementById('modalSubtitle');
-
-      if (pairKey === 'GOLDM-GOLDPETAL') {
-        title.innerHTML = '<i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i> Deep-Dive Investigation: GOLDM vs GOLDPETAL';
-        sub.innerText = 'Critical Spread Anomaly (+₹122.62 / 10g | Z = 2.47σ | 97.3th Percentile)';
-      } else if (pairKey === 'GOLDGUINEA-GOLDTEN') {
-        title.innerHTML = '<i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i> Deep-Dive Investigation: GOLDGUINEA vs GOLDTEN';
-        sub.innerText = 'High Dislocation with Liquidity Trap Flag (+₹141.34 / 10g | Z = 1.89σ)';
-      } else {
-        title.innerHTML = '<i class="fa-solid fa-microscope" style="color: var(--gold-light);"></i> Deep-Dive Investigation: GOLDM vs GOLDTEN';
-        sub.innerText = 'Medium Spread Equilibrium (+₹70.35 / 10g | Z = 1.42σ | Clean Execution)';
-      }
-
+      const body = modal.querySelector('.modal-body');
+      const requestId = ++investigationRequestId;
+      const snapshot = window.AURORA_RADAR_PAIRS?.[pairKey];
+      const escape = value => String(value ?? '—').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+      const value = number => number == null ? '—' : Number(number).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      title.textContent = `Deep-Dive Investigation: ${pairKey.replace('-', ' vs ')}`;
+      sub.textContent = snapshot ? 'Loading the matched backend observations…' : 'No current backend pair result is available.';
+      if (body) body.innerHTML = '<div class="modal-breakdown-card">Loading matched backend observations…</div>';
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
+      if (!snapshot || snapshot.spread == null || !body) return;
+
+      fetch(`http://127.0.0.1:8000/api/analytics/spreads?pair=${encodeURIComponent(snapshot.pair)}&window=30&end_date=${encodeURIComponent(snapshot.trade_date)}`)
+        .then(response => { if (!response.ok) throw new Error(`Analytics service returned ${response.status}`); return response.json(); })
+        .then(json => {
+          if (requestId !== investigationRequestId || !modal.classList.contains('open')) return;
+          const points = json?.success && Array.isArray(json?.data?.data_points) ? json.data.data_points : [];
+          const point = points.find(item => item.trade_date === snapshot.trade_date && item.expiry_date === snapshot.expiry_date);
+          if (!point) throw new Error('No same-date, same-expiry pair point was returned');
+          sub.textContent = `${snapshot.classification} · ${point.trade_date} · shared expiry ${point.expiry_date}`;
+          body.innerHTML = `
+            <div class="modal-details-grid">
+              <div class="modal-breakdown-card"><h4>${escape(snapshot.leg_a)} · matched observation</h4>
+                <div class="modal-kv-row"><span class="k">Quoted close</span><span class="v">₹${value(point.raw_price_a)}</span></div>
+                <div class="modal-kv-row"><span class="k">Normalized close / 10g</span><span class="v">₹${value(point.price_a)}</span></div>
+                <div class="modal-kv-row"><span class="k">Volume · open interest</span><span class="v">${value(point.volume_a)} · ${value(point.open_interest_a)}</span></div>
+                <div class="modal-kv-row"><span class="k">Days to expiry</span><span class="v">${value(point.dte_a)}</span></div>
+              </div>
+              <div class="modal-breakdown-card"><h4>${escape(snapshot.leg_b)} · matched observation</h4>
+                <div class="modal-kv-row"><span class="k">Quoted close</span><span class="v">₹${value(point.raw_price_b)}</span></div>
+                <div class="modal-kv-row"><span class="k">Normalized close / 10g</span><span class="v">₹${value(point.price_b)}</span></div>
+                <div class="modal-kv-row"><span class="k">Volume · open interest</span><span class="v">${value(point.volume_b)} · ${value(point.open_interest_b)}</span></div>
+                <div class="modal-kv-row"><span class="k">Days to expiry</span><span class="v">${value(point.dte_b)}</span></div>
+              </div>
+            </div>
+            <div class="modal-breakdown-card"><h4>Backend relative-value result · ₹/10g</h4>
+              <div class="modal-kv-row"><span class="k">Spread</span><span class="v">₹${value(snapshot.spread)}</span></div>
+              <div class="modal-kv-row"><span class="k">Rolling Z-score · percentile</span><span class="v">${snapshot.z_score == null ? '—' : `${value(snapshot.z_score)}σ`} · ${snapshot.percentile_rank == null ? '—' : `${value(snapshot.percentile_rank)}%`}</span></div>
+              <div class="modal-kv-row"><span class="k">Opportunity score · trap risk</span><span class="v">${value(snapshot.opportunity_score)} · ${value(snapshot.trap_risk_score)}</span></div>
+              <div class="modal-kv-row"><span class="k">Estimated cost hurdle</span><span class="v">₹${value(snapshot.estimated_cost_hurdle)}</span></div>
+              <div class="modal-kv-row"><span class="k">Gross edge · net edge</span><span class="v">₹${value(snapshot.gross_edge)} · ₹${value(snapshot.net_edge)}</span></div>
+              <p>${escape(snapshot.reason)}</p>
+            </div>`;
+        })
+        .catch(error => {
+          if (requestId !== investigationRequestId || !modal.classList.contains('open')) return;
+          console.warn('AURORA: Pair detail unavailable:', error);
+          sub.textContent = 'Matched pair details unavailable';
+          body.textContent = 'The backend did not return a valid observation for this pair, trade date, and expiry. Refresh the radar and try again.';
+        });
     }
 
     function closeInvestigationModal() {
@@ -3686,5 +3859,6 @@
 
     console.log("AURORA Opportunity Radar initialized with full telemetry.");
   </script>
+  <script src="aurora-nuggets.js" defer></script>
 </body>
 </html>
