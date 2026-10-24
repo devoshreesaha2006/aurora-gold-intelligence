@@ -379,15 +379,22 @@ class CsvIngestionService:
 
         try:
             high_price = parse_numeric(get_val("high"), "high", allow_none=True)
-            if high_price is not None and high_price <= 0:
-                return RowError(row_number=row_num, field="high", reason=f"High price must be positive, got {high_price}")
+            # Historical MCX rows sometimes use 0 to mean an unavailable OHLC value.
+            # Store that value as missing; zero is not a valid traded high.
+            if high_price == 0:
+                high_price = None
+            elif high_price is not None and high_price < 0:
+                return RowError(row_number=row_num, field="high", reason=f"High price cannot be negative, got {high_price}")
         except ValueError as e:
             return RowError(row_number=row_num, field="high", reason=str(e))
 
         try:
             low_price = parse_numeric(get_val("low"), "low", allow_none=True)
-            if low_price is not None and low_price <= 0:
-                return RowError(row_number=row_num, field="low", reason=f"Low price must be positive, got {low_price}")
+            # Match the open/high policy for unavailable historical prices.
+            if low_price == 0:
+                low_price = None
+            elif low_price is not None and low_price < 0:
+                return RowError(row_number=row_num, field="low", reason=f"Low price cannot be negative, got {low_price}")
         except ValueError as e:
             return RowError(row_number=row_num, field="low", reason=str(e))
 
