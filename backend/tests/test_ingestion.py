@@ -124,8 +124,8 @@ def test_database_persistence_and_relationships(client, db_session):
 
 def test_zero_open_price_is_treated_as_missing(client):
     csv_content = (
-        b"symbol,trade_date,expiry_date,open,high,low,close,volume,open_interest\\n"
-        b"GOLDM,2026-10-15,2026-10-30,0,63100,62710,62980,15400,37800\\n"
+        b"symbol,trade_date,expiry_date,open,high,low,close,volume,open_interest\n"
+        b"GOLDM,2026-10-15,2026-10-30,0,63100,62710,62980,15400,37800\n"
     )
     response = client.post(
         "/api/data/upload",
