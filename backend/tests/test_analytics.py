@@ -10,6 +10,7 @@ from backend.app.services.analytics_service import (
 )
 from backend.app.models.market_observation import MarketObservation
 from backend.app.models.contract import Contract
+from backend.app.schemas.analytics import EventEvidenceTrail
 
 SAMPLE_DIR = os.path.join(os.path.dirname(__file__), "..", "sample_data")
 
@@ -662,3 +663,37 @@ def test_pairwise_spreads_are_transitive_on_same_session_and_expiry(client):
         assert abs(
             (ten_guinea["spread"] + guinea_petal["spread"]) - ten_petal["spread"]
         ) < 0.02
+
+
+def test_event_evidence_preserves_unobserved_liquidity_as_unavailable():
+    evidence = EventEvidenceTrail(
+        spread=-100.0,
+        cost_hurdle=25.31,
+        rule_triggered="Liquidity unassessed",
+        volume_a=None,
+        volume_b=None,
+        open_interest_a=None,
+        open_interest_b=None,
+    )
+
+    assert evidence.volume_a is None
+    assert evidence.volume_b is None
+    assert evidence.open_interest_a is None
+    assert evidence.open_interest_b is None
+
+
+def test_event_evidence_preserves_observed_zero_liquidity():
+    evidence = EventEvidenceTrail(
+        spread=-100.0,
+        cost_hurdle=25.31,
+        rule_triggered="Observed zero volume",
+        volume_a=0,
+        volume_b=12,
+        open_interest_a=0,
+        open_interest_b=5,
+    )
+
+    assert evidence.volume_a == 0
+    assert evidence.volume_b == 12
+    assert evidence.open_interest_a == 0
+    assert evidence.open_interest_b == 5

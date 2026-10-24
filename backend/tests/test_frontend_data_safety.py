@@ -103,6 +103,8 @@ def test_market_detective_chart_legend_and_step_states_follow_selected_backend_e
     assert "Contracts traded vs. Open Commitment · ${evt.leg_a} / ${evt.leg_b}" in pipeline
     assert "const stepStates = ['EVENT DATA', 'NORMALIZED EVENT', 'BACKEND SPREAD'" in pipeline
     assert "if (!points.length) {" in pipeline
+    assert "evt.evidence.volume_a == null ? 'Unavailable'" in pipeline
+    assert "evt.evidence.open_interest_a == null || evt.evidence.open_interest_b == null ? 'Unavailable'" in pipeline
     assert "clearDetectiveCharts();\n        document.querySelectorAll('.chart-footer-metrics .chart-metric-value')" in pipeline
 
 
