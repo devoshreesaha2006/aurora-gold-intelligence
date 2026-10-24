@@ -123,6 +123,7 @@ def test_database_persistence_and_relationships(client, db_session):
     assert obs.normalized_price_10g_basis > 0
 
 def test_zero_open_price_is_treated_as_missing(client, db_session):
+    from datetime import date
     from backend.app.models.market_observation import MarketObservation
 
     csv_content = (
@@ -141,8 +142,8 @@ def test_zero_open_price_is_treated_as_missing(client, db_session):
 
     observation = db_session.query(MarketObservation).filter(
         MarketObservation.symbol == "GOLDM",
-        MarketObservation.trade_date == __import__("datetime").date(2026, 10, 15),
-        MarketObservation.expiry_date == __import__("datetime").date(2026, 10, 30),
+        MarketObservation.trade_date == date(2026, 10, 15),
+        MarketObservation.expiry_date == date(2026, 10, 30),
     ).first()
     assert observation is not None
     assert observation.open_price is None
