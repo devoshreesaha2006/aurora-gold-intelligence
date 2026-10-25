@@ -97,9 +97,25 @@ def get_relative_value_events(
     volume/OI where available, DTE, and plain-language decision rules. Event dates
     may be historical; this endpoint does not imply a live feed.
     """
+    if pair:
+        try:
+            parse_pair(pair)
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        pair = pair.strip().upper().replace("/", "-").replace("_", "-")
+
+    if status_filter:
+        allowed_statuses = {"investigate", "watch", "cost-blocked", "expiry-risk", "no signal"}
+        if status_filter.strip().lower() not in allowed_statuses:
+            allowed = ", ".join(sorted(allowed_statuses))
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unsupported status '{status_filter}'. Allowed values: {allowed}.",
+            )
+
     service = RelativeValueAnalyticsService(db)
     events_data = service.get_events(
-        status=status_filter,
+        status=status_filter.strip() if status_filter else None,
         pair=pair,
         min_z=min_z,
         limit=limit,
