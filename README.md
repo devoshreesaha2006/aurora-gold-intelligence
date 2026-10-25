@@ -384,6 +384,18 @@ Follow this step-by-step route to showcase the complete AURORA platform:
 
 ---
 
+## Frontend API Configuration
+
+The dashboard, Contract Explorer, and Backtesting Lab use a configurable backend URL:
+
+- Local development on `localhost` / `127.0.0.1`: defaults to `http://127.0.0.1:8000`.
+- Same-origin deployment: defaults to the current site's `/api` endpoint.
+- Separate frontend/backend deployment: define `window.AURORA_API_BASE` **before** loading the page's live JavaScript. Use the backend origin plus `/api` for the dashboard and Contract Explorer (for example, `https://api.example.com/api`); Backtesting Lab accepts the backend origin (for example, `https://api.example.com`) because its requests append `/api/...`.
+
+Do not put provider credentials in this frontend setting. Keep them only in the backend's ignored `.env` file.
+
+---
+
 ## Git Branches & Safety Backups
 
 - `backup-phase0-baseline`: Preserved snapshot of original repository state before Phase 1 implementation.
