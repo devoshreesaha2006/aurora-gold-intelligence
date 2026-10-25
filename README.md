@@ -98,7 +98,7 @@ hacknHills/
 - Windows PowerShell
 
 ### 2. Set Up Virtual Environment & Dependencies
-Open PowerShell in the project directory (`c:\Users\ASUS\OneDrive\Desktop\hacknHills`):
+Open PowerShell in the repository root (the folder containing `README.md`, `requirements.txt`, and `backend/`).
 
 ```powershell
 # Create Python virtual environment
@@ -121,7 +121,7 @@ Copy-Item .env.example .env
 Default `.env` configuration uses zero-config SQLite (`sqlite:///./aurora.db`) and demo mode.
 
 ### 4. Run Verification Tests
-Verify all 20 unit, analytics, and integration tests:
+Run the complete backend regression, analytics, and integration test suite:
 
 ```powershell
 python -m pytest backend/tests -v
