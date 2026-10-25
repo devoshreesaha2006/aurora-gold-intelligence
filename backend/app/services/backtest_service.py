@@ -212,7 +212,7 @@ class BacktestService:
             max_drawdown = min(max_drawdown, drawdown)
             previous_equity = points[-1].equity
             if previous_equity:
-                returns.append((equity - previous_equity) / previous_equity)
+                returns.append((round(equity, 2) - previous_equity) / previous_equity)
             points.append(EquityPoint(trade_date=oa.trade_date, equity=round(equity, 2), drawdown_pct=round(drawdown, 4)))
 
         if open_trade:
@@ -228,7 +228,7 @@ class BacktestService:
             # Include the final exit cost in the last daily return so the
             # annualized Sharpe ratio reflects the same terminal equity as P&L.
             if len(points) > 1 and points[-2].equity:
-                final_return = (equity - points[-2].equity) / points[-2].equity
+                final_return = (round(equity, 2) - points[-2].equity) / points[-2].equity
                 if returns:
                     returns[-1] = final_return
 

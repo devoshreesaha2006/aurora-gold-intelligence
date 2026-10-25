@@ -54,7 +54,7 @@ hacknHills/
 │   │   ├── sample_mcx_gold_bhavcopy_valid.csv    # 16-row valid synthetic test dataset
 │   │   ├── sample_mcx_gold_bhavcopy_invalid.csv  # 8-row malformed CSV testing diagnostics
 │   │   └── README.md                             # CSV schema and validation documentation
-│   └── tests/                                    # Pytest test suite (20 test cases)
+│   └── tests/                                    # Pytest regression suite
 │       ├── conftest.py
 │       ├── test_health.py
 │       ├── test_contracts.py
@@ -78,15 +78,6 @@ hacknHills/
 ├── .env.example                     # Environment template
 ├── requirements.txt                 # Python dependencies
 └── README.md
-│   ├── aurora-pipeline.js           # Phase 1 Live integration & CSV Ingest Modal
-│   ├── dashboard.html               # Executive Dashboard
-│   ├── contract-explorer.html       # Contract Specifications Explorer
-│   ├── opportunity-radar.html       # Relative-Value Radar
-│   ├── market-detective.html        # Anomaly Investigation Dossier
-│   └── backtesting-lab.html         # Walk-Forward Backtester
-├── .env.example                     # Environment template
-├── requirements.txt                 # Python dependencies
-└── README.md
 ```
 
 ---
@@ -98,7 +89,7 @@ hacknHills/
 - Windows PowerShell
 
 ### 2. Set Up Virtual Environment & Dependencies
-Open PowerShell in the project directory (`c:\Users\ASUS\OneDrive\Desktop\hacknHills`):
+Open PowerShell in the repository root (the folder containing `README.md`, `requirements.txt`, and `backend/`).
 
 ```powershell
 # Create Python virtual environment
@@ -121,7 +112,7 @@ Copy-Item .env.example .env
 Default `.env` configuration uses zero-config SQLite (`sqlite:///./aurora.db`) and demo mode.
 
 ### 4. Run Verification Tests
-Verify all 20 unit, analytics, and integration tests:
+Run the complete backend regression, analytics, and integration test suite:
 
 ```powershell
 python -m pytest backend/tests -v

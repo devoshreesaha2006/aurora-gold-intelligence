@@ -1,0 +1,41 @@
+name: AURORA Backend Tests
+
+on:
+  push:
+    branches:
+      - main
+      - fix/aurora-final-readiness-audit
+  pull_request:
+    branches:
+      - main
+      - fix/aurora-final-readiness-audit
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aurora-backend-tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-tests:
+    name: Python backend test suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
+
+      - name: Run backend tests
+        run: python -m pytest backend/tests -v
