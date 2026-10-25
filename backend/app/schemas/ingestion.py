@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List, Any, Dict
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class RowError(BaseModel):
@@ -36,5 +36,19 @@ class ImportBatchRead(BaseModel):
     is_synthetic: bool
     created_at: datetime
     error_summary: Optional[str] = None
+
+    @computed_field
+    @property
+    def duplicate_rows(self) -> int:
+        return max(0, self.total_rows - self.accepted_rows - self.rejected_rows)
+
+    @computed_field
+    @property
+    def status(self) -> str:
+        if self.accepted_rows == 0 and self.rejected_rows > 0:
+            return "failed"
+        if self.rejected_rows > 0:
+            return "partial_success"
+        return "completed"
 
     model_config = ConfigDict(from_attributes=True)
