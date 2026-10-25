@@ -225,6 +225,12 @@ class BacktestService:
             drawdown = ((equity - peak) / peak * 100) if peak else 0.0
             max_drawdown = min(max_drawdown, drawdown)
             points[-1] = EquityPoint(trade_date=oa.trade_date, equity=round(equity, 2), drawdown_pct=round(drawdown, 4))
+            # Include the final exit cost in the last daily return so the
+            # annualized Sharpe ratio reflects the same terminal equity as P&L.
+            if len(points) > 1 and points[-2].equity:
+                final_return = (equity - points[-2].equity) / points[-2].equity
+                if returns:
+                    returns[-1] = final_return
 
         closed_wins = sum(1 for trade in trades if trade.net_pnl > 0)
         losses = sum(-trade.net_pnl for trade in trades if trade.net_pnl < 0)
