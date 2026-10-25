@@ -100,6 +100,7 @@
   function resetDisplay() {
     clearCharts();
     allTrades = [];
+    $('exportTradesButton').disabled = true;
     renderTrades([]);
     ['metricReturn', 'metricPnl', 'metricDrawdown', 'metricSharpe', 'metricWinRate', 'metricWinSub', 'metricTrades', 'metricProfitFactor'].forEach((id) => {
       $(id).textContent = id === 'metricPnl' ? 'Waiting for results' : id === 'metricWinSub' ? 'Closed trades' : '—';
@@ -182,6 +183,7 @@
     renderMetrics(result.metrics);
     renderCharts(result.equity_curve || [], result.spread_series || []);
     allTrades = result.trades || [];
+    $('exportTradesButton').disabled = allTrades.length === 0;
     renderTrades(allTrades);
     $('assumptionList').replaceChildren(...(result.assumptions || []).map((item) => {
       const li = document.createElement('li'); li.textContent = item; return li;
@@ -307,6 +309,29 @@
     formError.hidden = true; resetDisplay(); setStatus('Configuration restored to the documented baseline.');
   });
   document.querySelectorAll('.bt-preset').forEach((button) => button.addEventListener('click', () => applyPreset(button.dataset.preset)));
+  function exportTradesCsv() {
+    if (!allTrades.length) return;
+    const columns = [
+      ['entry_date', 'Entry date'], ['exit_date', 'Exit date'], ['pair', 'Pair'],
+      ['direction', 'Position'], ['units', 'Units'], ['entry_spread', 'Entry spread INR/10g'],
+      ['exit_spread', 'Exit spread INR/10g'], ['gross_pnl', 'Gross P&L INR'],
+      ['costs', 'Costs INR'], ['net_pnl', 'Net P&L INR'], ['exit_reason', 'Exit reason'],
+    ];
+    const escapeCell = (value) => {
+      const text = value == null ? '' : String(value);
+      return '"' + text.replaceAll('"', '""') + '"';
+    };
+    const lines = [columns.map(([, label]) => escapeCell(label)).join(',')];
+    allTrades.forEach((trade) => lines.push(columns.map(([key]) => escapeCell(trade[key])).join(',')));
+    const blob = new Blob(['\\uFEFF' + lines.join('\\r\\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `aurora-backtest-trades-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link); link.click(); link.remove();
+    URL.revokeObjectURL(url);
+  }
+  $('exportTradesButton').addEventListener('click', exportTradesCsv);
   $('tradeSearch').addEventListener('input', () => renderTrades(allTrades));
   $('uploadButton').addEventListener('click', () => {
     const upload = document.getElementById('btnOpenIngestModal');
