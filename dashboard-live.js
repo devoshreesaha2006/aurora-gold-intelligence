@@ -1,6 +1,6 @@
 /* Live dashboard binding. All displayed market values come from the existing API. */
 (() => {
-  const API = 'http://127.0.0.1:8000/api';
+  const API = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? `${location.origin}/api` : 'http://127.0.0.1:8000/api')).replace(/\/$/, '');
   const pairKeys = ['GOLDM-GOLDTEN', 'GOLDM-GOLDGUINEA', 'GOLDM-GOLDPETAL', 'GOLDTEN-GOLDGUINEA', 'GOLDTEN-GOLDPETAL', 'GOLDGUINEA-GOLDPETAL'];
   const colors = ['#dfc477', '#c99c4e', '#b47d3d', '#9d8b59', '#d7ae5d', '#857a61'];
   const model = { status: null, contracts: [], prices: [], radar: [], radarDate: null, events: [], loaded: {}, timeframe: '30D', pure: true, costFilter: true };
