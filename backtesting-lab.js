@@ -340,5 +340,17 @@
   });
   $('sidebarToggle').addEventListener('click', () => $('sidebar').classList.toggle('open'));
 
+  const requestedPair = new URLSearchParams(window.location.search).get('pair');
+  if (requestedPair) {
+    const pairSelect = $('pairInput');
+    const normalizedPair = requestedPair.trim().toUpperCase().replace(/\//g, '-').replace(/\s+/g, '');
+    if ([...pairSelect.options].some((option) => option.value === normalizedPair)) {
+      pairSelect.value = normalizedPair;
+      setStatus(`Investigation pair loaded: ${normalizedPair.replace('-', ' / ')}. Review the dates and assumptions, then run the historical simulation.`);
+    } else {
+      setStatus('The investigation pair was not recognized. Choose a supported pair before running.', 'fa-solid fa-triangle-exclamation');
+    }
+  }
+
   loadMarketStatus();
 })();
