@@ -125,7 +125,7 @@
       { value: String(activeContracts.length), unit: 'Active', subtitle: `${activeContracts.length} contract specifications`, tag: model.status ? 'API connected' : 'Status unavailable' },
       { value: String(investigations.length), unit: 'Investigate', subtitle: `Latest radar snapshot · ${model.radarDate || 'date unavailable'}`, tag: `${validPairs.length} pairs with data` },
       { value: meanAbsSpread == null ? '—' : money(meanAbsSpread), unit: '/ 10g', subtitle: `Mean absolute spread · ${validPairs.length} pairs`, tag: 'Relative value' },
-      { value: best ? `${Number(best.opportunity_score).toFixed(0)}%` : '—', unit: 'Score', subtitle: best ? `${best.pair} · ${best.classification}` : 'No scored pair data', tag: best ? `Trap risk ${Number(best.trap_risk_score).toFixed(0)}%` : 'Awaiting observations' }
+      { value: best ? `${Number(best.opportunity_score).toFixed(0)}/100` : '—', unit: 'Rank', subtitle: best ? `${best.pair} · ${best.classification} · ranking only` : 'No scored pair data', tag: best && best.trap_risk_score != null ? `Trap risk ${Number(best.trap_risk_score).toFixed(0)}/100` : 'Awaiting observations' }
     ];
     cards.forEach((card, i) => {
       const v = values[i];
@@ -136,7 +136,7 @@
       const meta = $('.kpi-meta-row', card);
       if (meta) meta.innerHTML = `<span class="kpi-subtitle">${esc(sourceLoaded ? v.subtitle : 'Analytics endpoint unavailable')}</span><span class="kpi-tag">${esc(sourceLoaded ? v.tag : 'Unavailable')}</span>`;
       const tip = $('.kpi-tooltip', card);
-      if (tip) tip.textContent = i === 0 ? activeContracts.map(c => c.symbol).join(', ') || 'No active contracts returned.' : i === 1 ? investigations.map(p => p.pair).join(', ') || 'No pairs currently classified as Investigate.' : i === 2 ? 'Mean of absolute normalized spread values returned by the radar endpoint.' : best ? `${best.pair}: opportunity ${Number(best.opportunity_score).toFixed(1)}, trap risk ${Number(best.trap_risk_score).toFixed(1)}.` : 'Score appears when observations are available.';
+      if (tip) tip.textContent = i === 0 ? activeContracts.map(c => c.symbol).join(', ') || 'No active contracts returned.' : i === 1 ? investigations.map(p => p.pair).join(', ') || 'No pairs currently classified as Investigate.' : i === 2 ? 'Mean of absolute normalized spread values returned by the radar endpoint.' : best ? `${best.pair}: rank score ${Number(best.opportunity_score).toFixed(1)} out of 100; classification is ${best.classification}. A rank is not a trade signal.` : 'Ranking appears only when observations are available and is not itself a trade signal.';
     });
   }
 
@@ -361,10 +361,11 @@
     if (cycle) cycle.textContent = model.prices.length ? 'Observation expiries' : 'Awaiting observations';
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const expiries = new Map();
-    latestBySymbol().forEach((item, symbol) => {
-      if (!item.expiry_date) return;
+    model.prices.forEach(item => {
+      if (!item.expiry_date || !item.symbol || !item.trade_date) return;
       const list = expiries.get(item.expiry_date) || [];
-      list.push(symbol); expiries.set(item.expiry_date, list);
+      if (!list.includes(item.symbol)) list.push(item.symbol);
+      expiries.set(item.expiry_date, list);
     });
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     let html = weekdays.map(day => `<div class="cal-day-name">${day}</div>`).join('');
@@ -380,7 +381,7 @@
     const legend = $('.cal-legend-strip');
     if (legend) {
       const entries = [...expiries.entries()].filter(([date]) => date.slice(0, 7) === `${year}-${String(month + 1).padStart(2, '0')}`).sort(([a], [b]) => a.localeCompare(b));
-      legend.innerHTML = entries.length ? entries.map(([date, symbols]) => `<div class="cal-legend-item"><span class="legend-dot" style="background:#d6b363"></span><span><strong class="cal-item-sym">${date.slice(8)} ${now.toLocaleDateString('en-IN', { month: 'short' })}:</strong> ${symbols.map(esc).join(', ')}</span></div>`).join('') : empty(model.prices.length ? 'No upcoming expiries in this month are present in the loaded observations.' : 'Expiry dates appear when market observations are available.');
+      legend.innerHTML = entries.length ? entries.map(([date, symbols]) => `<div class="cal-legend-item"><span class="legend-dot" style="background:#d6b363"></span><span><strong class="cal-item-sym">${date.slice(8)} ${now.toLocaleDateString('en-IN', { month: 'short' })}:</strong> ${symbols.map(esc).join(', ')} <small>· observed in loaded history</small></span></div>`).join('') : empty(model.prices.length ? 'No expiry dates for this month are present in the loaded observation window.' : 'Expiry dates appear when market observations are available.');
     }
     grid.querySelectorAll('[data-cal-date]').forEach(cell => cell.addEventListener('click', () => window.selectCalDate(cell.dataset.calDate)));
   }

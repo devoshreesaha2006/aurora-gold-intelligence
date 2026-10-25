@@ -41,8 +41,15 @@
       const response = await fetch(`${API_BASE}/api/market/status`);
       if (!response.ok) throw new Error('Market status endpoint unavailable');
       const { data } = await response.json();
-      label.textContent = data.data_mode === 'live_feed_authorized' ? 'Authorized feed' : data.data_mode === 'staged_csv' ? 'Imported history' : 'Demo data mode';
-      coverage.textContent = `${data.total_observations} observations · latest ${data.latest_trade_date || 'no date'}`;
+      const verifiedLive = data.is_live_connected === true && String(data.feed_status).toUpperCase() === 'LIVE';
+      label.textContent = verifiedLive ? 'Verified MCX feed' : data.data_mode === 'staged_csv'
+        ? 'Imported history · unverified'
+        : data.data_mode === 'test_data' ? 'Test data · excluded from analysis'
+          : data.data_mode === 'demo_synthetic' ? 'Synthetic demo · excluded from analysis'
+            : 'Provider unavailable';
+      const observationCount = Number(data.total_observations);
+      const countLabel = Number.isFinite(observationCount) ? observationCount.toLocaleString('en-IN') : '—';
+      coverage.textContent = `${countLabel} stored observations across all sources · latest ${data.latest_trade_date || 'no date'}`;
       const chip = document.querySelector('.market-status-chip');
       if (chip) {
         const statusText = chip.querySelector('span:last-child');
@@ -158,7 +165,7 @@
   function renderResult(result) {
     $('resultHeading').textContent = result.status === 'completed' ? `${result.pair.replace('-', ' / ')} · historical result` : 'History is not ready for this run';
     $('resultDescription').textContent = result.message;
-    $('sourceLabel').textContent = result.data_source ? `Source: ${result.data_source}` : 'Source: no eligible imported history';
+    $('sourceLabel').textContent = result.data_source ? `Source: ${result.data_source}` : 'Source: unavailable for this run';
     $('runState').innerHTML = result.status === 'completed'
       ? '<i class="fa-solid fa-circle-check"></i> COMPLETED'
       : '<i class="fa-regular fa-circle-pause"></i> NO RESULT';
@@ -166,7 +173,7 @@
       $('historyCoverage').textContent = `${result.observations} synchronized days · ${result.first_date} — ${result.last_date}`;
     }
     if (result.status !== 'completed') {
-      setStatus(result.message, 'fa-solid fa-circle-info');
+      setStatus('No result; see the explanation in the summary below.', 'fa-solid fa-circle-info');
       alert(result.message, 'info');
       return;
     }

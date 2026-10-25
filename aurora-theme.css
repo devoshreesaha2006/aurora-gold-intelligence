@@ -1,0 +1,7 @@
+/* AURORA Appearance System: Dark & Gold Midnight Palette Only. Light mode is removed. */
+.aurora-theme-toggle {
+  display: none !important;
+}
+:root {
+  color-scheme: dark !important;
+}

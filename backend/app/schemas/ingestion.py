@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List, Any, Dict
-from pydantic import BaseModel, ConfigDict, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 
 class RowError(BaseModel):
@@ -37,6 +37,16 @@ class ImportBatchRead(BaseModel):
     created_at: datetime
     error_summary: Optional[str] = None
 
+    @field_validator("created_at", mode="before")
+    @classmethod
+    def mark_naive_database_timestamp_as_utc(cls, value):
+        # SQLite drops timezone metadata even though ImportBatch.created_at is
+        # written by utc_now(). Restore that known timezone before API output.
+        if isinstance(value, datetime) and value.tzinfo is None:
+            from datetime import timezone
+            return value.replace(tzinfo=timezone.utc)
+        return value
+
     @computed_field
     @property
     def duplicate_rows(self) -> int:
@@ -45,10 +55,8 @@ class ImportBatchRead(BaseModel):
     @computed_field
     @property
     def status(self) -> str:
-        if self.accepted_rows == 0 and self.rejected_rows > 0:
-            return "failed"
         if self.rejected_rows > 0:
-            return "partial_success"
+            return "partial_success" if self.accepted_rows > 0 or self.duplicate_rows > 0 else "failed"
         return "completed"
 
     model_config = ConfigDict(from_attributes=True)

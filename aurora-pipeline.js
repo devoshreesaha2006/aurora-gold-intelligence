@@ -607,6 +607,10 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         container.innerHTML = `<div class="table-empty"><i class="fa-solid fa-clock-rotate-left"></i> No historical batches recorded yet.</div>`;
         return;
       }
+      const formatCount = value => {
+        const count = Number(value);
+        return value == null || !Number.isFinite(count) ? '—' : count.toLocaleString('en-IN');
+      };
 
       container.innerHTML = `
         <table class="aurora-pipeline-table">
@@ -614,9 +618,11 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
             <tr>
               <th>Batch #</th>
               <th>Filename</th>
+              <th>Total Rows</th>
               <th>Accepted</th>
               <th>Rejected</th>
-              <th>Total Rows</th>
+              <th>Duplicates Skipped</th>
+              <th>Status</th>
               <th>Checksum (SHA-256)</th>
               <th>Import Timestamp</th>
             </tr>
@@ -626,11 +632,13 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
               <tr>
                 <td><b>#${b.id}</b></td>
                 <td><code>${b.filename}</code></td>
-                <td style="color:#34d399;font-weight:600;">${b.accepted_rows}</td>
-                <td style="color:${b.rejected_rows > 0 ? '#f87171' : 'var(--text-dim)'};">${b.rejected_rows}</td>
-                <td>${b.total_rows}</td>
+                <td>${formatCount(b.total_rows)}</td>
+                <td style="color:#34d399;font-weight:600;">${formatCount(b.accepted_rows)}</td>
+                <td style="color:${Number(b.rejected_rows) > 0 ? '#f87171' : 'var(--text-dim)'};">${formatCount(b.rejected_rows)}</td>
+                <td>${formatCount(b.duplicate_rows)}</td>
+                <td><span class="batch-status batch-status-${String(b.status || 'unavailable').toLowerCase().replace(/[^a-z0-9_-]/g, '')}">${String(b.status || 'Unavailable').replace(/_/g, ' ')}</span></td>
                 <td><small style="font-family:monospace;">${b.file_hash.slice(0, 16)}...</small></td>
-                <td>${new Date(b.created_at).toLocaleString()}</td>
+                <td>${formatImportTimestamp(b.created_at)}</td>
               </tr>
             `).join('')}
           </tbody>
@@ -639,6 +647,19 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     } catch (e) {
       container.innerHTML = `<div class="table-empty" style="color:#f87171;">Error loading batches: ${e.message}</div>`;
     }
+  }
+
+  function formatImportTimestamp(value) {
+    if (!value) return '—';
+    // API timestamps are UTC. Treat legacy offset-less values as UTC too,
+    // then display consistently in the application's India market timezone.
+    const timestamp = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value) ? value : `${value}Z`;
+    const parsed = new Date(timestamp);
+    if (!Number.isFinite(parsed.getTime())) return '—';
+    return `${new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata', day: '2-digit', month: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+    }).format(parsed)} IST`;
   }
 
   /* --------------------------------------------------------------------------
@@ -1025,6 +1046,7 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         border: 1px solid rgba(240, 185, 11, 0.15);
         background: rgba(6, 9, 25, 0.6);
       }
+      #batchesTableContainer .aurora-pipeline-table { min-width: 1120px; }
       .aurora-pipeline-table {
         width: 100%;
         border-collapse: collapse;
@@ -1051,6 +1073,20 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       .aurora-pipeline-table tr:hover {
         background: rgba(240, 185, 11, 0.04);
       }
+      .batch-status {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid rgba(201, 166, 80, 0.28);
+        border-radius: 999px;
+        padding: 3px 9px;
+        color: #e7cc83;
+        background: rgba(201, 166, 80, 0.09);
+        font-size: 11px;
+        font-weight: 650;
+        text-transform: capitalize;
+      }
+      .batch-status-failed { color: #ff9a9a; border-color: rgba(248, 113, 113, 0.3); background: rgba(248, 113, 113, 0.09); }
+      .batch-status-partial_success { color: #f2c66d; border-color: rgba(242, 198, 109, 0.3); background: rgba(242, 198, 109, 0.09); }
       .gold-badge {
         color: #ffd700;
         background: rgba(240, 185, 11, 0.12);
@@ -1512,6 +1548,8 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       if (pairKey) sparklineRequestIds.set(pairKey, (sparklineRequestIds.get(pairKey) || 0) + 1);
       const reason = card.querySelector('.pair-data-reason');
       if (reason) { reason.textContent = ''; reason.hidden = true; }
+      const sparklineState = card.querySelector('.sparkline-empty-state');
+      if (sparklineState) { sparklineState.textContent = message || 'No eligible synchronized snapshot to display.'; sparklineState.hidden = false; }
       const pill = card.querySelector('.severity-pill');
       if (pill) {
         pill.textContent = 'DATA UNAVAILABLE';
@@ -1522,14 +1560,20 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       card.querySelectorAll('.pair-direction-tag, .confidence-radial-box > div:last-child span:last-child').forEach(el => { el.textContent = 'Unavailable'; });
       const confidence = card.querySelector('.confidence-radial-box');
       if (confidence) confidence.title = 'No backend confidence data available';
-      card.classList.remove('critical', 'high', 'medium');
+      card.classList.remove('critical', 'high', 'medium', 'no-signal');
       card.dataset.hasSnapshot = 'false';
       card.dataset.classification = 'unavailable';
       card.dataset.zScore = '';
       card.dataset.liquidityTrap = 'false';
       card.dataset.costBlocked = 'false';
       card.dataset.expiryRisk = 'false';
-      card.querySelectorAll('button').forEach(button => { button.disabled = true; });
+      card.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+        button.removeAttribute('onclick');
+        button.title = message || 'No eligible synchronized snapshot is available.';
+      });
+      const unavailableAction = card.querySelector('.card-investigate-btn');
+      if (unavailableAction) unavailableAction.textContent = 'Unavailable';
     });
     document.querySelectorAll('.dist-tab-btn').forEach(tab => {
       tab.textContent = tab.textContent.replace(/\s+\([^)]*\)$/, '');
@@ -1681,11 +1725,8 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     if (executionState) executionState.textContent = 'No backend execution assessment';
     const caveats = document.getElementById('verdictCaveats');
     if (caveats) caveats.textContent = 'Backend caveats will appear here when returned for the selected event.';
-    const scoreLabel = document.querySelector('.verdict-header-row > div:last-child > span');
-    if (scoreLabel) scoreLabel.textContent = 'OPPORTUNITY SCORE · BACKEND';
-    const verdictMeta = document.querySelectorAll('.verdict-header-row > div:last-child > div');
-    if (verdictMeta[0]) verdictMeta[0].textContent = 'Unavailable';
-    if (verdictMeta[1]) verdictMeta[1].textContent = 'No backend execution assessment';
+    const signalConfidenceLabel = document.querySelector('.verdict-header-row #detectiveSignalConfidence')?.previousElementSibling;
+    if (signalConfidenceLabel) signalConfidenceLabel.textContent = 'SIGNAL CONFIDENCE';
     const source = document.querySelector('.ai-source-row span');
     if (source) source.textContent = 'Sources will be shown for a selected backend investigation.';
     const raw = document.getElementById('rawPayloadBlock');
@@ -1919,11 +1960,8 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     const circle = document.getElementById('scoreProgressCircle');
 
     if (scoreVal) scoreVal.textContent = Math.round(evt.opportunity_score);
-    const scoreLabel = document.querySelector('.verdict-header-row > div:last-child > span');
-    if (scoreLabel) scoreLabel.textContent = 'OPPORTUNITY SCORE · BACKEND';
-    const verdictMeta = document.querySelectorAll('.verdict-header-row > div:last-child > div');
-    if (verdictMeta[0]) verdictMeta[0].textContent = `${Number(evt.opportunity_score).toFixed(0)} / 100`;
-    if (verdictMeta[1]) verdictMeta[1].textContent = 'Execution assessment not returned by backend';
+    const signalConfidenceLabel = document.querySelector('.verdict-header-row #detectiveSignalConfidence')?.previousElementSibling;
+    if (signalConfidenceLabel) signalConfidenceLabel.textContent = 'SIGNAL CONFIDENCE';
     if (badgeText) badgeText.textContent = evt.classification.toUpperCase();
     const stepsBadge = document.getElementById('stepsCountBadge'); if (stepsBadge) stepsBadge.textContent = `BACKEND EVENT · ${evt.event_id}`;
     if (circle) {
@@ -1959,6 +1997,14 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       if (rawVal) rawVal.textContent = `₹${evt.evidence.spread.toFixed(2)} / 10g`;
       const allVals = s3.querySelectorAll('.detail-val');
       if (allVals.length >= 2) allVals[1].textContent = 'Not returned by backend';
+      const direction = s3.querySelector('.detail-val.warn');
+      if (direction) {
+        const spread = Number(evt.evidence.spread);
+        const roundedSpread = Number(spread.toFixed(2));
+        direction.textContent = roundedSpread === 0
+          ? 'At normalized parity (Leg A − Leg B)'
+          : `${spread > 0 ? evt.leg_a : evt.leg_b} normalized premium (Leg A − Leg B)`;
+      }
     }
 
     const s4 = document.getElementById('step4Card');
@@ -2056,11 +2102,13 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     const title = document.querySelector('.headline-pair-title');
     if (title) title.textContent = `${pair.leg_a} vs ${pair.leg_b}`;
     const classification = document.getElementById('radarClassification');
-    if (classification) classification.textContent = pair.classification || 'No signal';
+    const pairClass = pair.classification || 'No Signal';
+    if (classification) classification.textContent = pairClass === 'No Signal' ? 'NO SIGNAL · NOT ACTIONABLE' : pairClass;
     const snapshotDate = document.getElementById('radarSnapshotDate');
     if (snapshotDate) snapshotDate.textContent = `As of ${pair.trade_date || '—'} · Expiry ${pair.expiry_date || '—'}`;
     const spread = document.getElementById('radarHeroSpread');
-    if (spread) spread.textContent = `${Number(pair.spread) >= 0 ? '+' : ''}₹${Number(pair.spread).toFixed(2)}/10g`;
+    const roundedSpread = Number(Number(pair.spread).toFixed(2));
+    if (spread) spread.textContent = `${roundedSpread > 0 ? '+' : ''}₹${roundedSpread.toFixed(2)}/10g`;
     const values = document.querySelectorAll('.headline-metric-cell .value');
     if (values.length >= 3) {
       values[0].textContent = pair.z_score == null ? '—' : `${Number(pair.z_score) >= 0 ? '+' : ''}${Number(pair.z_score).toFixed(2)}σ`;
@@ -2074,9 +2122,9 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     if (badge) badge.textContent = `${validPairs.size}/6 matched`;
     syncRadarSelectionFilterState();
     const deepDive = document.getElementById('radarDeepDiveButton');
-    if (deepDive) { deepDive.disabled = false; deepDive.setAttribute('onclick', `openInvestigationModal('${pair.pair}')`); }
+    if (deepDive) { deepDive.disabled = false; deepDive.removeAttribute('title'); deepDive.setAttribute('onclick', `openInvestigationModal('${pair.pair}')`); }
     const watch = document.getElementById('radarWatchButton');
-    if (watch) { watch.disabled = false; watch.setAttribute('onclick', `triggerToast('Added ${pair.pair} to high-priority watchlist')`); }
+    if (watch) { watch.disabled = false; watch.removeAttribute('title'); watch.setAttribute('onclick', `triggerToast('Added ${pair.pair} to high-priority watchlist')`); }
   }
 
   function selectRadarPairFromUi(pairKey) {
@@ -2094,16 +2142,24 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     const title = document.querySelector('.headline-pair-title');
     if (title) title.textContent = `${legA} vs ${legB}`;
     const classification = document.getElementById('radarClassification');
-    if (classification) classification.textContent = 'No synchronized snapshot';
+    if (classification) classification.textContent = 'NO SYNCHRONIZED SNAPSHOT';
     const snapshotDate = document.getElementById('radarSnapshotDate');
     if (snapshotDate) snapshotDate.textContent = 'Current snapshot · unavailable';
     const spread = document.getElementById('radarHeroSpread');
     if (spread) spread.textContent = '—';
     document.querySelectorAll('.headline-metric-cell .value').forEach(node => { node.textContent = '—'; });
     const deepDive = document.getElementById('radarDeepDiveButton');
-    if (deepDive) deepDive.disabled = true;
+    if (deepDive) {
+      deepDive.disabled = true;
+      deepDive.removeAttribute('onclick');
+      deepDive.title = pair?.reason || 'Unavailable until a synchronized same-expiry snapshot exists.';
+    }
     const watch = document.getElementById('radarWatchButton');
-    if (watch) watch.disabled = true;
+    if (watch) {
+      watch.disabled = true;
+      watch.removeAttribute('onclick');
+      watch.title = pair?.reason || 'Unavailable until a synchronized same-expiry snapshot exists.';
+    }
     const badge = document.getElementById('radarPairStatusBadge');
     if (badge) badge.title = pair?.reason || 'No current synchronized same-date, same-expiry snapshot is available.';
     syncRadarSelectionFilterState();
@@ -2122,7 +2178,8 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     const card = document.querySelector(`.signal-card[data-pair="${selectedRadarPairKey}"]`) ||
       document.querySelector(`.signal-card[data-pair="${reverseKey}"]`);
     if (!pair || pair.spread == null || !card) {
-      notice.textContent = 'This pair has no current synchronized snapshot. Historical distribution uses eligible observations separately.';
+      const reason = pair?.reason ? ` ${pair.reason}` : ' Matching requires the same trade date and explicit expiry; different expiries are never paired.';
+      notice.textContent = `${selectedRadarPairKey}: no current synchronized snapshot.${reason} Historical distribution is separate from the current snapshot.`;
       notice.hidden = false;
       return;
     }
@@ -2159,6 +2216,15 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       const unavailableReason = card.querySelector('.pair-data-reason');
       if (displayPair.spread == null) {
         const reason = displayPair.reason || 'No synchronized snapshot is available for this pair.';
+        const sparklineKey = displayPair.pair;
+        sparklineRequestIds.set(sparklineKey, (sparklineRequestIds.get(sparklineKey) || 0) + 1);
+        const sparklineCanvas = card.querySelector('.sparkline-box canvas');
+        const sparklineChart = sparklineCanvas && typeof Chart !== 'undefined' ? Chart.getChart(sparklineCanvas) : null;
+        if (sparklineChart) {
+          sparklineChart.data.labels = [];
+          sparklineChart.data.datasets.forEach(dataset => { dataset.data = []; });
+          sparklineChart.update();
+        }
         const pill = card.querySelector('.severity-pill');
         if (pill) {
           pill.textContent = 'NO SYNCHRONIZED SNAPSHOT';
@@ -2169,10 +2235,21 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
           unavailableReason.textContent = reason;
           unavailableReason.hidden = false;
         }
+        const sparklineState = card.querySelector('.sparkline-empty-state');
+        if (sparklineState) {
+          sparklineState.textContent = 'No synchronized same-expiry snapshot to plot.';
+          sparklineState.hidden = false;
+        }
         card.querySelectorAll('.stat-num, .radial-text').forEach(el => { el.textContent = '—'; });
         card.querySelectorAll('.v-status').forEach(el => { el.textContent = 'Unavailable'; });
-        card.querySelectorAll('button').forEach(button => { button.disabled = true; });
-        card.classList.remove('critical', 'high', 'medium');
+        card.querySelectorAll('button').forEach(button => {
+          button.disabled = true;
+          button.removeAttribute('onclick');
+          button.title = reason;
+        });
+        const unavailableAction = card.querySelector('.card-investigate-btn');
+        if (unavailableAction) unavailableAction.textContent = 'Unavailable';
+        card.classList.remove('critical', 'high', 'medium', 'no-signal');
         card.setAttribute('data-severity', 'unavailable');
         card.dataset.hasSnapshot = 'false';
         card.dataset.classification = 'unavailable';
@@ -2184,7 +2261,8 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       }
       if (unavailableReason) unavailableReason.hidden = true;
       const statValues = card.querySelectorAll('.stat-num');
-      if (statValues[0]) statValues[0].innerHTML = `${Number(displayPair.spread) >= 0 ? '+' : ''}₹${Number(displayPair.spread).toFixed(2)} <span class="stat-subtext">/ 10g</span>`;
+      const roundedSpread = Number(Number(displayPair.spread).toFixed(2));
+      if (statValues[0]) statValues[0].innerHTML = `${roundedSpread > 0 ? '+' : ''}₹${roundedSpread.toFixed(2)} <span class="stat-subtext">/ 10g</span>`;
       if (statValues[1]) statValues[1].textContent = displayPair.z_score == null ? '—' : `${Number(displayPair.z_score) >= 0 ? '+' : ''}${Number(displayPair.z_score).toFixed(2)}σ`;
       if (statValues[2]) statValues[2].textContent = displayPair.percentile_rank == null ? '—' : `${Number(displayPair.percentile_rank).toFixed(1)}%`;
       if (statValues[3]) statValues[3].textContent = '—'; // No duration metric is returned by the API.
@@ -2193,29 +2271,33 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       const specs = card.querySelector('.pair-specs-sub');
       if (specs) specs.textContent = `Synchronized historical snapshot · ${displayPair.trade_date || 'date unavailable'} · expiry ${displayPair.expiry_date || 'unavailable'}`;
       const direction = card.querySelector('.pair-direction-tag');
-      if (direction) direction.textContent = `${Number(displayPair.spread) >= 0 ? displayPair.leg_a : displayPair.leg_b} normalized premium`;
+      if (direction) direction.textContent = roundedSpread === 0
+        ? 'At normalized parity'
+        : `${Number(displayPair.spread) > 0 ? displayPair.leg_a : displayPair.leg_b} normalized premium`;
       const scoreAvailable = displayPair.opportunity_score != null && Number.isFinite(Number(displayPair.opportunity_score));
       const score = scoreAvailable ? Math.round(Number(displayPair.opportunity_score)) : null;
       const radial = card.querySelector('.radial-text');
-      if (radial) radial.textContent = score == null ? '—' : `${score}%`;
+      if (radial) radial.textContent = score == null ? '—' : String(score);
       const radialCircle = card.querySelector('.circle-val');
       if (radialCircle) radialCircle.setAttribute('stroke-dasharray', `${score ?? 0}, 100`);
       const scoreNote = card.querySelector('.confidence-radial-box > div:last-child span:last-child');
-      if (scoreNote) scoreNote.textContent = score == null ? 'Unavailable' : `${score}%`;
+      if (scoreNote) scoreNote.textContent = score == null ? 'Unavailable' : `${score}/100`;
       const confidenceBox = card.querySelector('.confidence-radial-box');
       if (confidenceBox) confidenceBox.title = `Opportunity score ${score == null ? 'unavailable' : `${score}/100 (Heuristic ranking score, not win probability)`} · Trap risk ${displayPair.trap_risk_score == null ? 'unavailable' : `${Math.round(Number(displayPair.trap_risk_score))}/100`} · Status: ${displayPair.classification || 'No Signal'}`;
       const pill = card.querySelector('.severity-pill');
+      const isNoSignal = displayPair.classification === 'No Signal';
       if (pill) {
-        pill.textContent = String(displayPair.classification || 'No Signal').toUpperCase();
-        pill.className = `severity-pill ${displayPair.classification === 'Investigate' ? 'pill-critical' : ['Cost-Blocked', 'Expiry-Risk'].includes(displayPair.classification) ? 'pill-high' : 'pill-medium'}`;
+        pill.textContent = isNoSignal ? 'NO SIGNAL · NOT ACTIONABLE' : String(displayPair.classification || 'No Signal').toUpperCase();
+        pill.className = `severity-pill ${isNoSignal ? 'pill-no-signal' : displayPair.classification === 'Investigate' ? 'pill-critical' : ['Cost-Blocked', 'Expiry-Risk'].includes(displayPair.classification) ? 'pill-high' : 'pill-medium'}`;
       }
       if (radialCircle) {
         radialCircle.classList.remove('circle-val-critical', 'circle-val-high', 'circle-val-medium');
         radialCircle.classList.add(displayPair.classification === 'Investigate' ? 'circle-val-critical' : ['Cost-Blocked', 'Expiry-Risk'].includes(displayPair.classification) ? 'circle-val-high' : 'circle-val-medium');
       }
-      card.classList.remove('critical', 'high', 'medium');
+      card.classList.remove('critical', 'high', 'medium', 'no-signal');
       if (displayPair.classification === 'Investigate') card.classList.add('critical');
       else if (['Cost-Blocked', 'Expiry-Risk'].includes(displayPair.classification)) card.classList.add('high');
+      else if (isNoSignal) card.classList.add('no-signal');
       else card.classList.add('medium');
       const absZ = displayPair.z_score == null ? null : Math.abs(Number(displayPair.z_score));
       card.dataset.zScore = absZ == null || !Number.isFinite(absZ) ? '' : String(absZ);
@@ -2231,16 +2313,22 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       const investButton = card.querySelector('.card-investigate-btn');
       if (investButton) {
         investButton.disabled = false;
+        investButton.removeAttribute('title');
         investButton.textContent = displayPair.classification === 'Investigate' ? 'Review investigation →' : 'View pair details →';
         investButton.setAttribute('onclick', `openInvestigationModal('${displayPair.pair}')`);
       }
       const bookmarkButton = card.querySelector('.card-footer-actions .clay-btn-outline');
-      if (bookmarkButton) { bookmarkButton.disabled = false; bookmarkButton.setAttribute('onclick', `triggerToast('Added ${displayPair.pair} to high-priority watchlist')`); }
+      if (bookmarkButton) { bookmarkButton.disabled = false; bookmarkButton.removeAttribute('title'); bookmarkButton.setAttribute('onclick', `triggerToast('Added ${displayPair.pair} to high-priority watchlist')`); }
       card.dataset.hasSnapshot = 'true';
       card.dataset.classification = displayPair.classification || 'No Signal';
       card.dataset.liquidityTrap = String(Boolean(displayPair.is_liquidity_trap));
       card.dataset.costBlocked = String(Boolean(displayPair.is_cost_blocked));
       card.dataset.expiryRisk = String(Boolean(displayPair.is_expiry_risk));
+      const sparklineState = card.querySelector('.sparkline-empty-state');
+      if (sparklineState) {
+        sparklineState.textContent = 'Loading synchronized spread history…';
+        sparklineState.hidden = false;
+      }
       loadRadarSparkline(displayPair, card);
     });
   }
@@ -2280,9 +2368,16 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
 
   async function loadRadarSparkline(pair, card) {
     const canvas = card.querySelector('.sparkline-box canvas');
-    if (!canvas || typeof Chart === 'undefined') return;
+    const state = card.querySelector('.sparkline-empty-state');
+    if (!canvas || typeof Chart === 'undefined') {
+      if (state) { state.textContent = 'Chart visualization is unavailable.'; state.hidden = false; }
+      return;
+    }
     const chart = Chart.getChart(canvas);
-    if (!chart) return;
+    if (!chart) {
+      if (state) { state.textContent = 'Chart visualization is unavailable.'; state.hidden = false; }
+      return;
+    }
     const requestId = (sparklineRequestIds.get(pair.pair) || 0) + 1;
     sparklineRequestIds.set(pair.pair, requestId);
     chart.data.labels = [];
@@ -2290,15 +2385,29 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     chart.update();
     try {
       const response = await fetch(`${API_BASE}/api/analytics/spreads?pair=${encodeURIComponent(pair.pair)}&window=14&end_date=${encodeURIComponent(pair.trade_date)}`);
-      if (sparklineRequestIds.get(pair.pair) !== requestId || !response.ok) return;
+      if (sparklineRequestIds.get(pair.pair) !== requestId) return;
+      if (!response.ok) {
+        const state = card.querySelector('.sparkline-empty-state');
+        if (state) { state.textContent = 'Synchronized spread history unavailable.'; state.hidden = false; }
+        return;
+      }
       const json = await response.json();
       if (sparklineRequestIds.get(pair.pair) !== requestId) return;
       const points = json?.success && Array.isArray(json?.data?.data_points) ? json.data.data_points : [];
-      chart.data.labels = points.map(point => point.trade_date);
-      chart.data.datasets.forEach(dataset => { dataset.data = points.map(point => point.spread); });
+      const plottablePoints = points.filter(point => point?.spread != null && Number.isFinite(Number(point.spread)));
+      chart.data.labels = plottablePoints.map(point => point.trade_date);
+      chart.data.datasets.forEach(dataset => { dataset.data = plottablePoints.map(point => Number(point.spread)); });
       chart.update();
+      if (state) {
+        state.textContent = plottablePoints.length ? '' : 'No eligible synchronized spread history returned.';
+        state.hidden = plottablePoints.length > 0;
+      }
     } catch (error) {
-      if (sparklineRequestIds.get(pair.pair) === requestId) console.warn(`AURORA: ${pair.pair} spread history unavailable:`, error);
+      if (sparklineRequestIds.get(pair.pair) === requestId) {
+        console.warn(`AURORA: ${pair.pair} spread history unavailable:`, error);
+        const state = card.querySelector('.sparkline-empty-state');
+        if (state) { state.textContent = 'Synchronized spread history unavailable.'; state.hidden = false; }
+      }
     }
   }
 

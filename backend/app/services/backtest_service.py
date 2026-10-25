@@ -92,12 +92,40 @@ class BacktestService:
             first_date=first, last_date=last, metrics=BacktestMetricSet(), assumptions=ASSUMPTIONS,
         )
 
+    def _no_pair_data_message(self, req: BacktestRequest) -> str:
+        leg_a, leg_b = req.pair.split("-")
+        rows_a = self._eligible_rows(leg_a, req.start_date, req.end_date)
+        rows_b = self._eligible_rows(leg_b, req.start_date, req.end_date)
+        if req.start_date or req.end_date:
+            window = f"the selected date window ({req.start_date or 'start of history'} through {req.end_date or 'latest'})"
+        else:
+            window = "stored history"
+
+        if rows_a and rows_b:
+            return (
+                f"No synchronized {leg_a}-{leg_b} observations are available in {window}. "
+                "Both legs have eligible history, but no rows share the same trade date and explicit expiry. "
+                "Different expiries are never paired. Expand or change the date window, or choose another pair."
+            )
+        missing = [symbol for symbol, rows in ((leg_a, rows_a), (leg_b, rows_b)) if not rows]
+        if len(missing) == 1:
+            return (
+                f"No eligible {missing[0]} observations are available in {window}; both pair legs need "
+                "eligible non-test, non-synthetic history. Change the date window or pair; import history "
+                "only if the required records are not already stored."
+            )
+        return (
+            f"No eligible observations for either {leg_a} or {leg_b} are available in {window}. "
+            "Test and synthetic rows are excluded. Change the date window or pair, or import user-provided "
+            "historical records if the required data is not already stored."
+        )
+
     def run(self, req: BacktestRequest) -> BacktestResponse:
         pairs = self._paired_rows(req)
         if not pairs:
             return self._empty(
                 req, "no_eligible_data",
-                "No eligible non-synthetic, non-test history is available for this pair. Upload a user-provided historical CSV to run a backtest; uploaded data is not provider-verified.",
+                self._no_pair_data_message(req),
             )
         first_date, last_date = pairs[0][0].trade_date, pairs[-1][0].trade_date
         if len(pairs) < req.lookback + 2:
@@ -125,6 +153,9 @@ class BacktestService:
         open_trade: Optional[Dict] = None
         gross_total = 0.0
         total_costs = 0.0
+        entry_setups = 0
+        volume_blocked_entries = 0
+        expiry_blocked_entries = 0
         half_cost = (req.transaction_cost_per_10g + req.slippage_per_10g) * req.units / 2
 
         for idx in range(1, len(pairs)):
@@ -156,10 +187,15 @@ class BacktestService:
                 trades.append(self._trade(open_trade, oa, ob, spread, req.units, gross_trade, half_cost * 2, net_trade, "Z-score reverted"))
                 open_trade = None
             elif not open_trade and z is not None and abs(z) >= req.entry_z:
+                entry_setups += 1
                 dte_a = (oa.expiry_date - oa.trade_date).days
                 dte_b = (ob.expiry_date - ob.trade_date).days
                 liquid = self._has_sufficient_observed_volume(oa, ob, req.min_volume)
                 expiry_clear = min(dte_a, dte_b) > req.expiry_buffer_days
+                if not liquid:
+                    volume_blocked_entries += 1
+                if not expiry_clear:
+                    expiry_blocked_entries += 1
                 if liquid and expiry_clear:
                     sign = -1 if z > 0 else 1
                     equity -= half_cost
@@ -211,8 +247,19 @@ class BacktestService:
             SpreadPoint(trade_date=oa.trade_date, spread=spread, execution=markers.get(oa.trade_date))
             for oa, _ob, spread in pairs
         ]
+        message = "Historical walk-forward simulation completed."
+        if not trades:
+            if entry_setups == 0:
+                message = "Historical simulation completed with no trades: no eligible observation crossed the configured entry threshold."
+            else:
+                skipped = []
+                if volume_blocked_entries:
+                    skipped.append(f"{volume_blocked_entries} entry check(s) failed the observed-volume requirement")
+                if expiry_blocked_entries:
+                    skipped.append(f"{expiry_blocked_entries} entry check(s) fell inside the {req.expiry_buffer_days}-day expiry buffer")
+                message = "Historical simulation completed with no trades: " + "; ".join(skipped) + "."
         return BacktestResponse(
-            status="completed", message="Historical walk-forward simulation completed.", pair=req.pair,
+            status="completed", message=message, pair=req.pair,
             data_source="User-imported historical observations (not provider-verified)", first_date=first_date, last_date=last_date,
             observations=len(pairs), metrics=metrics, equity_curve=points, spread_series=spread_series,
             trades=trades, assumptions=ASSUMPTIONS,
