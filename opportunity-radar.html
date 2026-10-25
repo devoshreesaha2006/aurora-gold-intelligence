@@ -3807,7 +3807,10 @@
       document.body.style.overflow = 'hidden';
       if (!snapshot || snapshot.spread == null || !body) return;
 
-      fetch(`http://127.0.0.1:8000/api/analytics/spreads?pair=${encodeURIComponent(snapshot.pair)}&window=30&end_date=${encodeURIComponent(snapshot.trade_date)}`)
+      const apiBase = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? `${location.origin}/api` : 'http://127.0.0.1:8000/api')).replace(/\/$/, '');
+      const ageText = snapshot.data_age_days == null ? 'Age unavailable' : snapshot.data_age_days === 0 ? 'Trade date is today' : `${snapshot.data_age_days} calendar day${snapshot.data_age_days === 1 ? '' : 's'} old`;
+      const freshnessText = String(snapshot.snapshot_freshness || 'unavailable').replace(/-/g, ' ').toUpperCase();
+      fetch(`${apiBase}/analytics/spreads?pair=${encodeURIComponent(snapshot.pair)}&window=30&end_date=${encodeURIComponent(snapshot.trade_date)}`)
         .then(response => { if (!response.ok) throw new Error(`Analytics service returned ${response.status}`); return response.json(); })
         .then(json => {
           if (requestId !== investigationRequestId || !modal.classList.contains('open')) return;
@@ -3816,6 +3819,13 @@
           if (!point) throw new Error('No same-date, same-expiry pair point was returned');
           sub.textContent = `${snapshot.classification} · ${point.trade_date} · shared expiry ${point.expiry_date}`;
           body.innerHTML = `
+            <div class="modal-breakdown-card"><h4>Snapshot freshness & provenance</h4>
+              <div class="modal-kv-row"><span class="k">Observation date</span><span class="v">${escape(snapshot.trade_date || point.trade_date)}</span></div>
+              <div class="modal-kv-row"><span class="k">Data age</span><span class="v">${escape(ageText)}</span></div>
+              <div class="modal-kv-row"><span class="k">Freshness classification</span><span class="v">${escape(freshnessText)}</span></div>
+              <div class="modal-kv-row"><span class="k">Shared expiry match</span><span class="v">${escape(point.expiry_date || 'Unavailable')}</span></div>
+              <p>Historical observations are not a verified live quote. Feed status is shown separately on the dashboard.</p>
+            </div>
             <div class="modal-details-grid">
               <div class="modal-breakdown-card"><h4>${escape(snapshot.leg_a)} · matched observation</h4>
                 <div class="modal-kv-row"><span class="k">Quoted close</span><span class="v">₹${value(point.raw_price_a)}</span></div>
