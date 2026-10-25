@@ -212,7 +212,7 @@ class BacktestService:
             max_drawdown = min(max_drawdown, drawdown)
             previous_equity = points[-1].equity
             if previous_equity:
-                returns.append((equity - previous_equity) / previous_equity)
+                returns.append((round(equity, 2) - previous_equity) / previous_equity)
             points.append(EquityPoint(trade_date=oa.trade_date, equity=round(equity, 2), drawdown_pct=round(drawdown, 4)))
 
         if open_trade:
