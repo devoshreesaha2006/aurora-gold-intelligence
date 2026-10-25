@@ -228,7 +228,7 @@ class BacktestService:
             # Include the final exit cost in the last daily return so the
             # annualized Sharpe ratio reflects the same terminal equity as P&L.
             if len(points) > 1 and points[-2].equity:
-                final_return = (equity - points[-2].equity) / points[-2].equity
+                final_return = (round(equity, 2) - points[-2].equity) / points[-2].equity
                 if returns:
                     returns[-1] = final_return
 
