@@ -3878,7 +3878,7 @@
         triggerToast('Investigation details are not loaded yet. Open a pair and try again.');
         return;
       }
-      const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=900,height=700');
+      const printWindow = window.open('', '_blank', 'width=900,height=700');
       if (!printWindow) {
         triggerToast('Pop-up blocked. Allow pop-ups to export the investigation packet.');
         return;
