@@ -1,0 +1,92 @@
+U+252C occurrences: 30
+
+pos=60413 next=U+2556 '╖'
+  ctx: '"ticker-name">GOLDM ┬╖ latest close:</span><span c'
+
+pos=60574 next=U+2556 '╖'
+  ctx: 'icker-name">GOLDTEN ┬╖ latest close:</span><span c'
+
+pos=60741 next=U+2556 '╖'
+  ctx: 'er-name">GOLDGUINEA ┬╖ latest close:</span><span c'
+
+pos=60906 next=U+2556 '╖'
+  ctx: 'ker-name">GOLDPETAL ┬╖ latest close:</span><span c'
+
+pos=69493 next=U+2556 '╖'
+  ctx: 'p: 2px;">Rank index ┬╖ not win %</div>\n           '
+
+pos=73376 next=U+2556 '╖'
+  ctx: ' per canonical pair ┬╖ historical snapshots, not l'
+
+pos=94800 next=U+2556 '╖'
+  ctx: 'e">Liquidity filter ┬╖ <span id="radarDiagnosticLi'
+
+pos=95385 next=U+2556 '╖'
+  ctx: 'e">Expiry proximity ┬╖ <span id="radarDiagnosticEx'
+
+pos=95962 next=U+2556 '╖'
+  ctx: 'saction-cost filter ┬╖ <span id="radarDiagnosticCo'
+
+pos=96585 next=U+2556 '╖'
+  ctx: 'ut a current signal ┬╖ <span id="radarDiagnosticNo'
+
+pos=100834 next=U+2592 '▒'
+  ctx: 'l Equilibrium Zone (┬▒1σ | 68.2%)</span>\n         '
+
+pos=101084 next=U+2592 '▒'
+  ctx: 'pan>Attention Zone (┬▒1σ to ┬▒2σ | 27.2%)</span>\n '
+
+pos=101092 next=U+2592 '▒'
+  ctx: 'ntion Zone (┬▒1σ to ┬▒2σ | 27.2%)</span>\n         '
+
+pos=101359 next=U+2592 '▒'
+  ctx: ' Anomaly Zone (&gt; ┬▒2σ | 4.2%)</span>\n          '
+
+pos=123138 next=U+2556 '╖'
+  ctx: ': ${selectedStatus} ┬╖ ${selectedSeverity}`);\n    '
+
+pos=126305 next=U+2556 '╖'
+  ctx: 'hot.classification} ┬╖ ${point.trade_date} ┬╖ shar'
+
+pos=126328 next=U+2556 '╖'
+  ctx: '${point.trade_date} ┬╖ shared expiry ${point.expir'
+
+pos=126520 next=U+2556 '╖'
+  ctx: 'pe(snapshot.leg_a)} ┬╖ matched observation</h4>\n  '
+
+pos=126889 next=U+2556 '╖'
+  ctx: 'an class="k">Volume ┬╖ open interest</span><span c'
+
+pos=126953 next=U+2556 '╖'
+  ctx: 'ue(point.volume_a)} ┬╖ ${value(point.open_interest'
+
+pos=127230 next=U+2556 '╖'
+  ctx: 'pe(snapshot.leg_b)} ┬╖ matched observation</h4>\n  '
+
+pos=127599 next=U+2556 '╖'
+  ctx: 'an class="k">Volume ┬╖ open interest</span><span c'
+
+pos=127663 next=U+2556 '╖'
+  ctx: 'ue(point.volume_b)} ┬╖ ${value(point.open_interest'
+
+pos=127961 next=U+2556 '╖'
+  ctx: 'lative-value result ┬╖ ₹/10g</h4>\n              <d'
+
+pos=128172 next=U+2556 '╖'
+  ctx: '"k">Rolling Z-score ┬╖ percentile</span><span clas'
+
+pos=128274 next=U+2556 '╖'
+  ctx: 'apshot.z_score)}σ`} ┬╖ ${snapshot.percentile_rank '
+
+pos=128446 next=U+2556 '╖'
+  ctx: '">Opportunity score ┬╖ trap risk</span><span class'
+
+pos=128518 next=U+2556 '╖'
+  ctx: 'opportunity_score)} ┬╖ ${value(snapshot.trap_risk_'
+
+pos=128791 next=U+2556 '╖'
+  ctx: 'lass="k">Gross edge ┬╖ net edge</span><span class='
+
+pos=128856 next=U+2556 '╖'
+  ctx: 'apshot.gross_edge)} ┬╖ ₹${value(snapshot.net_edge)'
+

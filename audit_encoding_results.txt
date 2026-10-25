@@ -1,0 +1,583 @@
+ENCODING ISSUES FOUND IN 58 FILES:
+
+=== .\aurora-nav.js ===
+  Line 384: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <span class="aurora-badge aurora-badge-blue"><i class="fa-solid fa-code-fork"></i> Phase 3 Roadmap â
+  Line 500: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    showToast('Market Simulator & Walk-Forward Lab active â configure parameters above', 'fa-sliders')
+=== .\aurora-pipeline.js ===
+  Line 521: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <th>Norm Price (â¹/g Fine)</th>
+  Line 532: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <td><b>â¹${Number(row.close_price).toLocaleString('en-IN')}</b></td>
+  Line 535: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <td style="color:#34d399;font-weight:600;">â¹${Number(row.normalized_price_per_gram).toFixed(2)}/g<
+  Line 536: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <td style="color:var(--gold-primary);font-weight:700;">â¹${Number(row.normalized_price_10g_basis).t
+  Line 1338: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    if (price) price.textContent = `â¹${Number(row.close_price).toLocaleString('en-IN', { maximumFracti
+  Line 1461: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    td.title = `${pairKey} Â· ${p.trade_date} Â· expiry ${p.expiry_date} Â· Spread â¹${cellSpread} Â· Z
+  Line 1623: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    if (meanEl && d.mean !== null) meanEl.textContent = `â¹${d.mean.toFixed(2)}`;
+  Line 1624: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    if (sigmaEl && d.sigma !== null) sigmaEl.textContent = `â¹${d.sigma.toFixed(2)}`;
+=== .\auth.js ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA front-end auth (demo only â data lives in this browser, no server). */
+=== .\backend\app\api\ingestion.py ===
+  Line 26: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    - Normalizes contract prices to common â¹/g fine-gold basis.
+=== .\backend\app\schemas\analytics.py ===
+  Line 13: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    spread: float = Field(..., description="Normalized Spread (Leg A - Leg B) in â¹ per 10g benchmark b
+  Line 14: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    price_a: float = Field(..., description="Leg A normalized price (â¹ per 10g)")
+  Line 15: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    price_b: float = Field(..., description="Leg B normalized price (â¹ per 10g)")
+  Line 51: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    brokerage_per_10g: float = Field(2.50, description="Estimated brokerage hurdle in â¹ per 10g")
+  Line 52: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    slippage_buffer_per_10g: float = Field(15.00, description="Bid-ask half-spread / execution slippage 
+  Line 53: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    total_roundtrip_cost_per_10g: float = Field(..., description="Total estimated hurdle in â¹ per 10g"
+  Line 101: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    benchmark_basis: str = "â¹ per 10g (995 fine gold equivalent)"
+=== .\backend\app\services\analytics_service.py ===
+  Line 60: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Computes institutional trading friction hurdle in â¹ per 10g benchmark basis:
+  Line 63: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    - Brokerage hurdle: ~â¹2.50 per 10g
+  Line 64: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    - Slippage & market impact buffer: ~â¹15.00 per 10g
+  Line 136: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Spread(t) = NormPrice_A(t) - NormPrice_B(t) (in â¹ per 10g benchmark 995 basis)
+  Line 364: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    reason = f"Gross edge of â¹{gross_edge}/10g is absorbed by estimated transaction hurdle of â¹{cost
+  Line 373: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    reason = f"Confirmed statistical dislocation (|Z|={abs_z:.2f}Ï, Percentile={percentile:.1f}%) with 
+  Line 676: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    caveats.append(f"Transaction friction hurdle: gross edge â¹{gross_edge} is smaller than friction hu
+  Line 690: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    summary=f"{pair_name} spread reached â¹{pt.spread:+.2f}/10g (Z={pt.z_score:+.2f}Ï, {pt.percentile_
+=== .\backend\app\services\backtest_service.py ===
+  Line 19: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    "Spread P&L uses normalized â¹ per 10g basis and the configured number of spread units.",
+=== .\backend\tests\test_analytics.py ===
+  Line 240: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    assert evt["evidence"]["benchmark_basis"] == "â¹ per 10g (995 fine gold equivalent)"
+  Line 411: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    goldten_quote = 145015.0  # â¹ per 10g, 999 purity
+  Line 412: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    guinea_quote = 116648.0   # â¹ per 8g, 999 purity
+  Line 303: [Mojibake sigma: Ïƒ]
+    assert result.current_z_score.startswith(f"{expected[-1].z_score:+.2f}Ï")
+=== .\backend\tests\test_backtests.py ===
+  Line 13: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    # Analytics' reference round-trip hurdle is â¹25.31/10g including â¹15 slippage.
+  Line 14: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    # Backtesting accepts fees and slippage separately, so its fee default must be â¹10.31.
+=== .\backend\tests\test_frontend_data_safety.py ===
+  Line 20: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    assert "â¹74,850.00" not in page
+  Line 21: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    assert "â¹141.34" not in page
+  Line 131: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    assert "d.current_z_score || 'â'" in pipeline
+  Line 203: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    assert "currentZ.textContent = d.current_z_score || 'â'" in pipeline
+  Line 18: [Mojibake sigma: Ïƒ]
+    assert "+2.47Ï" not in page
+  Line 65: [Mojibake sigma: Ïƒ]
+    assert '2.47Ï' not in page
+=== .\backtesting-lab.html ===
+  Line 80: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <label class="bt-field"><span>Starting capital</span><div class="bt-input-suffix"><span>â¹</span><i
+  Line 81: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="bt-field-grid"><label class="bt-field"><span>Transaction fees</span><div class="bt-input
+  Line 108: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <article class="bt-chart-card panel-glass bt-equity-card"><div class="bt-card-heading"><div><span cl
+  Line 112: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <article class="bt-chart-card panel-glass"><div class="bt-card-heading"><div><span class="bt-section
+  Line 7: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>AURORA â Backtesting Lab</title>
+  Line 99: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <article class="bt-kpi panel-glass"><span class="bt-kpi-label">Net return</span><strong id="metricRe
+  Line 100: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <article class="bt-kpi panel-glass"><span class="bt-kpi-label">Max drawdown</span><strong id="metric
+  Line 101: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <article class="bt-kpi panel-glass"><span class="bt-kpi-label">Sharpe ratio</span><strong id="metric
+=== .\backtesting-lab.js ===
+  Line 28: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    ? `â¹${Number(number).toLocaleString('en-IN', { minimumFractionDigits: digits, maximumFractionDigit
+  Line 202: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    $('metricPnl').textContent = metrics.total_pnl === null ? 'P&L unavailable' : `${signed(metrics.tota
+  Line 28: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    ? `â¹${Number(number).toLocaleString('en-IN', { minimumFractionDigits: digits, maximumFractionDigit
+  Line 30: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    ? `${Number(number) > 0 ? '+' : ''}${Number(number).toLocaleString('en-IN', { maximumFractionDigits:
+  Line 51: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    const countLabel = Number.isFinite(observationCount) ? observationCount.toLocaleString('en-IN') : 'â
+  Line 105: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    $(id).textContent = id === 'metricPnl' ? 'Waiting for results' : id === 'metricWinSub' ? 'Closed tra
+  Line 173: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    $('historyCoverage').textContent = `${result.observations} synchronized days Â· ${result.first_date}
+  Line 201: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    setMetric('metricReturn', Number.isFinite(returnPct) ? signed(returnPct, '%') : 'â', returnPct > 0
+=== .\backup_auth_before_nav_fix.js ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA front-end auth (demo only â data lives in this browser, no server). */
+=== .\backup_auth_before_stitch.js ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA front-end auth (demo only â data lives in this browser, no server). */
+=== .\backup_auth_phase2_nav.js ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA front-end auth (demo only â data lives in this browser, no server). */
+=== .\backup_backtesting_lab_phase2_nav.html ===
+  Line 1790: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span>Friction Aware: â¹95 + â¹15 Slip</span>
+  Line 1826: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="info-sub">Normalized Fine Gold Basis (â¹/g)</span>
+  Line 1893: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="info-sub">â¹/lot round-trip</span>
+  Line 1901: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="info-sub">â¹/trade model</span>
+  Line 1985: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="kpi-card accent-amber" title="Net realized return after â¹95 exchange fees + â¹15 slip
+  Line 2202: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div>Gross Alpha: <span class="highlight-txt">â¹1,48,200</span></div>
+  Line 2203: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div>Exchange/STT: <span style="color:var(--amber-light); font-weight:700;">-â¹78,400</span></div>
+  Line 2204: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div>Slippage: <span style="color:var(--red-light); font-weight:700;">-â¹32,000</span></div>
+=== .\backup_contract_explorer_phase2_nav.html ===
+  Line 1926: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹62,450</span>
+  Line 1932: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹62,380</span>
+  Line 1938: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹50,120</span>
+  Line 1944: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹6,310</span>
+  Line 2031: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="stat-chip-value">+â¹122.62 (0.20%)</span>
+  Line 2066: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="price-value-raw">â¹62,450</span>
+  Line 2075: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="price-value-norm">â¹62,892.46</span>
+  Line 2090: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="spec-v">â¹ / 10 grams</span>
+=== .\backup_dashboard_phase2_nav.html ===
+  Line 1830: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="loader-subtext">Normalizing MCX Gold Contracts (â¹/g Fine Basis)...</div>
+  Line 1995: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <p style="color: var(--text-secondary); margin-top: 2px;">Spread deviation passes 2.45Ï threshold (
+  Line 2044: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <i class="fa-solid fa-coins"></i> 995 Fine Gold (â¹/g)
+  Line 2047: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <i class="fa-solid fa-filter"></i> Cost Filter: Active (â¹1.5/g)
+  Line 2105: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    â¹127.45 <span class="kpi-value-unit">/lot</span>
+  Line 2109: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="kpi-tag tag-green"><i class="fa-solid fa-bolt"></i> Mean â¹124.58</span>
+  Line 2150: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="panel-subtitle">MCX Gold Futures standardized to â¹/g (995 Pure Basis) over time</div>
+  Line 2233: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="price-norm-val">â¹7,482.50</div>
+=== .\backup_frontend_baseline\AURORA\auth.js ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA front-end auth (demo only â data lives in this browser, no server). */
+=== .\backup_frontend_baseline\AURORA\backtesting-lab.html ===
+  Line 1: [File has UTF-8 BOM (ï»¿) - may cause browser issues]
+  Line 1789: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span>Friction Aware: â¹95 + â¹15 Slip</span>
+  Line 1825: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="info-sub">Normalized Fine Gold Basis (â¹/g)</span>
+  Line 1892: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="info-sub">â¹/lot round-trip</span>
+  Line 1900: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="info-sub">â¹/trade model</span>
+  Line 1984: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="kpi-card accent-amber" title="Net realized return after â¹95 exchange fees + â¹15 slip
+  Line 2201: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div>Gross Alpha: <span class="highlight-txt">â¹1,48,200</span></div>
+  Line 2202: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div>Exchange/STT: <span style="color:var(--amber-light); font-weight:700;">-â¹78,400</span></div>
+=== .\backup_frontend_baseline\AURORA\build_radar.py ===
+  Line 2065: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,850.00</span>
+  Line 2070: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,920.00</span>
+  Line 2074: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,849.65</span>
+  Line 2078: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹7,607.62</span>
+  Line 2082: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹60,021.34</span>
+  Line 2224: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Normalized Spread Divergence: <span class="mono" style="color: var(--gold-bright); font-weight: 700;
+  Line 2256: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span><i class="fa-solid fa-table-cells" style="margin-right: 6px;"></i> Pairwise Spread Matrix (â¹
+  Line 2274: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')" title="Spread: â¹70.35 | Z:
+=== .\backup_frontend_baseline\AURORA\contract-explorer.html ===
+  Line 1925: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹62,450</span>
+  Line 1931: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹62,380</span>
+  Line 1937: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹50,120</span>
+  Line 1943: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="val">â¹6,310</span>
+  Line 2030: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="stat-chip-value">+â¹122.62 (0.20%)</span>
+  Line 2065: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="price-value-raw">â¹62,450</span>
+  Line 2074: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="price-value-norm">â¹62,892.46</span>
+  Line 2089: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="spec-v">â¹ / 10 grams</span>
+=== .\backup_frontend_baseline\AURORA\dashboard.html ===
+  Line 1829: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="loader-subtext">Normalizing MCX Gold Contracts (â¹/g Fine Basis)...</div>
+  Line 1994: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <p style="color: var(--text-secondary); margin-top: 2px;">Spread deviation passes 2.45Ï threshold (
+  Line 2043: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <i class="fa-solid fa-coins"></i> 995 Fine Gold (â¹/g)
+  Line 2046: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <i class="fa-solid fa-filter"></i> Cost Filter: Active (â¹1.5/g)
+  Line 2104: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    â¹127.45 <span class="kpi-value-unit">/lot</span>
+  Line 2108: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="kpi-tag tag-green"><i class="fa-solid fa-bolt"></i> Mean â¹124.58</span>
+  Line 2149: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="panel-subtitle">MCX Gold Futures standardized to â¹/g (995 Pure Basis) over time</div>
+  Line 2232: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="price-norm-val">â¹7,482.50</div>
+=== .\backup_frontend_baseline\AURORA\generate_final_radar.py ===
+  Line 2578: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="validation-badge" title="Fails after â¹148/10g estimated execution drag">
+  Line 2675: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="validation-badge" title="High volume contracts with friction of only â¹14.20/10g">
+  Line 3339: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    label: function(ctx) { return `Spread: â¹${ctx.raw}`; }
+  Line 3805: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    sub.innerText = 'Critical Spread Anomaly (+â¹122.62 / 10g | Z = 2.47Ï | 97.3th Percentile)';
+  Line 3806: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    formulaOut.innerHTML = 'Spread = Normalized_Price(GOLDPETAL) â Normalized_Price(GOLDM) = â¹76,076
+  Line 3807: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    gross.innerText = 'â¹122.62';
+  Line 3808: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    fees.innerText = '-â¹21.40';
+  Line 3809: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    slippage.innerText = '-â¹22.70';
+=== .\backup_frontend_baseline\AURORA\index.html ===
+  Line 165: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip3d" style="--x:160px;--y:120px;--z:170px"><div style="--fd:-3.8s"><i class="fa-solid
+  Line 212: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip"><small>Avg pairwise basis</small><b>â¹127.45/lot</b></div>
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>AURORA â Commodity Intelligence & Relative-Value Platform for MCX Gold</title>
+  Line 93: [Mojibake en-dash: â€"]
+    .faq details[open] summary::after { content: 'â'; }
+=== .\backup_frontend_baseline\AURORA\login.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Log in â AURORA Commodity Intelligence</title>
+=== .\backup_frontend_baseline\AURORA\market-detective.html ===
+  Line 1948: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <span>Formula: P_norm = (P_quoted / Lot_g) Ãâ 10 Ãâ (995 / Purity_std)</span>
+  Line 2217: [Mojibake en-dash: â€"]
+    <span style="color: #06B6D4;">Ã¢âÂ </span> GOLDM &nbsp;
+  Line 2218: [Mojibake en-dash: â€"]
+    <span style="color: #F59E0B;">Ã¢âÂ </span> GOLDPETAL &nbsp;
+=== .\backup_frontend_baseline\AURORA\opportunity-radar.html ===
+  Line 2070: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,850.00</span>
+  Line 2075: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,920.00</span>
+  Line 2079: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,849.65</span>
+  Line 2083: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹7,607.62</span>
+  Line 2087: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹60,021.34</span>
+  Line 2229: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Normalized Spread Divergence: <span class="mono" style="color: var(--gold-bright); font-weight: 700;
+  Line 2261: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span><i class="fa-solid fa-table-cells" style="margin-right: 6px;"></i> Pairwise Spread Matrix (â¹
+  Line 2279: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')" title="Spread: â¹70.35 | Z:
+=== .\backup_frontend_baseline\AURORA\signup.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Create account â AURORA Commodity Intelligence</title>
+=== .\backup_frontend_baseline\AURORA\site.css ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA public site â same tokens as the app (navy + gold, glass + clay) */
+=== .\backup_frontend_baseline\AURORA\site3d.css ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA 3D layer â CSS 3D gold bars, tilt cards, scroll-driven deck */
+=== .\backup_index_before_nav_fix.html ===
+  Line 463: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="text-white font-medium" id="scrubPrice">â¹72,480/10g</span>
+  Line 553: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    { label:"DEPTH LIQUIDITY",   val:"â¹2,840.4 Cr",   tag:"HIGH_VOL"        },
+  Line 559: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    "14:02:11 UTC: Large block order (450 lots) matched on MCX Aug contract at â¹71,450/10g.",
+  Line 722: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    scrubPrice.textContent = `â¹${price.toLocaleString('en-IN')}/10g`;
+  Line 92: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* Enter Aurora button â outline style to differentiate from primary gold CTA */
+  Line 129: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <!-- Right Group â live status indicator -->
+  Line 331: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    BOTTOM ROW â CTAs + Info Card
+  Line 337: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <!-- Primary CTA â opens anomaly drawer (unchanged) -->
+=== .\backup_index_before_stitch.html ===
+  Line 165: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip3d" style="--x:160px;--y:120px;--z:170px"><div style="--fd:-3.8s"><i class="fa-solid
+  Line 212: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip"><small>Avg pairwise basis</small><b>â¹127.45/lot</b></div>
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>AURORA â Commodity Intelligence & Relative-Value Platform for MCX Gold</title>
+  Line 93: [Mojibake en-dash: â€"]
+    .faq details[open] summary::after { content: 'â'; }
+=== .\backup_landing_before_nav_fix.html ===
+  Line 166: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip3d" style="--x:160px;--y:120px;--z:170px"><div style="--fd:-3.8s"><i class="fa-solid
+  Line 213: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip"><small>Avg pairwise basis</small><b>â¹127.45/lot</b></div>
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>AURORA â Commodity Intelligence & Relative-Value Platform for MCX Gold</title>
+  Line 93: [Mojibake en-dash: â€"]
+    .faq details[open] summary::after { content: 'â'; }
+=== .\backup_landing_phase2_nav.html ===
+  Line 167: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip3d" style="--x:160px;--y:120px;--z:170px"><div style="--fd:-3.8s"><i class="fa-solid
+  Line 214: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="chip"><small>Avg pairwise basis</small><b>â¹127.45/lot</b></div>
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>AURORA â Commodity Intelligence & Relative-Value Platform for MCX Gold</title>
+  Line 93: [Mojibake en-dash: â€"]
+    .faq details[open] summary::after { content: 'â'; }
+=== .\backup_login_before_nav_fix.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Log in â AURORA Commodity Intelligence</title>
+=== .\backup_login_before_stitch.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Log in â AURORA Commodity Intelligence</title>
+=== .\backup_login_phase2_nav.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Log in â AURORA Commodity Intelligence</title>
+=== .\backup_login_visual_redesign.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Log in â AURORA Commodity Intelligence</title>
+=== .\backup_market_detective_before_sim_fix.html ===
+  Line 1949: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <span>Formula: P_norm = (P_quoted / Lot_g) Ãâ 10 Ãâ (995 / Purity_std)</span>
+  Line 2218: [Mojibake en-dash: â€"]
+    <span style="color: #06B6D4;">Ã¢âÂ </span> GOLDM &nbsp;
+  Line 2219: [Mojibake en-dash: â€"]
+    <span style="color: #F59E0B;">Ã¢âÂ </span> GOLDPETAL &nbsp;
+=== .\backup_market_detective_phase2_nav.html ===
+  Line 1949: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <span>Formula: P_norm = (P_quoted / Lot_g) Ãâ 10 Ãâ (995 / Purity_std)</span>
+  Line 2218: [Mojibake en-dash: â€"]
+    <span style="color: #06B6D4;">Ã¢âÂ </span> GOLDM &nbsp;
+  Line 2219: [Mojibake en-dash: â€"]
+    <span style="color: #F59E0B;">Ã¢âÂ </span> GOLDPETAL &nbsp;
+=== .\backup_opportunity_radar_phase2_nav.html ===
+  Line 2071: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,850.00</span>
+  Line 2076: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,920.00</span>
+  Line 2080: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,849.65</span>
+  Line 2084: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹7,607.62</span>
+  Line 2088: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹60,021.34</span>
+  Line 2230: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Normalized Spread Divergence: <span class="mono" style="color: var(--gold-bright); font-weight: 700;
+  Line 2262: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span><i class="fa-solid fa-table-cells" style="margin-right: 6px;"></i> Pairwise Spread Matrix (â¹
+  Line 2280: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')" title="Spread: â¹70.35 | Z:
+=== .\backup_signup_before_stitch.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Create account â AURORA Commodity Intelligence</title>
+=== .\build_radar.py ===
+  Line 2065: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,850.00</span>
+  Line 2070: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,920.00</span>
+  Line 2074: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹74,849.65</span>
+  Line 2078: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹7,607.62</span>
+  Line 2082: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="ticker-price">â¹60,021.34</span>
+  Line 2224: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Normalized Spread Divergence: <span class="mono" style="color: var(--gold-bright); font-weight: 700;
+  Line 2256: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span><i class="fa-solid fa-table-cells" style="margin-right: 6px;"></i> Pairwise Spread Matrix (â¹
+  Line 2274: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <td class="cell-normal" onclick="selectPairFromMatrix('GOLDM-GOLDTEN')" title="Spread: â¹70.35 | Z:
+=== .\contract-explorer-live.js ===
+  Line 9: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    const money = value => Number.isFinite(Number(value)) ? `â¹${Number(value).toLocaleString('en-IN', 
+  Line 195: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    setText(specs[1], `â¹ / ${contract.quote_unit || 'â'}`);
+  Line 221: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    : rowIndex === 1 ? (contract?.quote_unit ? `â¹ per ${contract.quote_unit}` : null)
+  Line 262: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    y: { type: 'linear', position: 'left', grid: { color: theme.grid }, ticks: { color: theme.tick, call
+  Line 9: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    const money = value => Number.isFinite(Number(value)) ? `â¹${Number(value).toLocaleString('en-IN', 
+  Line 10: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    const dateLabel = value => value ? new Date(`${value}T12:00:00`).toLocaleDateString('en-IN', { day: 
+  Line 37: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    setText($('.val', chip), 'â'); setText($('.chg', chip), 'â');
+  Line 40: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    $$('.stat-chip-value').forEach((node, i) => setText(node, i === 0 ? 'Loadingâ¦' : 'â'));
+=== .\contract-explorer.html ===
+  Line 2110: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="spec-v">â¹ / 10 grams</span>
+  Line 2183: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Spread: -â¹70.35 (-0.11%)
+  Line 2196: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="spec-v">â¹ / 10 grams</span>
+  Line 2272: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Spread: +â¹70.99 (+0.11%)
+  Line 2285: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="spec-v">â¹ / 8 grams</span>
+  Line 2358: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Spread: +â¹122.62 (+0.20%)
+  Line 2371: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="spec-v">â¹ / 1 gram</span>
+  Line 2455: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    Standard Base: <strong>â¹ per 10 grams @ 995 Fine Gold</strong>
+=== .\dashboard-live.js ===
+  Line 9: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    const money = n => Number.isFinite(Number(n)) ? `${Number(n) < 0 ? '-â¹' : 'â¹'}${Math.abs(Number(
+  Line 13: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    const formatSummary = value => String(value ?? '').replace(/â¹-(?=\d)/g, '-â¹');
+  Line 214: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    svg += `<line x1="${plot.left}" y1="${y}" x2="${plot.right}" y2="${y}" stroke="rgba(221,190,116,.15)
+  Line 275: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    svg += `<rect x="${x - barWidth / 2}" y="${Math.min(y, baseline)}" width="${barWidth}" height="${Mat
+  Line 424: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    if (body) body.innerHTML = `<div class="dashboard-event-detail"><h3>${esc(evt.pair)} Â· ${esc(evt.cl
+  Line 483: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    if (button) { button.innerHTML = model.pure ? '<i class="fa-solid fa-coins"></i> 995 Fine Gold (â¹/
+  Line 485: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    if (subtitle) subtitle.textContent = model.pure ? 'MCX Gold Futures normalized to â¹/10g (995 fine-
+  Line 512: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    ? 'Normalized price (â¹/10g, 995 fine-gold basis)'
+=== .\dashboard.html ===
+  Line 2013: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <i class="fa-solid fa-coins"></i> 995 Fine Gold (â¹/10g)
+  Line 2074: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    â <span class="kpi-value-unit">â¹ / 10g mean</span>
+  Line 2119: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="panel-subtitle">MCX Gold Futures normalized to â¹/10g (995 fine-gold basis)</div>
+  Line 2252: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="panel-subtitle">Pairwise normalized spread (â¹/10g fine-gold basis)</div>
+  Line 2767: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    return ` ${context.dataset.label}: â¹${context.parsed.y.toFixed(2)}/10g`;
+  Line 2795: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    return 'â¹' + val;
+  Line 2904: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    label: 'Pairwise Basis Spread (â¹/10g)',
+  Line 2933: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    return ` Spread: â¹${context.parsed.y.toFixed(2)}/10g`;
+=== .\generate_final_radar.py ===
+  Line 2578: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="validation-badge" title="Fails after â¹148/10g estimated execution drag">
+  Line 2675: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <div class="validation-badge" title="High volume contracts with friction of only â¹14.20/10g">
+  Line 3339: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    label: function(ctx) { return `Spread: â¹${ctx.raw}`; }
+  Line 3805: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    sub.innerText = 'Critical Spread Anomaly (+â¹122.62 / 10g | Z = 2.47Ï | 97.3th Percentile)';
+  Line 3806: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    formulaOut.innerHTML = 'Spread = Normalized_Price(GOLDPETAL) â Normalized_Price(GOLDM) = â¹76,076
+  Line 3807: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    gross.innerText = 'â¹122.62';
+  Line 3808: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    fees.innerText = '-â¹21.40';
+  Line 3809: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    slippage.innerText = '-â¹22.70';
+=== .\index.html ===
+  Line 492: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="text-white font-medium" id="scrubPrice">â¹72,480/10g</span>
+  Line 582: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    { label:"DEPTH LIQUIDITY",   val:"â¹2,840.4 Cr",   tag:"HIGH_VOL"        },
+  Line 588: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    "14:02:11 UTC: Large block order (450 lots) matched on MCX Aug contract at â¹71,450/10g.",
+  Line 758: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    scrubPrice.textContent = `â¹${price.toLocaleString('en-IN')}/10g`;
+  Line 110: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* Enter Aurora button â outline style to differentiate from primary gold CTA */
+  Line 158: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <!-- Right Group â live status indicator -->
+  Line 360: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    BOTTOM ROW â CTAs + Info Card
+  Line 366: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <!-- Primary CTA â opens anomaly drawer (unchanged) -->
+=== .\landing-premium.css ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA public page â original implementation following Goldify's broad layout rhythm. */
+=== .\landing.html ===
+  Line 8: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>AURORA â Gold market intelligence</title>
+  Line 93: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <div class="workspace-foot"><span>Four contracts <i>Â·</i> Six pairwise comparisons</span><span>Rese
+=== .\login.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Sign In â AURORA</title>
+  Line 371: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <i class="fa-solid fa-bolt bolt"></i> Demo Login â no account needed
+=== .\market-detective.html ===
+  Line 2179: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <p>Backend spread observations (â¹/10g) with rolling statistical bands</p>
+  Line 2704: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    return `Backend spread: â¹${val.toFixed(2)}`;
+  Line 2706: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    return `Spread: â¹${val.toFixed(2)}`;
+  Line 2708: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    return `${context.dataset.label}: â¹${val.toFixed(2)}`;
+  Line 2732: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    return 'â¹' + value;
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Market Detective â AURORA MCX Gold Intelligence</title>
+  Line 1916: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <span class="detail-val">â</span>
+  Line 1920: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <span class="detail-val success">â</span>
+=== .\signup.html ===
+  Line 6: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    <title>Create account â AURORA Commodity Intelligence</title>
+=== .\site.css ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA public site â same tokens as the app (navy + gold, glass + clay) */
+=== .\site3d.css ===
+  Line 1: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    /* AURORA 3D layer â CSS 3D gold bars, tilt cards, scroll-driven deck */
+=== .\stitch_intro\code.html ===
+  Line 571: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    <span class="text-white font-medium" id="scrubPrice">â¹72,480/10g</span>
+  Line 732: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    { label: "DEPTH LIQUIDITY", val: "â¹2,840.4 Cr", tag: "HIGH_VOL" },
+  Line 738: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    "14:02:11 UTC: Large block order (450 lots) matched on MCX Aug contract at â¹71,450/10g.",
+  Line 908: [Mojibake rupee (UTF-8 bytes read as Latin-1): â‚¹]
+    scrubPrice.textContent = `â¹${price.toLocaleString('en-IN')}/10g`;
+  Line 441: [Mojibake em-dash (UTF-8 bytes read as Latin-1): â€"]
+    COMMODITY INTELLIGENCE â MCX GOLD
+  Line 339: [Mojibake sigma: Ïƒ]
+    <span class="font-semibold" style="color: #FEF08A;">+4.2Ï</span>
+  Line 521: [Mojibake sigma: Ïƒ]
+    <!-- +4.0Ï -->
+  Line 523: [Mojibake sigma: Ïƒ]
+    <span class="">+4.0Ï CRITICAL_BREACH</span>

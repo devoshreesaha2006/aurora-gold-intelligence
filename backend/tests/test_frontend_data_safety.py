@@ -1,7 +1,33 @@
 from pathlib import Path
+import re
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_opportunity_radar_encoding_is_clean_utf8():
+    """Verify opportunity-radar.html has no mojibake / corrupted characters."""
+    page = (ROOT / "opportunity-radar.html").read_text(encoding="utf-8")
+
+    # Must contain correct Unicode special chars
+    assert "\u20b9" in page, "Missing rupee sign U+20B9"
+    assert "\u2014" in page, "Missing em-dash U+2014"
+    assert "\u03c3" in page, "Missing sigma U+03C3"
+    assert "\u2192" in page, "Missing right-arrow U+2192"
+    assert "\u00b7" in page, "Missing middle-dot U+00B7"
+
+    # Must NOT contain box-drawing corruption artifacts
+    box_drawing = [c for c in set(page) if 0x2500 <= ord(c) <= 0x259F]
+    assert box_drawing == [], f"Box-drawing corruption remains: {[f'U+{ord(c):04X}' for c in box_drawing]}"
+
+    # Must NOT contain Greek Gamma (signature of CP1252 mojibake)
+    assert "\u0393" not in page, "Greek Gamma U+0393 mojibake remains"
+
+    # Title should read correctly
+    title_m = re.search(r"<title>(.*?)</title>", page)
+    assert title_m, "No <title> tag found"
+    assert "\u2014" in title_m.group(1) or "-" in title_m.group(1), "Title separator is corrupted"
+    assert "\u0393" not in title_m.group(1), "Title contains mojibake Gamma"
 
 
 def test_opportunity_radar_does_not_ship_seeded_live_badge_or_signal_metrics():

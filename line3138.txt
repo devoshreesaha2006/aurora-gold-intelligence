@@ -1,0 +1,10 @@
+Line 3138 (0-indexed 3137):
+            <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>
+
+
+Non-ASCII chars:
+pos 49: U+256C
+pos 50: U+255D
+
+Found U+256C at pos 49
+Following chars: U+256C U+255D U+0029 U+0020 U+003C

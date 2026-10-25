@@ -1,0 +1,5 @@
+Found sequence: 1 times
+Replaced!
+Mu count now: 1
+255D remaining: 0
+256C remaining: 0

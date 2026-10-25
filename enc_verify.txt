@@ -1,0 +1,77 @@
+
+=== opportunity-radar.html ===
+  File size: 130947 bytes
+  BOM present: False
+  Correct rupee (U+20B9) count: 0
+  Correct em-dash (U+2014) count: 0
+  Correct en-dash (U+2013) count: 0
+  Correct sigma (U+03C3) count: 0
+  Correct mu (U+03BC) count: 0
+  Title bytes hex: 4155524f524120ce93c387c3b6204f70706f7274756e697479205261646172207c204d435820476f6c6420525620506c6174666f726d
+  Title as UTF-8: AURORA ΓÇö Opportunity Radar | MCX Gold RV Platform
+  UTF-8 validity: CLEAN
+  SUSPICIOUS CHARS:
+    U+00C7 'Ç' x100: C WITH CEDILLA Ç - POSSIBLE CORRUPTION
+      Line 6: <title>AURORA ΓÇö Opportunity Radar | MCX Gold RV Platform</title>
+    U+00F6 'ö' x89: O WITH UMLAUT ö - POSSIBLE CORRUPTION
+      Line 6: <title>AURORA ΓÇö Opportunity Radar | MCX Gold RV Platform</title>
+    U+0393 'Γ' x122: GREEK GAMMA Γ - POSSIBLE CORRUPTION
+      Line 6: <title>AURORA ΓÇö Opportunity Radar | MCX Gold RV Platform</title>
+
+=== aurora-pipeline.js ===
+  File size: 126937 bytes
+  BOM present: False
+  Correct rupee (U+20B9) count: 21
+  Correct em-dash (U+2014) count: 68
+  Correct en-dash (U+2013) count: 0
+  Correct sigma (U+03C3) count: 9
+  Correct mu (U+03BC) count: 0
+  UTF-8 validity: CLEAN
+
+=== dashboard.html ===
+  File size: 99353 bytes
+  BOM present: False
+  Correct rupee (U+20B9) count: 10
+  Correct em-dash (U+2014) count: 8
+  Correct en-dash (U+2013) count: 0
+  Correct sigma (U+03C3) count: 0
+  Correct mu (U+03BC) count: 0
+  Title bytes hex: 4155524f524120e2809420436f6d6d6f6469747920496e74656c6c6967656e636520262052656c61746976652d56616c756520506c6174666f726d207c204d435820476f6c64
+  Title as UTF-8: AURORA — Commodity Intelligence & Relative-Value Platform | MCX Gold
+  UTF-8 validity: CLEAN
+
+=== market-detective.html ===
+  File size: 99355 bytes
+  BOM present: False
+  Correct rupee (U+20B9) count: 5
+  Correct em-dash (U+2014) count: 31
+  Correct en-dash (U+2013) count: 0
+  Correct sigma (U+03C3) count: 8
+  Correct mu (U+03BC) count: 0
+  Title bytes hex: 4d61726b65742044657465637469766520e28094204155524f5241204d435820476f6c6420496e74656c6c6967656e6365
+  Title as UTF-8: Market Detective — AURORA MCX Gold Intelligence
+  UTF-8 validity: CLEAN
+
+=== backtesting-lab.html ===
+  File size: 14445 bytes
+  BOM present: False
+  Correct rupee (U+20B9) count: 5
+  Correct em-dash (U+2014) count: 7
+  Correct en-dash (U+2013) count: 0
+  Correct sigma (U+03C3) count: 2
+  Correct mu (U+03BC) count: 0
+  Title bytes hex: 4155524f524120e28094204261636b74657374696e67204c6162
+  Title as UTF-8: AURORA — Backtesting Lab
+  UTF-8 validity: CLEAN
+
+=== contract-explorer.html ===
+  File size: 105186 bytes
+  BOM present: False
+  Correct rupee (U+20B9) count: 27
+  Correct em-dash (U+2014) count: 33
+  Correct en-dash (U+2013) count: 0
+  Correct sigma (U+03C3) count: 0
+  Correct mu (U+03BC) count: 0
+  Title bytes hex: 4155524f524120e28094204d435820476f6c6420436f6e7472616374204578706c6f726572
+  Title as UTF-8: AURORA — MCX Gold Contract Explorer
+  UTF-8 validity: CLEAN

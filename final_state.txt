@@ -1,0 +1,10 @@
+U+255D count: 1
+  Line 3138: <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>
+U+256C count: 1
+  Line 3138: <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>
+U+2592 count: 0
+U+2556 count: 0
+U+252C count: 0
+U+0393 count: 0
+Line 3138: <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>
+Line 3167: <span>Normal Equilibrium Zone (±1σ | 68.2%)</span>

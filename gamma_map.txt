@@ -1,0 +1,68 @@
+All Gamma-starting sequences in opportunity-radar.html:
+
+Sequence: "ΓÇª'" (U+0393 U+00C7 U+00AA U+0027) - 1 occurrences
+  Context: "backend observationsΓÇª' : 'No current backend pair result i"
+
+Sequence: 'ΓÇª<' (U+0393 U+00C7 U+00AA U+003C) - 2 occurrences
+  Context: 'ing for backend dataΓÇª</div>\n              <div id="radarSe'
+  Context: "backend observationsΓÇª</div>';\n      modal.classList.add('o"
+
+Sequence: 'ΓÇô ' (U+0393 U+00C7 U+00F4 U+0020) - 1 occurrences
+  Context: 'act combinations (0 ΓÇô 100 Scale)</p>\n            </div>\n  '
+
+Sequence: 'ΓÇô1' (U+0393 U+00C7 U+00F4 U+0031) - 7 occurrences
+  Context: 'Opportunity Score (0ΓÇô100)</div>\n                <div class'
+  Context: 'Opportunity score (0ΓÇô100 heuristic ranking, not win probab'
+  Context: 'case;">Rank Score (0ΓÇô100)</span>\n                  <span s'
+
+Sequence: 'ΓÇö' (U+0393 U+00C7 U+00F6) - 12 occurrences
+  Context: 'rrow-trend-up"></i> ΓÇö\n                </span>\n            '
+  Context: '>\n                  ΓÇö\n                </div>\n             '
+  Context: '>\n                  ΓÇö\n                </div>\n             '
+
+Sequence: 'ΓÇö ' (U+0393 U+00C7 U+00F6 U+0020) - 15 occurrences
+  Context: '0">\n  <title>AURORA ΓÇö Opportunity Radar | MCX Gold RV Plat'
+  Context: 'URORA DESIGN SYSTEM ΓÇö NAVY / GOLD / CLAYMORPHISM / GLASSMO'
+  Context: '\n    /* Ticker Pill ΓÇö scrollable pill, never causes page o'
+
+Sequence: "ΓÇö'" (U+0393 U+00C7 U+00F6 U+0027) - 5 occurrences
+  Context: "ment.textContent = 'ΓÇö';\n      });\n      if (distributionCh"
+  Context: '=> String(value ?? \'ΓÇö\').replace(/[&<>"\']/g, char => ({ \'&\''
+  Context: "> number == null ? 'ΓÇö' : Number(number).toLocaleString('en"
+
+Sequence: 'ΓÇö<' (U+0393 U+00C7 U+00F6 U+003C) - 57 occurrences
+  Context: 'ont-size: 0.74rem;">ΓÇö</span>\n        </div>\n        <p sty'
+  Context: 'lass="ticker-price">ΓÇö</span></div>\n        <div class="tic'
+  Context: 'lass="ticker-price">ΓÇö</span></div>\n        <div class="tic'
+
+Sequence: 'ΓåÆ' (U+0393 U+00E5 U+00C6) - 3 occurrences
+  Context: '        Investigate ΓåÆ\n              </button>\n            '
+  Context: '        Investigate ΓåÆ\n              </button>\n            '
+  Context: '        Investigate ΓåÆ\n              </button>\n            '
+
+Sequence: 'ΓåÆ ' (U+0393 U+00E5 U+00C6 U+0020) - 4 occurrences
+  Context: 'ackend pairs</span> ΓåÆ <span>Liquidity ΓÇö</span> ΓåÆ <span'
+  Context: 'iquidity ΓÇö</span> ΓåÆ <span>Expiry ΓÇö</span> ΓåÆ <span>Co'
+  Context: 'n>Expiry ΓÇö</span> ΓåÆ <span>Cost ΓÇö</span> ΓåÆ <span>Inve'
+
+Sequence: 'ΓåÆc' (U+0393 U+00E5 U+00C6 U+0063) - 1 occurrences
+  Context: ' // Preserve the rowΓåÆcolumn direction selected in the matr'
+
+Sequence: 'Γé╣ ' (U+0393 U+00E9 U+2563 U+0020) - 1 occurrences
+  Context: 'wise Spread Matrix (Γé╣ / 10g)</span>\n              <span cl'
+
+Sequence: 'Γé╣$' (U+0393 U+00E9 U+2563 U+0024) - 9 occurrences
+  Context: ') { return `Spread: Γé╣${ctx.raw}`; }\n              }\n      '
+  Context: 'pan><span class="v">Γé╣${value(point.raw_price_a)}</span></d'
+  Context: 'pan><span class="v">Γé╣${value(point.price_a)}</span></div>\n'
+
+Sequence: 'Γé╣/' (U+0393 U+00E9 U+2563 U+002F) - 2 occurrences
+  Context: '95 Fine-Gold Basis (Γé╣/10g)</span>\n            </div>\n     '
+  Context: 'ive-value result ┬╖ Γé╣/10g</h4>\n              <div class="m'
+
+Sequence: 'Γé╣1' (U+0393 U+00E9 U+2563 U+0031) - 1 occurrences
+  Context: 'th friction of only Γé╣14.20/10g">\n                <span cla'
+
+Sequence: 'ΓëÑ ' (U+0393 U+00EB U+00D1 U+0020) - 1 occurrences
+  Context: 'critical">Critical (ΓëÑ 2.0╧â)</option>\n              <optio'
+

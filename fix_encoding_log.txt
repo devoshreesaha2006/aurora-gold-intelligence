@@ -1,0 +1,21 @@
+Original length: 130405
+  Replaced U+0393... -> U+20B9: 13 times
+  Replaced U+0393... -> U+2014: 89 times
+  Replaced U+0393... -> U+2013: 8 times
+  Replaced U+0393... -> U+2026: 3 times
+  Replaced U+0393... -> U+2192: 8 times
+  Replaced U+0393... -> U+2265: 1 times
+  Replaced U+2567... -> U+03C3: 13 times
+After replacements length: 130148
+REMAINING SUSPICIOUS CHARS:
+  U+252C BOX DOWN-HRZ x30
+    Line 2322: <div class="ticker-item" data-market-symbol="GOLDM"><span class="ticker-name">GO
+VERIFICATION:
+  Rupee U+20B9 count: 13
+  Em-dash U+2014 count: 89
+  En-dash U+2013 count: 8
+  Sigma U+03C3 count: 13
+  Arrow U+2192 count: 8
+  Ellipsis U+2026 count: 3
+  Middle-dot U+00B7 count: 0
+File written successfully!

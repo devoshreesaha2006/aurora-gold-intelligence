@@ -1,0 +1,11 @@
+=== FINAL VERIFICATION ===
+Rupee U+20B9: 13
+Em-dash U+2014: 89
+En-dash U+2013: 8
+Sigma U+03C3: 13
+Mu U+03BC: 0
+Arrow U+2192: 8
+Ellipsis U+2026: 3
+Middle-dot U+00B7: 26
+Plus-minus U+00B1: 4
+Remaining unusual: ['U+255D x1', 'U+256C x1']
