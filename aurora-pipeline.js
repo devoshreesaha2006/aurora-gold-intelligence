@@ -1544,7 +1544,7 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     document.querySelectorAll('.dist-tab-btn').forEach(tab => tab.classList.remove('active'));
     const distributionTabs = {
       'GOLDM-GOLDPETAL': 'tab-goldm-petal',
-      'GOLDGUINEA-GOLDTEN': 'tab-guinea-ten',
+      'GOLDTEN-GOLDGUINEA': 'tab-guinea-ten',
       'GOLDM-GOLDTEN': 'tab-goldm-ten',
       'GOLDM-GOLDGUINEA': 'tab-goldm-guinea',
       'GOLDTEN-GOLDPETAL': 'tab-ten-petal',
@@ -2147,8 +2147,6 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
       rolling_mean: pair.rolling_mean == null ? null : -Number(pair.rolling_mean),
       z_score: pair.z_score == null ? null : -Number(pair.z_score),
       percentile_rank: pair.percentile_rank == null ? null : 100 - Number(pair.percentile_rank),
-      gross_edge: pair.gross_edge == null ? null : -Number(pair.gross_edge),
-      net_edge: pair.net_edge == null ? null : -Number(pair.net_edge),
     };
   }
 
