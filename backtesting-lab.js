@@ -323,7 +323,7 @@
     };
     const lines = [columns.map(([, label]) => escapeCell(label)).join(',')];
     allTrades.forEach((trade) => lines.push(columns.map(([key]) => escapeCell(trade[key])).join(',')));
-    const blob = new Blob(['\\uFEFF' + lines.join('\\r\\n')], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
