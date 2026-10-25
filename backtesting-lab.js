@@ -61,7 +61,7 @@
     } catch (error) {
       label.textContent = 'API unavailable';
       coverage.textContent = 'Start the AURORA API to inspect history';
-      setStatus('Cannot reach the AURORA API at 127.0.0.1:8000.', 'fa-solid fa-triangle-exclamation');
+      setStatus(`Cannot reach the AURORA API at ${API_BASE}. Check that the backend is running and the configured URL is correct.`, 'fa-solid fa-triangle-exclamation');
     }
   }
 
