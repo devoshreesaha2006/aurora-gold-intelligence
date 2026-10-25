@@ -154,7 +154,7 @@ class RelativeValueAnalyticsService:
         spread_history: List[float] = []
 
         for i, (oa, ob) in enumerate(pairs):
-            spread_val = round(oa.normalized_price_10g_basis - ob.normalized_price_10g_basis, 2)
+            spread_val = oa.normalized_price_10g_basis - ob.normalized_price_10g_basis
             if invert_spread:
                 spread_val = -spread_val
 
@@ -175,7 +175,7 @@ class RelativeValueAnalyticsService:
                 data_points.append(PairSpreadPoint(
                     trade_date=oa.trade_date,
                     expiry_date=oa.expiry_date,
-                    spread=spread_val,
+                    spread=round(spread_val, 2),
                     price_a=oa.normalized_price_10g_basis if not invert_spread else ob.normalized_price_10g_basis,
                     price_b=ob.normalized_price_10g_basis if not invert_spread else oa.normalized_price_10g_basis,
                     raw_price_a=oa.close_price if not invert_spread else ob.close_price,
