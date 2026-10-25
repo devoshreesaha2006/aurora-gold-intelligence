@@ -53,7 +53,7 @@
       const chip = document.querySelector('.market-status-chip');
       if (chip) {
         const statusText = chip.querySelector('span:last-child');
-        if (statusText) statusText.textContent = 'API CONNECTED';
+        if (statusText) statusText.textContent = verifiedLive ? 'API ONLINE · VERIFIED LIVE FEED' : `API ONLINE · ${String(data.feed_status || data.data_mode || 'FEED UNAVAILABLE').replaceAll('_', ' ').toUpperCase()}`;
         chip.title = `${data.provider_name}; live connection: ${data.is_live_connected ? 'connected' : 'not connected'}`;
       }
       const freshness = document.querySelector('.data-freshness-chip span');
