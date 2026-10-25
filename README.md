@@ -54,7 +54,7 @@ hacknHills/
 │   │   ├── sample_mcx_gold_bhavcopy_valid.csv    # 16-row valid synthetic test dataset
 │   │   ├── sample_mcx_gold_bhavcopy_invalid.csv  # 8-row malformed CSV testing diagnostics
 │   │   └── README.md                             # CSV schema and validation documentation
-│   └── tests/                                    # Pytest test suite (20 test cases)
+│   └── tests/                                    # Pytest regression suite
 │       ├── conftest.py
 │       ├── test_health.py
 │       ├── test_contracts.py
@@ -74,15 +74,6 @@ hacknHills/
 │   ├── contract-explorer.html       # Contract Specifications Explorer
 │   ├── opportunity-radar.html       # Relative-Value Radar (Live 6-Pair Radar & Bell Curve)
 │   ├── market-detective.html        # Anomaly Investigation Dossier (Live Event Dossier)
-│   └── backtesting-lab.html         # Walk-Forward Backtester
-├── .env.example                     # Environment template
-├── requirements.txt                 # Python dependencies
-└── README.md
-│   ├── aurora-pipeline.js           # Phase 1 Live integration & CSV Ingest Modal
-│   ├── dashboard.html               # Executive Dashboard
-│   ├── contract-explorer.html       # Contract Specifications Explorer
-│   ├── opportunity-radar.html       # Relative-Value Radar
-│   ├── market-detective.html        # Anomaly Investigation Dossier
 │   └── backtesting-lab.html         # Walk-Forward Backtester
 ├── .env.example                     # Environment template
 ├── requirements.txt                 # Python dependencies
