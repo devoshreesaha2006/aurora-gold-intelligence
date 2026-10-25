@@ -165,7 +165,7 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
     # Threshold is selected from training-only absolute z-scores, bounded to avoid an
     # extreme threshold that simply eliminates all test observations.
     abs_z = sorted(abs(p.z_score) for p in train if p.z_score is not None)
-    threshold = max(1.0, min(3.0, abs_z[int(0.9 * (len(abs_z) - 1)])) if abs_z else request.entry_z
+    threshold = max(1.0, min(3.0, abs_z[int(0.9 * (len(abs_z) - 1))])) if abs_z else request.entry_z
     cost_per_roundtrip = (request.transaction_cost_per_10g + request.slippage_per_10g) * 2 * request.units
     outcomes = []
     for idx in range(len(test) - 1):
