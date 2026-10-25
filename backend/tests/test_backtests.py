@@ -294,3 +294,35 @@ def test_backtest_uses_only_nearest_shared_expiry_per_session(db_session):
     assert pairs[0][0].trade_date == day
     assert pairs[0][0].expiry_date == pairs[0][1].expiry_date == front_expiry
     assert pairs[0][2] == 100
+
+
+
+def test_backtest_sharpe_matches_final_equity_curve_after_exit_costs(db_session):
+    from math import sqrt
+    from statistics import mean, stdev
+
+    spreads = [0, 2, -2, 3, -3, 4, -4, 5, -5, 1, 0, -1, 2, -2, 4, -4, 0, 1]
+    expiry = date(2026, 12, 25)
+    for idx, spread in enumerate(spreads):
+        day = date(2026, 4, 1) + timedelta(days=idx)
+        for symbol, close in (("GOLDM", 62500 + spread), ("GOLDPETAL", 62500)):
+            db_session.add(MarketObservation(
+                symbol=symbol, trade_date=day, expiry_date=expiry,
+                close_price=close, normalized_price_per_gram=close / 10,
+                normalized_price_10g_basis=close, volume=1000, volume_observed=True,
+                data_source="csv_upload", is_synthetic=False,
+            ))
+    db_session.commit()
+
+    request = BacktestRequest(
+        pair="GOLDM-GOLDPETAL", lookback=5, entry_z=1.0, exit_z=0.2,
+        transaction_cost_per_10g=10.31, slippage_per_10g=15.0,
+    )
+    result = BacktestService(db_session).run(request)
+    equity = [point.equity for point in result.equity_curve]
+    daily_returns = [(current - previous) / previous for previous, current in zip(equity, equity[1:])]
+    expected_sharpe = mean(daily_returns) / stdev(daily_returns) * sqrt(252)
+
+    assert result.metrics.total_trades > 0
+    assert result.metrics.sharpe_ratio == pytest.approx(expected_sharpe, abs=0.0001)
+    assert result.metrics.total_pnl == pytest.approx(equity[-1] - request.capital, abs=0.01)
