@@ -29,6 +29,9 @@ def get_pairwise_spreads(
     empirical percentile rank, observed volume/OI where available, and expiry DTE
     without look-ahead bias. Returned observations may be historical, not live.
     """
+    if start_date and end_date and start_date > end_date:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="start_date must be on or before end_date.")
+
     try:
         leg_a, leg_b, is_inverted = parse_pair(pair)
     except ValueError as e:
@@ -121,9 +124,15 @@ def get_spread_distribution(
     Returns historical spread distribution, skewness, kurtosis, empirical frequency bins,
     and theoretical Gaussian PDF curve for the specified pair.
     """
+    try:
+        # Validate pair names here so malformed requests return a clear 400, not a 500.
+        parse_pair(pair)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
     service = RelativeValueAnalyticsService(db)
     dist_data = service.get_spread_distribution(
-        pair=pair,
+        pair=pair.strip().upper().replace("/", "-").replace("_", "-"),
         window_days=window,
         num_bins=bins
     )
