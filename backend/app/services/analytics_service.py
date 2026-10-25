@@ -527,11 +527,11 @@ class RelativeValueAnalyticsService:
 
             if classification == "Investigate":
                 investigate_count += 1
-            elif classification == "Cost-Blocked":
+            if is_cost:
                 cost_blocked_count += 1
-            elif classification == "Expiry-Risk":
+            if classification == "Expiry-Risk":
                 expiry_risk_count += 1
-            elif classification == "Watch":
+            if classification == "Watch":
                 watch_count += 1
 
             # Map Z to 0-100 radar deviation intensity
