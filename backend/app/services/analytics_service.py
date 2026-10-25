@@ -555,6 +555,8 @@ class RelativeValueAnalyticsService:
                 leg_b=leg_b,
                 trade_date=last_pt.trade_date,
                 expiry_date=last_pt.expiry_date,
+                data_age_days=max(0, (date.today() - last_pt.trade_date).days),
+                snapshot_freshness=("current-session" if (date.today() - last_pt.trade_date).days == 0 else "recent-history" if (date.today() - last_pt.trade_date).days == 1 else "historical"),
                 spread=last_pt.spread,
                 rolling_mean=last_pt.rolling_mean,
                 rolling_std=last_pt.rolling_std,

@@ -1,6 +1,6 @@
 /* Contract Explorer bindings. Values and charts come only from eligible API rows. */
 (() => {
-  const API = 'http://127.0.0.1:8000/api';
+  const API = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? `${location.origin}/api` : 'http://127.0.0.1:8000/api')).replace(/\/$/, '');
   const SYMBOLS = ['GOLDM', 'GOLDTEN', 'GOLDGUINEA', 'GOLDPETAL'];
   const COLORS = ['#c99a34', '#b68c40', '#d08a45', '#789b7a'];
   const model = { contracts: new Map(), rows: new Map(), status: null, range: 90 };

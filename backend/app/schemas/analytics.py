@@ -59,6 +59,8 @@ class PairRadarItem(BaseModel):
     leg_b: str
     trade_date: Optional[date] = None
     expiry_date: Optional[date] = None
+    data_age_days: Optional[int] = Field(None, description="Calendar days between the observation date and server date")
+    snapshot_freshness: str = Field("unavailable", description="unavailable, current-session, recent-history, or historical")
     spread: Optional[float] = None
     rolling_mean: Optional[float] = None
     rolling_std: Optional[float] = None

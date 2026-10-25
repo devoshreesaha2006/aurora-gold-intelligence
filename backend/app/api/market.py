@@ -1,6 +1,6 @@
 from typing import Optional, List
 from datetime import date
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
@@ -41,12 +41,23 @@ def get_market_prices(
     Returns historical observations with both quoted prices and fine-gold normalized metrics.
     Supports filtering by contract symbol and trade date bounds.
     """
+    if start_date and end_date and start_date > end_date:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="start_date must be on or before end_date.",
+        )
+
     # Preserve stored observations for auditability while applying the shared
     # analytics eligibility policy to market results.
     query = eligible_analytics_observations_query(db)
 
     if symbol:
         clean_symbol = symbol.strip().upper()
+        if not clean_symbol.replace("_", "").isalnum():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="symbol must be a valid contract code, e.g. GOLDM.",
+            )
         query = query.filter(MarketObservation.symbol == clean_symbol)
 
     if start_date:
@@ -57,7 +68,12 @@ def get_market_prices(
 
     total = query.count()
     items = (
-        query.order_by(MarketObservation.trade_date.desc(), MarketObservation.symbol.asc())
+        query.order_by(
+            MarketObservation.trade_date.desc(),
+            MarketObservation.symbol.asc(),
+            MarketObservation.expiry_date.asc(),
+            MarketObservation.id.asc(),
+        )
         .offset(offset)
         .limit(limit)
         .all()

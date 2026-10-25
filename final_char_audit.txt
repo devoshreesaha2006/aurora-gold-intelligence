@@ -1,0 +1,28 @@
+Box drawing chars remaining: []
+
+All non-ASCII chars:
+  U+00B1 '±' x4: plus-minus
+  U+00B7 '·' x26: middle dot
+  U+03BC 'μ' x1: mu
+  U+03C3 'σ' x13: sigma
+  U+2013 '–' x8: en-dash
+  U+2014 '—' x89: em-dash
+  U+2026 '…' x3: ellipsis
+  U+20B9 '₹' x13: rupee
+  U+2192 '→' x8: right arrow
+  U+2265 '≥' x1: geq
+
+Suspicious chars: 0
+ALL CLEAR - No suspicious characters!
+
+=== KEY CHAR COUNTS ===
+  plus-minus: 4
+  middle dot: 26
+  mu: 1
+  sigma: 13
+  en-dash: 8
+  em-dash: 89
+  ellipsis: 3
+  rupee: 13
+  right arrow: 8
+  geq: 1

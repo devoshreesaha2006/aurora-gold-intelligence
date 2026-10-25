@@ -225,6 +225,12 @@ class BacktestService:
             drawdown = ((equity - peak) / peak * 100) if peak else 0.0
             max_drawdown = min(max_drawdown, drawdown)
             points[-1] = EquityPoint(trade_date=oa.trade_date, equity=round(equity, 2), drawdown_pct=round(drawdown, 4))
+            # Include the final exit cost in the last daily return so the
+            # annualized Sharpe ratio reflects the same terminal equity as P&L.
+            if len(points) > 1 and points[-2].equity:
+                final_return = (equity - points[-2].equity) / points[-2].equity
+                if returns:
+                    returns[-1] = final_return
 
         closed_wins = sum(1 for trade in trades if trade.net_pnl > 0)
         losses = sum(-trade.net_pnl for trade in trades if trade.net_pnl < 0)
@@ -247,17 +253,30 @@ class BacktestService:
             SpreadPoint(trade_date=oa.trade_date, spread=spread, execution=markers.get(oa.trade_date))
             for oa, _ob, spread in pairs
         ]
-        message = "Historical walk-forward simulation completed."
+        message = (
+            f"Historical walk-forward simulation completed with {len(trades)} completed trade(s) "
+            f"across {len(pairs)} synchronized observations. "
+            f"{entry_setups} entry-threshold check(s); {volume_blocked_entries} blocked by observed-volume "
+            f"requirements and {expiry_blocked_entries} blocked by the expiry buffer."
+        )
         if not trades:
             if entry_setups == 0:
-                message = "Historical simulation completed with no trades: no eligible observation crossed the configured entry threshold."
+                message = (
+                    f"Historical simulation completed with no trades across {len(pairs)} synchronized "
+                    "observations: no eligible observation crossed the configured entry threshold. "
+                    "Compare another preset or pair; do not lower thresholds solely to force trades."
+                )
             else:
                 skipped = []
                 if volume_blocked_entries:
                     skipped.append(f"{volume_blocked_entries} entry check(s) failed the observed-volume requirement")
                 if expiry_blocked_entries:
                     skipped.append(f"{expiry_blocked_entries} entry check(s) fell inside the {req.expiry_buffer_days}-day expiry buffer")
-                message = "Historical simulation completed with no trades: " + "; ".join(skipped) + "."
+                message = (
+                    f"Historical simulation completed with no trades from {entry_setups} entry-threshold check(s): "
+                    + ("; ".join(skipped) if skipped else "all candidate entries were unavailable")
+                    + "."
+                )
         return BacktestResponse(
             status="completed", message=message, pair=req.pair,
             data_source="User-imported historical observations (not provider-verified)", first_date=first_date, last_date=last_date,

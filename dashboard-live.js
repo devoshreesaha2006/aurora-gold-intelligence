@@ -1,6 +1,6 @@
 /* Live dashboard binding. All displayed market values come from the existing API. */
 (() => {
-  const API = 'http://127.0.0.1:8000/api';
+  const API = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? `${location.origin}/api` : 'http://127.0.0.1:8000/api')).replace(/\/$/, '');
   const pairKeys = ['GOLDM-GOLDTEN', 'GOLDM-GOLDGUINEA', 'GOLDM-GOLDPETAL', 'GOLDTEN-GOLDGUINEA', 'GOLDTEN-GOLDPETAL', 'GOLDGUINEA-GOLDPETAL'];
   const colors = ['#dfc477', '#c99c4e', '#b47d3d', '#9d8b59', '#d7ae5d', '#857a61'];
   const model = { status: null, contracts: [], prices: [], radar: [], radarDate: null, events: [], loaded: {}, timeframe: '30D', pure: true, costFilter: true };
@@ -100,8 +100,15 @@
         : status.market_open ? 'Session open' : 'Session closed';
     if (statusChip) statusChip.innerHTML = `<span class="live-pulse-dot" style="background:${dot}"></span><span>${esc(label)} · ${sessionLabel}</span>`;
     const when = status.latest_trade_date || status.last_ingestion_at || 'No observation date';
+    const tradeDate = status.latest_trade_date ? new Date(status.latest_trade_date + 'T00:00:00Z') : null;
+    const nowUtc = new Date();
+    const todayStart = Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate());
+    const tradeStart = tradeDate && Number.isFinite(tradeDate.getTime()) ? Date.UTC(tradeDate.getUTCFullYear(), tradeDate.getUTCMonth(), tradeDate.getUTCDate()) : null;
+    const ageDays = tradeStart == null ? null : Math.max(0, Math.floor((todayStart - tradeStart) / 86400000));
+    const ageLabel = ageDays == null ? 'age unavailable' : ageDays === 0 ? 'trade date: today' : 'trade date ' + ageDays + ' calendar day' + (ageDays === 1 ? '' : 's') + ' old';
     const provenance = status.data_freshness_label || `${Number(status.total_observations || 0).toLocaleString('en-IN')} stored observations · ${when}`;
-    if (freshness) freshness.innerHTML = `<i class="fa-solid fa-database"></i><span>${esc(provenance)}</span>`;
+    const freshnessText = ageDays != null && ageDays >= 2 ? `${provenance} · HISTORICAL — ${ageLabel}` : `${provenance} · ${ageLabel}`;
+    if (freshness) freshness.innerHTML = `<i class="fa-solid fa-database"></i><span>${esc(freshnessText)}</span>`;
   }
 
   function latestBySymbol() {

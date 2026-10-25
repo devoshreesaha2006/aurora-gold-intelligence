@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const API_BASE = 'http://127.0.0.1:8000';
+  const API_BASE = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? location.origin : 'http://127.0.0.1:8000')).replace(/\/$/, '');
   const form = document.getElementById('backtestForm');
   const runButton = document.getElementById('runButton');
   const formError = document.getElementById('formError');
@@ -53,7 +53,7 @@
       const chip = document.querySelector('.market-status-chip');
       if (chip) {
         const statusText = chip.querySelector('span:last-child');
-        if (statusText) statusText.textContent = 'API CONNECTED';
+        if (statusText) statusText.textContent = verifiedLive ? 'API ONLINE · VERIFIED LIVE FEED' : `API ONLINE · ${String(data.feed_status || data.data_mode || 'FEED UNAVAILABLE').replaceAll('_', ' ').toUpperCase()}`;
         chip.title = `${data.provider_name}; live connection: ${data.is_live_connected ? 'connected' : 'not connected'}`;
       }
       const freshness = document.querySelector('.data-freshness-chip span');
@@ -61,7 +61,7 @@
     } catch (error) {
       label.textContent = 'API unavailable';
       coverage.textContent = 'Start the AURORA API to inspect history';
-      setStatus('Cannot reach the AURORA API at 127.0.0.1:8000.', 'fa-solid fa-triangle-exclamation');
+      setStatus(`Cannot reach the AURORA API at ${API_BASE}. Check that the backend is running and the configured URL is correct.`, 'fa-solid fa-triangle-exclamation');
     }
   }
 
@@ -100,6 +100,7 @@
   function resetDisplay() {
     clearCharts();
     allTrades = [];
+    $('exportTradesButton').disabled = true;
     renderTrades([]);
     ['metricReturn', 'metricPnl', 'metricDrawdown', 'metricSharpe', 'metricWinRate', 'metricWinSub', 'metricTrades', 'metricProfitFactor'].forEach((id) => {
       $(id).textContent = id === 'metricPnl' ? 'Waiting for results' : id === 'metricWinSub' ? 'Closed trades' : '—';
@@ -182,6 +183,7 @@
     renderMetrics(result.metrics);
     renderCharts(result.equity_curve || [], result.spread_series || []);
     allTrades = result.trades || [];
+    $('exportTradesButton').disabled = allTrades.length === 0;
     renderTrades(allTrades);
     $('assumptionList').replaceChildren(...(result.assumptions || []).map((item) => {
       const li = document.createElement('li'); li.textContent = item; return li;
@@ -307,6 +309,29 @@
     formError.hidden = true; resetDisplay(); setStatus('Configuration restored to the documented baseline.');
   });
   document.querySelectorAll('.bt-preset').forEach((button) => button.addEventListener('click', () => applyPreset(button.dataset.preset)));
+  function exportTradesCsv() {
+    if (!allTrades.length) return;
+    const columns = [
+      ['entry_date', 'Entry date'], ['exit_date', 'Exit date'], ['pair', 'Pair'],
+      ['direction', 'Position'], ['units', 'Units'], ['entry_spread', 'Entry spread INR/10g'],
+      ['exit_spread', 'Exit spread INR/10g'], ['gross_pnl', 'Gross P&L INR'],
+      ['costs', 'Costs INR'], ['net_pnl', 'Net P&L INR'], ['exit_reason', 'Exit reason'],
+    ];
+    const escapeCell = (value) => {
+      const text = value == null ? '' : String(value);
+      return '"' + text.replaceAll('"', '""') + '"';
+    };
+    const lines = [columns.map(([, label]) => escapeCell(label)).join(',')];
+    allTrades.forEach((trade) => lines.push(columns.map(([key]) => escapeCell(trade[key])).join(',')));
+    const blob = new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `aurora-backtest-trades-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link); link.click(); link.remove();
+    URL.revokeObjectURL(url);
+  }
+  $('exportTradesButton').addEventListener('click', exportTradesCsv);
   $('tradeSearch').addEventListener('input', () => renderTrades(allTrades));
   $('uploadButton').addEventListener('click', () => {
     const upload = document.getElementById('btnOpenIngestModal');
@@ -314,6 +339,18 @@
     else { setStatus('The CSV import control is not available. Open Market Data from the dashboard.', 'fa-solid fa-triangle-exclamation'); window.location.href = 'dashboard.html#data'; }
   });
   $('sidebarToggle').addEventListener('click', () => $('sidebar').classList.toggle('open'));
+
+  const requestedPair = new URLSearchParams(window.location.search).get('pair');
+  if (requestedPair) {
+    const pairSelect = $('pairInput');
+    const normalizedPair = requestedPair.trim().toUpperCase().replace(/\//g, '-').replace(/\s+/g, '');
+    if ([...pairSelect.options].some((option) => option.value === normalizedPair)) {
+      pairSelect.value = normalizedPair;
+      setStatus(`Investigation pair loaded: ${normalizedPair.replace('-', ' / ')}. Review the dates and assumptions, then run the historical simulation.`);
+    } else {
+      setStatus('The investigation pair was not recognized. Choose a supported pair before running.', 'fa-solid fa-triangle-exclamation');
+    }
+  }
 
   loadMarketStatus();
 })();

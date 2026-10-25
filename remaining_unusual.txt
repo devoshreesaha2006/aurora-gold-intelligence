@@ -1,0 +1,6 @@
+Unusual chars remaining (after previous fixes):
+U+252C '┬' x30: <div class="ticker-item" data-market-symbol="GOLDM"><span class="ticker-name">GOLDM ┬╖ latest close:
+U+2556 '╖' x26: <div class="ticker-item" data-market-symbol="GOLDM"><span class="ticker-name">GOLDM ┬╖ latest close:
+U+255D '╝' x1: <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>
+U+256C '╬' x1: <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>
+U+2592 '▒' x4: <span>Normal Equilibrium Zone (┬▒1σ | 68.2%)</span>

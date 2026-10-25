@@ -1,0 +1,2 @@
+U+255D x1
+  Line 3138: <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>

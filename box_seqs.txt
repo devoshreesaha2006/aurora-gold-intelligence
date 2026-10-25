@@ -1,0 +1,14 @@
+'┬' (U+252C) x4
+  'ilibrium Zone (┬▒1╧â | 68.2%)</span>\n        '
+  'ttention Zone (┬▒1╧â to ┬▒2╧â | 27.2%)</span>'
+'┬╖' (U+252C U+2556) x26
+  'er-name">GOLDM ┬╖ latest close:</span><span c'
+  '-name">GOLDTEN ┬╖ latest close:</span><span c'
+'╣' (U+2563) x13
+  'read Matrix (Γé╣ / 10g)</span>\n              '
+  '-Gold Basis (Γé╣/10g)</span>\n            </di'
+'╧' (U+2567) x13
+  'itical (ΓëÑ 2.0╧â)</option>\n              <op'
+  'high">High (1.5╧â - 2.0╧â)</option>\n         '
+'╬╝' (U+256C U+255D) x1
+  'storical Mean (╬╝) <i class="fa-solid fa-calc'

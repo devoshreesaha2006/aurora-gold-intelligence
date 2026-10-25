@@ -1,0 +1,18 @@
+Title hex: 4155524f524120ce93c387c3b6204f70706f7274756e697479205261646172207c204d435820476f6c6420525620506c6174666f726d
+Title as UTF-8: AURORA ΓÇö Opportunity Radar | MCX Gold RV Platform
+Title as latin-1: AURORA ÎÃÃ¶ Opportunity Radar | MCX Gold RV Platform
+
+Key insight: Files ARE UTF-8 but CONTAIN the mojibake STRINGS literally
+The issue: The source code itself has the mojibake strings HARDCODED
+(Not a runtime encoding issue, but the actual characters in the file are wrong)
+
+Mojibake rupee as unicode codepoints: ['0xe2', '0x82', '0xb9']
+Mojibake rupee encoded as UTF-8: c3a2c282c2b9
+Correct rupee (E2 82 B9) count in aurora-pipeline.js: 21
+Mojibake rupee in aurora-pipeline.js: 0
+
+Snippet near 'Norm Price' in pipeline: 4e6f726d2050726963652028e282b92f672046696e65293c2f74683e0d0a20202020202020202020
+Decoded as UTF-8: Norm Price (₹/g Fine)</th>
+          
+Decoded as latin-1: Norm Price (â¹/g Fine)</th>
+          
