@@ -11,6 +11,7 @@ from backend.app.services.analytics_service import (
 from backend.app.models.market_observation import MarketObservation
 from backend.app.models.contract import Contract
 from backend.app.schemas.analytics import EventEvidenceTrail
+from backend.app.services.ingestion_service import CsvIngestionService
 
 SAMPLE_DIR = os.path.join(os.path.dirname(__file__), "..", "sample_data")
 
@@ -238,6 +239,32 @@ def test_api_events_endpoint(client):
         assert evt["severity"] in ("critical", "high", "medium", "low")
         assert evt["evidence"]["benchmark_basis"] == "₹ per 10g (995 fine gold equivalent)"
         assert evt["evidence"]["cost_hurdle"] > 0
+
+    # IDs are used as the Market Detective selector key, so same-date events
+    # for different GOLD* pairs must remain distinct.
+    ids = [event["event_id"] for event in data["items"]]
+    assert len(ids) == len(set(ids))
+    for event in data["items"]:
+        assert f"-{event['pair']}-" in event["event_id"]
+
+
+def test_event_ids_remain_unique_across_gold_pairs(db_session: Session):
+    """Market Detective uses event_id as a key; GOLD* prefixes must not collide."""
+    csv_path = os.path.join(SAMPLE_DIR, "sample_mcx_gold_bhavcopy_valid.csv")
+    with open(csv_path, "rb") as source:
+        file_bytes = source.read()
+    file_bytes = file_bytes.replace(b"2026-11-27", b"2026-10-30").replace(b"2026-10-28", b"2026-10-30")
+    CsvIngestionService(db_session).process_csv(
+        file_bytes=file_bytes,
+        filename="event-id-regression.csv",
+        data_source="csv_upload",
+        is_synthetic=False,
+    )
+
+    events = RelativeValueAnalyticsService(db_session).get_events(limit=200)
+    event_ids = [event.event_id for event in events.items]
+    assert len(event_ids) == len(set(event_ids))
+    assert all(f"-{event.pair}-" in event.event_id for event in events.items)
 
 
 def test_api_distribution_endpoint(client):

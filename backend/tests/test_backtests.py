@@ -58,6 +58,63 @@ def test_backtest_pairs_only_matching_expiries_on_same_date(db_session):
     assert pairs[0][0].expiry_date == pairs[0][1].expiry_date == monthly
 
 
+def test_backtest_no_pair_data_explains_selected_date_and_expiry_mismatch(db_session):
+    trade_day = date(2026, 10, 15)
+    db_session.add_all([
+        MarketObservation(
+            symbol="GOLDM", trade_date=trade_day, expiry_date=date(2026, 11, 5),
+            close_price=62500, normalized_price_per_gram=6250, normalized_price_10g_basis=62500,
+            data_source="csv_upload", is_synthetic=False,
+        ),
+        MarketObservation(
+            symbol="GOLDPETAL", trade_date=trade_day, expiry_date=date(2026, 10, 30),
+            close_price=62500, normalized_price_per_gram=6250, normalized_price_10g_basis=62500,
+            data_source="csv_upload", is_synthetic=False,
+        ),
+    ])
+    db_session.commit()
+
+    result = BacktestService(db_session).run(BacktestRequest(
+        pair="GOLDM-GOLDPETAL", start_date=trade_day, end_date=trade_day, lookback=5,
+    ))
+
+    assert result.status == "no_eligible_data"
+    assert result.observations == 0
+    assert "No synchronized GOLDM-GOLDPETAL observations" in result.message
+    assert "2026-10-15 through 2026-10-15" in result.message
+    assert "same trade date and explicit expiry" in result.message
+    assert "Different expiries are never paired" in result.message
+    assert "Upload a user-provided historical CSV" not in result.message
+
+
+def test_backtest_empty_trade_result_explains_expiry_buffer_blocks(db_session):
+    start = date(2026, 1, 1)
+    expiry = date(2026, 2, 3)
+    spreads = [1 if index % 2 else -1 for index in range(29)] + [50, 50, 50]
+    for index, spread in enumerate(spreads):
+        trade_day = start + timedelta(days=index)
+        for symbol, value in (("GOLDM", 62500 + spread), ("GOLDPETAL", 62500)):
+            db_session.add(MarketObservation(
+                symbol=symbol, trade_date=trade_day, expiry_date=expiry,
+                close_price=value, normalized_price_per_gram=value / 10,
+                normalized_price_10g_basis=value, volume=1000, volume_observed=True,
+                open_interest=1000, data_source="csv_upload", is_synthetic=False,
+            ))
+    db_session.commit()
+
+    result = BacktestService(db_session).run(BacktestRequest(
+        pair="GOLDM-GOLDPETAL", lookback=30, entry_z=2.0, exit_z=0.5,
+        expiry_buffer_days=3, min_volume=0,
+    ))
+
+    assert result.status == "completed"
+    assert result.observations == 32
+    assert result.metrics.total_trades == 0
+    assert result.metrics.total_return_pct == 0
+    assert "no trades" in result.message
+    assert "expiry buffer" in result.message
+
+
 def test_backtest_excludes_test_invalid_source_and_test_import_batch(db_session):
     day = date(2026, 6, 1)
     batches = []

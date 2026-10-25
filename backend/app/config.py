@@ -1,6 +1,14 @@
 from typing import List, Optional
+from pathlib import Path
 from pydantic import Field
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import make_url
+
+
+# Resolve local configuration and SQLite storage from the repository root,
+# independent of whether Uvicorn is launched from the root or backend folder.
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -8,7 +16,7 @@ class Settings(BaseSettings):
     Application configuration loaded from environment variables or .env file.
     """
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(PROJECT_ROOT / ".env"),
         env_file_encoding="utf-8",
         extra="ignore"
     )
@@ -21,7 +29,7 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # Database: SQLite default for zero-config local run, switchable to PostgreSQL
-    database_url: str = "sqlite:///./aurora.db"
+    database_url: str = f"sqlite:///{(PROJECT_ROOT / 'aurora.db').as_posix()}"
 
     # CORS origins (comma-separated or '*')
     cors_origins: str = "*"
@@ -42,6 +50,19 @@ class Settings(BaseSettings):
     # Explicit operator attestation that the subscribed product's license permits
     # AURORA's intended processing and storage. Credentials alone are insufficient.
     mcx_feed_license_confirmed: bool = False
+
+    @field_validator("database_url")
+    @classmethod
+    def resolve_relative_sqlite_database(cls, value: str) -> str:
+        """Anchor relative SQLite paths to the project, not the shell CWD."""
+        url = make_url(value)
+        if url.get_backend_name() != "sqlite" or not url.database or url.database == ":memory:":
+            return value
+        database_path = Path(url.database)
+        if not database_path.is_absolute():
+            database_path = (PROJECT_ROOT / database_path).resolve()
+            return url.set(database=database_path.as_posix()).render_as_string(hide_password=False)
+        return value
 
     @property
     def cors_origins_list(self) -> List[str]:

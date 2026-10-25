@@ -46,6 +46,8 @@ def test_duplicate_csv_prevention(client):
     data2 = res2.json()["data"]
     assert "Duplicate file ignored" in data2["message"]
     assert data2["accepted_rows"] == 0
+    assert data2["duplicate_rows"] == 1
+    assert data2["status"] == "completed"
 
 
 def test_invalid_csv_validation_report(client):
@@ -179,3 +181,62 @@ def test_zero_high_and_low_prices_are_treated_as_missing(client, db_session):
     assert observation.high_price is None
     assert observation.low_price is None
     assert observation.close_price == 62890.0
+
+
+def test_import_with_skipped_duplicates_and_rejected_rows_is_partial_success(db_session):
+    from backend.app.models.data_import import ImportBatch
+    from backend.app.schemas.ingestion import ImportBatchRead
+    from backend.app.services.ingestion_service import CsvIngestionService
+
+    valid = b"symbol,trade_date,expiry_date,close\nGOLDM,2026-10-15,2026-10-30,62980\n"
+    service = CsvIngestionService(db_session)
+    first = service.process_csv(valid, "initial.csv")
+    assert first.accepted_rows == 1
+
+    mixed = (
+        b"symbol,trade_date,expiry_date,close\n"
+        b"GOLDM,2026-10-15,2026-10-30,62980\n"
+        b"GOLDTEN,2026-10-15,2026-11-27,-1\n"
+    )
+    result = service.process_csv(mixed, "mixed.csv")
+    assert result.total_rows == 2
+    assert result.accepted_rows == 0
+    assert result.rejected_rows == 1
+    assert result.duplicate_rows == 1
+    assert result.status == "partial_success"
+
+    batch = db_session.query(ImportBatch).filter(ImportBatch.filename == "mixed.csv").one()
+    response_batch = ImportBatchRead.model_validate(batch)
+    assert response_batch.duplicate_rows == 1
+    assert response_batch.status == "partial_success"
+
+
+def test_import_history_status_distinguishes_failure_from_skipped_duplicates():
+    from datetime import datetime, timezone
+    from backend.app.schemas.ingestion import ImportBatchRead
+
+    def batch(total, accepted, rejected):
+        return ImportBatchRead(
+            id=1, filename="audit.csv", file_hash="a" * 64, total_rows=total,
+            accepted_rows=accepted, rejected_rows=rejected, data_source="csv_upload",
+            is_synthetic=False, created_at=datetime.now(timezone.utc),
+        )
+
+    assert batch(3, 2, 1).status == "partial_success"
+    assert batch(2, 0, 1).status == "partial_success"  # one duplicate was skipped
+    assert batch(1, 0, 1).status == "failed"
+    assert batch(2, 0, 0).status == "completed"  # both rows were duplicates
+
+
+def test_import_history_timestamp_is_explicit_utc_when_sqlite_returns_naive():
+    from datetime import datetime, timezone
+    from backend.app.schemas.ingestion import ImportBatchRead
+
+    batch = ImportBatchRead(
+        id=1, filename="audit.csv", file_hash="a" * 64, total_rows=1,
+        accepted_rows=1, rejected_rows=0, data_source="csv_upload",
+        is_synthetic=False, created_at=datetime(2026, 10, 25, 7, 19, 58),
+    )
+
+    assert batch.created_at.tzinfo is timezone.utc
+    assert batch.created_at.isoformat() == "2026-10-25T07:19:58+00:00"

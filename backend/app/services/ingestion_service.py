@@ -249,10 +249,8 @@ class CsvIngestionService:
         self.db.commit()
 
         status = "completed"
-        if errors and not accepted_observations:
-            status = "failed"
-        elif errors and accepted_observations:
-            status = "partial_success"
+        if errors:
+            status = "partial_success" if accepted_observations or duplicate_count else "failed"
 
         msg = (
             f"Ingestion {status}: {len(accepted_observations)} accepted, "

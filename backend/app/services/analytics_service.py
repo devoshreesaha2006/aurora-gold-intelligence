@@ -660,7 +660,14 @@ class RelativeValueAnalyticsService:
                 else:
                     severity = "low"
 
-                event_id = f"EVT-{pt.trade_date.strftime('%Y%m%d')}-{leg_a[:3]}{leg_b[:3]}-{idx+1:03d}"
+                # Keep the full canonical pair in the identity. The former
+                # three-character abbreviations collided for GOLD* contracts
+                # (for example GOLDTEN-GOLDPETAL and GOLDTEN-GOLDGUINEA both
+                # became GOLGOL), causing the detective UI to overwrite events.
+                event_id = (
+                    f"EVT-{pt.trade_date.strftime('%Y%m%d')}-"
+                    f"{leg_a}-{leg_b}-{idx+1:03d}"
+                )
 
                 caveats = []
                 if is_exp:

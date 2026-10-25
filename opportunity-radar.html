@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AURORA — Opportunity Radar | MCX Gold RV Platform</title>
+  <title>AURORA ΓÇö Opportunity Radar | MCX Gold RV Platform</title>
   
   <!-- Google Fonts: Orbitron, Inter, JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
 
   <style>
     /* ==========================================================================
-       AURORA DESIGN SYSTEM — NAVY / GOLD / CLAYMORPHISM / GLASSMORPHISM / 3D
+       AURORA DESIGN SYSTEM ΓÇö NAVY / GOLD / CLAYMORPHISM / GLASSMORPHISM / 3D
        ========================================================================== */
     :root {
       --bg-dark: #060b18;
@@ -494,7 +494,7 @@
       font-weight: 600;
     }
 
-    /* Ticker Pill — scrollable pill, never causes page overflow */
+    /* Ticker Pill ΓÇö scrollable pill, never causes page overflow */
     .market-ticker-bar {
       display: flex;
       align-items: center;
@@ -2278,7 +2278,7 @@
             <span style="font-weight: 600; color: #FFF;">
             <span class="status-dot-pulse"></span> Provider status pending
           </span>
-          <span class="mono" style="color: var(--text-muted); font-size: 0.74rem;">—</span>
+          <span class="mono" style="color: var(--text-muted); font-size: 0.74rem;">ΓÇö</span>
         </div>
         <p style="color: var(--text-muted); font-size: 0.7rem;">No verified live provider is connected.</p>
         
@@ -2313,10 +2313,10 @@
 
       <!-- Latest backend observation ticker (not a real-time feed) -->
       <div class="market-ticker-bar">
-        <div class="ticker-item" data-market-symbol="GOLDM"><span class="ticker-name">GOLDM · latest close:</span><span class="ticker-price">—</span></div>
-        <div class="ticker-item" data-market-symbol="GOLDTEN"><span class="ticker-name">GOLDTEN · latest close:</span><span class="ticker-price">—</span></div>
-        <div class="ticker-item" data-market-symbol="GOLDGUINEA"><span class="ticker-name">GOLDGUINEA · latest close:</span><span class="ticker-price">—</span></div>
-        <div class="ticker-item" data-market-symbol="GOLDPETAL"><span class="ticker-name">GOLDPETAL · latest close:</span><span class="ticker-price">—</span></div>
+        <div class="ticker-item" data-market-symbol="GOLDM"><span class="ticker-name">GOLDM ┬╖ latest close:</span><span class="ticker-price">ΓÇö</span></div>
+        <div class="ticker-item" data-market-symbol="GOLDTEN"><span class="ticker-name">GOLDTEN ┬╖ latest close:</span><span class="ticker-price">ΓÇö</span></div>
+        <div class="ticker-item" data-market-symbol="GOLDGUINEA"><span class="ticker-name">GOLDGUINEA ┬╖ latest close:</span><span class="ticker-price">ΓÇö</span></div>
+        <div class="ticker-item" data-market-symbol="GOLDPETAL"><span class="ticker-name">GOLDPETAL ┬╖ latest close:</span><span class="ticker-price">ΓÇö</span></div>
       </div>
 
       <!-- Header Tools -->
@@ -2329,7 +2329,7 @@
         </button>
         <div class="tool-icon-btn" title="Active Anomaly Alerts">
           <i class="fa-solid fa-bell"></i>
-          <span class="badge-count">—</span>
+          <span class="badge-count">ΓÇö</span>
         </div>
         <div class="clay-chip" style="font-family: var(--font-mono); color: var(--gold-bright);">
           <i class="fa-regular fa-clock"></i>
@@ -2369,10 +2369,10 @@
             <span class="filter-label"><i class="fa-solid fa-triangle-exclamation"></i> Severity:</span>
             <select class="filter-select" id="severityFilter">
               <option value="all" selected>All Severities</option>
-              <option value="critical">Critical (≥ 2.0σ)</option>
-              <option value="high">High (1.5σ - 2.0σ)</option>
-              <option value="medium">Medium (1.0σ - 1.5σ)</option>
-              <option value="low">Low (&lt; 1.0σ)</option>
+              <option value="critical">Critical (ΓëÑ 2.0╧â)</option>
+              <option value="high">High (1.5╧â - 2.0╧â)</option>
+              <option value="medium">Medium (1.0╧â - 1.5╧â)</option>
+              <option value="low">Low (&lt; 1.0╧â)</option>
             </select>
           </div>
 
@@ -2428,7 +2428,7 @@
                 <i class="fa-solid fa-satellite" style="color: var(--gold-light);"></i>
                 Pairwise Anomaly Radar
               </h3>
-              <p>Spread deviation intensity across all 6 contract combinations (0 – 100 Scale)</p>
+              <p>Spread deviation intensity across all 6 contract combinations (0 ΓÇô 100 Scale)</p>
             </div>
             
             <div class="radar-legend-chips">
@@ -2472,30 +2472,30 @@
               <span class="stat-badge-pulse">
                 <i class="fa-solid fa-bolt"></i> <span id="radarClassification">Loading analytics</span>
               </span>
-              <span class="mono" id="radarSnapshotDate" style="font-size: 0.72rem; color: var(--text-muted);">As of —</span>
+              <span class="mono" id="radarSnapshotDate" style="font-size: 0.72rem; color: var(--text-muted);">As of ΓÇö</span>
             </div>
 
             <div>
-              <div class="headline-pair-title">Waiting for backend data…</div>
+              <div class="headline-pair-title">Waiting for backend dataΓÇª</div>
               <div id="radarSelectionFilterNotice" class="radar-selection-filter-notice" role="status" hidden></div>
               <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
-                Normalized Spread Divergence: <span class="mono" id="radarHeroSpread" style="color: var(--gold-bright); font-weight: 700;">—</span>
+                Normalized Spread Divergence: <span class="mono" id="radarHeroSpread" style="color: var(--gold-bright); font-weight: 700;">ΓÇö</span>
               </div>
             </div>
 
             <div class="headline-metrics-row">
               <div class="headline-metric-cell">
                 <div class="label">Z-Score</div>
-                <div class="value" style="color: #FF7685;">—</div>
+                <div class="value" style="color: #FF7685;">ΓÇö</div>
               </div>
               <div class="headline-metric-cell">
                 <div class="label">Historical %ile</div>
-                <div class="value">—</div>
+                <div class="value">ΓÇö</div>
               </div>
               <div class="headline-metric-cell">
-                <div class="label" title="Relative ranking heuristic (0-100), not execution probability">Opportunity Score (0–100)</div>
-                <div class="value">—</div>
-                <div style="font-size: 0.62rem; color: var(--text-muted); margin-top: 2px;">Rank index · not win %</div>
+                <div class="label" title="Relative ranking heuristic (0-100), not execution probability">Opportunity Score (0ΓÇô100)</div>
+                <div class="value">ΓÇö</div>
+                <div style="font-size: 0.62rem; color: var(--text-muted); margin-top: 2px;">Rank index ┬╖ not win %</div>
               </div>
             </div>
 
@@ -2512,7 +2512,7 @@
           <!-- Pairwise Spread Deviation Heatmap Matrix -->
           <div class="glass-panel pairwise-matrix-card">
             <div class="matrix-title">
-              <span><i class="fa-solid fa-table-cells" style="margin-right: 6px;"></i> Pairwise Spread Matrix (₹ / 10g)</span>
+              <span><i class="fa-solid fa-table-cells" style="margin-right: 6px;"></i> Pairwise Spread Matrix (Γé╣ / 10g)</span>
               <span class="mono" style="font-size: 0.7rem; color: var(--text-muted);">Z-Score Coded</span>
             </div>
             
@@ -2530,29 +2530,29 @@
                 <tr>
                   <th style="color: var(--gold-light);">GOLDM</th>
                   <td class="cell-self">-</td>
-                  <td class="cell-unavailable">—</td>
-                  <td class="cell-unavailable">—</td>
-                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">ΓÇö</td>
+                  <td class="cell-unavailable">ΓÇö</td>
+                  <td class="cell-unavailable">ΓÇö</td>
                 </tr>
                 <tr>
                   <th style="color: var(--gold-light);">GOLDTEN</th>
-                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">ΓÇö</td>
                   <td class="cell-self">-</td>
-                  <td class="cell-unavailable">—</td>
-                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">ΓÇö</td>
+                  <td class="cell-unavailable">ΓÇö</td>
                 </tr>
                 <tr>
                   <th style="color: var(--gold-light);">G-GUINEA</th>
-                  <td class="cell-unavailable">—</td>
-                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">ΓÇö</td>
+                  <td class="cell-unavailable">ΓÇö</td>
                   <td class="cell-self">-</td>
-                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">ΓÇö</td>
                 </tr>
                 <tr>
                   <th style="color: var(--gold-light);">G-PETAL</th>
-                  <td class="cell-unavailable">—</td>
-                  <td class="cell-unavailable">—</td>
-                  <td class="cell-unavailable">—</td>
+                  <td class="cell-unavailable">ΓÇö</td>
+                  <td class="cell-unavailable">ΓÇö</td>
+                  <td class="cell-unavailable">ΓÇö</td>
                   <td class="cell-self">-</td>
                 </tr>
               </tbody>
@@ -2560,7 +2560,7 @@
 
             <div style="margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--text-muted);">
               <span><i class="fa-solid fa-circle-info"></i> Click cell to highlight pair</span>
-              <span class="mono">995 Fine-Gold Basis (₹/10g)</span>
+              <span class="mono">995 Fine-Gold Basis (Γé╣/10g)</span>
             </div>
           </div>
 
@@ -2581,7 +2581,7 @@
           </div>
 
           <div style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">
-            One card per canonical pair · historical snapshots, not live quotes
+            One card per canonical pair ┬╖ historical snapshots, not live quotes
           </div>
         </div>
 
@@ -2594,17 +2594,17 @@
                 <i class="fa-solid fa-radiation"></i> AWAITING BACKEND DATA
               </span>
               
-              <div class="confidence-radial-box" title="Opportunity score (0–100 heuristic ranking, not win probability)">
+              <div class="confidence-radial-box" title="Opportunity score (0ΓÇô100 heuristic ranking, not win probability)">
                 <div class="radial-svg-wrap">
                   <svg viewBox="0 0 36 36">
                     <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
                     <circle class="circle-val circle-val-critical" cx="18" cy="18" r="14" stroke-dasharray="0, 100" stroke-dashoffset="0"></circle>
                   </svg>
-                  <span class="radial-text">—</span>
+                  <span class="radial-text">ΓÇö</span>
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0–100)</span>
-                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--gold-bright);">—</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0ΓÇô100)</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--gold-bright);">ΓÇö</span>
                 </div>
               </div>
             </div>
@@ -2614,7 +2614,7 @@
               <div class="pair-symbols">
                 <span>GOLDM vs GOLDPETAL</span>
                 <span class="pair-direction-tag">
-                  <i class="fa-solid fa-arrow-trend-up"></i> —
+                  <i class="fa-solid fa-arrow-trend-up"></i> ΓÇö
                 </span>
               </div>
               <div class="pair-specs-sub">
@@ -2628,25 +2628,25 @@
               <div class="stat-claycell highlight-cell">
                 <div class="stat-lbl">Normalized Spread</div>
                 <div class="stat-num">
-                  — <span class="stat-subtext">/ 10g</span>
+                  ΓÇö <span class="stat-subtext">/ 10g</span>
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Z-Score Deviation</div>
                 <div class="stat-num" style="color: #FF7685;">
-                  —
+                  ΓÇö
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Hist. Percentile</div>
                 <div class="stat-num">
-                  —
+                  ΓÇö
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Anomaly Duration</div>
                 <div class="stat-num">
-                  —
+                  ΓÇö
                 </div>
               </div>
             </div>
@@ -2655,15 +2655,15 @@
             <div class="card-validations-row">
               <div class="validation-badge">
                 <span class="v-name">Volume Conf.</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
               <div class="validation-badge">
                 <span class="v-name">Liquidity</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
               <div class="validation-badge" title="Cost validation is populated from backend analytics">
                 <span class="v-name">Cost Filter</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
             </div>
 
@@ -2676,7 +2676,7 @@
             <!-- Footer Action -->
             <div class="card-footer-actions">
               <button class="clay-btn card-investigate-btn" onclick="openInvestigationModal('GOLDM-GOLDPETAL')" disabled>
-                Investigate →
+                Investigate ΓåÆ
               </button>
               <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDPETAL to active tracker')" disabled>
                 <i class="fa-regular fa-bookmark"></i>
@@ -2691,17 +2691,17 @@
                 <i class="fa-solid fa-triangle-exclamation"></i> AWAITING BACKEND DATA
               </span>
               
-              <div class="confidence-radial-box" title="Opportunity score (0–100 heuristic ranking, not win probability)">
+              <div class="confidence-radial-box" title="Opportunity score (0ΓÇô100 heuristic ranking, not win probability)">
                 <div class="radial-svg-wrap">
                   <svg viewBox="0 0 36 36">
                     <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
                     <circle class="circle-val circle-val-high" cx="18" cy="18" r="14" stroke-dasharray="0, 100" stroke-dashoffset="0"></circle>
                   </svg>
-                  <span class="radial-text">—</span>
+                  <span class="radial-text">ΓÇö</span>
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0–100)</span>
-                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--high-amber);">—</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0ΓÇô100)</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--high-amber);">ΓÇö</span>
                 </div>
               </div>
             </div>
@@ -2711,7 +2711,7 @@
               <div class="pair-symbols">
                 <span>GOLDGUINEA vs GOLDTEN</span>
                 <span class="pair-direction-tag">
-                  <i class="fa-solid fa-arrow-trend-up"></i> —
+                  <i class="fa-solid fa-arrow-trend-up"></i> ΓÇö
                 </span>
               </div>
               <div class="pair-specs-sub">
@@ -2725,25 +2725,25 @@
               <div class="stat-claycell highlight-cell">
                 <div class="stat-lbl">Normalized Spread</div>
                 <div class="stat-num">
-                  — <span class="stat-subtext">/ 10g</span>
+                  ΓÇö <span class="stat-subtext">/ 10g</span>
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Z-Score Deviation</div>
                 <div class="stat-num" style="color: var(--high-amber);">
-                  —
+                  ΓÇö
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Hist. Percentile</div>
                 <div class="stat-num">
-                  —
+                  ΓÇö
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Anomaly Duration</div>
                 <div class="stat-num">
-                  —
+                  ΓÇö
                 </div>
               </div>
             </div>
@@ -2752,15 +2752,15 @@
             <div class="card-validations-row">
               <div class="validation-badge">
                 <span class="v-name">Volume Conf.</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
               <div class="validation-badge" title="Liquidity validation is populated from backend analytics">
                 <span class="v-name">Liquidity</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
               <div class="validation-badge" title="Cost validation is populated from backend analytics">
                 <span class="v-name">Cost Filter</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
             </div>
 
@@ -2773,7 +2773,7 @@
             <!-- Footer Action -->
             <div class="card-footer-actions">
               <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #FFA502 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDGUINEA-GOLDTEN')" disabled>
-                Investigate →
+                Investigate ΓåÆ
               </button>
               <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDGUINEA-GOLDTEN to active tracker')" disabled>
                 <i class="fa-regular fa-bookmark"></i>
@@ -2788,17 +2788,17 @@
                 <i class="fa-solid fa-circle-dot"></i> AWAITING BACKEND DATA
               </span>
               
-              <div class="confidence-radial-box" title="Opportunity score (0–100 heuristic ranking, not win probability)">
+              <div class="confidence-radial-box" title="Opportunity score (0ΓÇô100 heuristic ranking, not win probability)">
                 <div class="radial-svg-wrap">
                   <svg viewBox="0 0 36 36">
                     <circle class="circle-bg" cx="18" cy="18" r="14"></circle>
                     <circle class="circle-val circle-val-medium" cx="18" cy="18" r="14" stroke-dasharray="0, 100" stroke-dashoffset="0"></circle>
                   </svg>
-                  <span class="radial-text">—</span>
+                  <span class="radial-text">ΓÇö</span>
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0–100)</span>
-                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--cyan-accent);">—</span>
+                  <span style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Rank Score (0ΓÇô100)</span>
+                  <span style="font-size: 0.72rem; font-weight: 700; color: var(--cyan-accent);">ΓÇö</span>
                 </div>
               </div>
             </div>
@@ -2808,7 +2808,7 @@
               <div class="pair-symbols">
                 <span>GOLDM vs GOLDTEN</span>
                 <span class="pair-direction-tag">
-                  <i class="fa-solid fa-arrow-trend-up"></i> —
+                  <i class="fa-solid fa-arrow-trend-up"></i> ΓÇö
                 </span>
               </div>
               <div class="pair-specs-sub">
@@ -2822,25 +2822,25 @@
               <div class="stat-claycell highlight-cell">
                 <div class="stat-lbl">Normalized Spread</div>
                 <div class="stat-num">
-                  — <span class="stat-subtext">/ 10g</span>
+                  ΓÇö <span class="stat-subtext">/ 10g</span>
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Z-Score Deviation</div>
                 <div class="stat-num" style="color: var(--cyan-accent);">
-                  —
+                  ΓÇö
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Hist. Percentile</div>
                 <div class="stat-num">
-                  —
+                  ΓÇö
                 </div>
               </div>
               <div class="stat-claycell">
                 <div class="stat-lbl">Anomaly Duration</div>
                 <div class="stat-num">
-                  —
+                  ΓÇö
                 </div>
               </div>
             </div>
@@ -2849,15 +2849,15 @@
             <div class="card-validations-row">
               <div class="validation-badge">
                 <span class="v-name">Volume Conf.</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
               <div class="validation-badge">
                 <span class="v-name">Liquidity</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
-              <div class="validation-badge" title="High volume contracts with friction of only ₹14.20/10g">
+              <div class="validation-badge" title="High volume contracts with friction of only Γé╣14.20/10g">
                 <span class="v-name">Cost Filter</span>
-                <span class="v-status">—</span>
+                <span class="v-status">ΓÇö</span>
               </div>
             </div>
 
@@ -2870,7 +2870,7 @@
             <!-- Footer Action -->
             <div class="card-footer-actions">
               <button class="clay-btn card-investigate-btn" style="background: linear-gradient(135deg, #38BDF8 0%, #D4AF37 100%);" onclick="openInvestigationModal('GOLDM-GOLDTEN')" disabled>
-                Investigate →
+                Investigate ΓåÆ
               </button>
               <button class="clay-btn-outline" style="padding: 10px 14px;" onclick="triggerToast('Pinning GOLDM-GOLDTEN to active tracker')" disabled>
                 <i class="fa-regular fa-bookmark"></i>
@@ -2892,11 +2892,11 @@
               <i class="fa-solid fa-filter-circle-dollar" style="color: var(--gold-light);"></i>
               Opportunity vs Trap Filter
             </h3>
-            <p>5-Stage Quantitative Validation Engine — Filtering phantom arbitrage from actionable edge</p>
+            <p>5-Stage Quantitative Validation Engine ΓÇö Filtering phantom arbitrage from actionable edge</p>
           </div>
 
           <div class="pipeline-summary-pill" id="radarPipelineSummary">
-            <span>Waiting for backend pairs</span> → <span>Liquidity —</span> → <span>Expiry —</span> → <span>Cost —</span> → <span>Investigate —</span>
+            <span>Waiting for backend pairs</span> ΓåÆ <span>Liquidity ΓÇö</span> ΓåÆ <span>Expiry ΓÇö</span> ΓåÆ <span>Cost ΓÇö</span> ΓåÆ <span>Investigate ΓÇö</span>
           </div>
         </div>
 
@@ -2911,7 +2911,7 @@
             </div>
             <div class="node-title">Matched Snapshot</div>
             <div class="node-count-badge">
-              <span id="radarStageObserved">— pairs</span>
+              <span id="radarStageObserved">ΓÇö pairs</span>
               <span style="font-size: 0.7rem; color: var(--cyan-accent); font-weight: 500;">Backend</span>
             </div>
             <div class="node-desc">Pairs with synchronized backend spread observations on the shared evaluation date.</div>
@@ -2927,8 +2927,8 @@
             </div>
             <div class="node-title">Liquidity Check</div>
             <div class="node-count-badge">
-              <span id="radarStageLiquidity">— Passed</span>
-              <span class="node-drop-tag" id="radarStageLiquidityDrop">— flagged</span>
+              <span id="radarStageLiquidity">ΓÇö Passed</span>
+              <span class="node-drop-tag" id="radarStageLiquidityDrop">ΓÇö flagged</span>
             </div>
             <div class="node-desc">Uses the backend liquidity flags derived from observed volume and open interest.</div>
           </div>
@@ -2943,8 +2943,8 @@
             </div>
             <div class="node-title">Expiry Check</div>
             <div class="node-count-badge">
-              <span id="radarStageExpiry">— Passed</span>
-              <span class="node-drop-tag" id="radarStageExpiryDrop">— flagged</span>
+              <span id="radarStageExpiry">ΓÇö Passed</span>
+              <span class="node-drop-tag" id="radarStageExpiryDrop">ΓÇö flagged</span>
             </div>
             <div class="node-desc">Uses expiry dates matched across both contracts and the configured expiry-risk window.</div>
           </div>
@@ -2959,8 +2959,8 @@
             </div>
             <div class="node-title">Cost Analysis</div>
             <div class="node-count-badge">
-              <span id="radarStageCost">— Passed</span>
-              <span class="node-drop-tag" id="radarStageCostDrop">— flagged</span>
+              <span id="radarStageCost">ΓÇö Passed</span>
+              <span class="node-drop-tag" id="radarStageCostDrop">ΓÇö flagged</span>
             </div>
             <div class="node-desc">Compares gross spread edge with the configured round-trip cost hurdle.</div>
           </div>
@@ -2977,7 +2977,7 @@
             </div>
             <div class="node-title" style="color: var(--gold-bright);">Active Investigations</div>
             <div class="node-count-badge" style="color: #FFF;">
-              <span id="radarStageInvestigate">— Investigate</span>
+              <span id="radarStageInvestigate">ΓÇö Investigate</span>
               <span style="font-size: 0.72rem; color: var(--gold-bright);">Backend classification</span>
             </div>
             <div class="node-desc">Backend Investigate classifications; this is not an execution guarantee.</div>
@@ -2997,7 +2997,7 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
               <span>1. Matched Snapshots</span>
-                <span id="radarFunnelObserved">—</span>
+                <span id="radarFunnelObserved">ΓÇö</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-1"></div></div>
             </div>
@@ -3005,7 +3005,7 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
                 <span>2. Liquidity Filter</span>
-                <span id="radarFunnelLiquidity">—</span>
+                <span id="radarFunnelLiquidity">ΓÇö</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-2"></div></div>
             </div>
@@ -3013,7 +3013,7 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
                 <span>3. Expiry Calendar</span>
-                <span id="radarFunnelExpiry">—</span>
+                <span id="radarFunnelExpiry">ΓÇö</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-3"></div></div>
             </div>
@@ -3021,7 +3021,7 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
                 <span>4. Transaction Friction</span>
-                <span id="radarFunnelCost">—</span>
+                <span id="radarFunnelCost">ΓÇö</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-4"></div></div>
             </div>
@@ -3029,7 +3029,7 @@
             <div class="funnel-bar-item">
               <div class="funnel-bar-labels">
                 <span style="color: var(--gold-bright); font-weight: 700;">5. Investigate</span>
-                <span id="radarFunnelInvestigate" style="color: var(--gold-bright); font-weight: 700;">—</span>
+                <span id="radarFunnelInvestigate" style="color: var(--gold-bright); font-weight: 700;">ΓÇö</span>
               </div>
               <div class="funnel-track"><div class="funnel-fill funnel-5"></div></div>
             </div>
@@ -3048,7 +3048,7 @@
             <div class="trap-item-row" id="radarRowLiquidity">
               <i class="fa-solid fa-ban trap-item-icon"></i>
               <div class="trap-item-details">
-                <div class="t-title">Liquidity filter · <span id="radarDiagnosticLiquidity">—</span></div>
+                <div class="t-title">Liquidity filter ┬╖ <span id="radarDiagnosticLiquidity">ΓÇö</span></div>
                 <div class="t-desc">Backend liquidity flags are based on the available matched volume and open-interest observations.</div>
               </div>
               <span id="radarTagLiquidity" class="trap-tag-eliminated trap-tag-pass">Stage 2: 0 Flagged (Pass)</span>
@@ -3057,7 +3057,7 @@
             <div class="trap-item-row" id="radarRowExpiry">
               <i class="fa-solid fa-calendar-xmark trap-item-icon"></i>
               <div class="trap-item-details">
-                <div class="t-title">Expiry proximity · <span id="radarDiagnosticExpiry">—</span></div>
+                <div class="t-title">Expiry proximity ┬╖ <span id="radarDiagnosticExpiry">ΓÇö</span></div>
                 <div class="t-desc">Expiry-risk flags use the matched contract expiry dates and the backend's configured risk window.</div>
               </div>
               <span id="radarTagExpiry" class="trap-tag-eliminated trap-tag-pass">Stage 3: 0 Flagged (Pass)</span>
@@ -3066,7 +3066,7 @@
             <div class="trap-item-row" id="radarRowCost">
               <i class="fa-solid fa-receipt trap-item-icon"></i>
               <div class="trap-item-details">
-                <div class="t-title">Transaction-cost filter · <span id="radarDiagnosticCost">—</span></div>
+                <div class="t-title">Transaction-cost filter ┬╖ <span id="radarDiagnosticCost">ΓÇö</span></div>
                 <div class="t-desc">Cost-blocked flags compare the calculated spread edge with the configured transaction-cost hurdle.</div>
               </div>
               <span id="radarTagCost" class="trap-tag-eliminated trap-tag-pass">Stage 4: 0 Flagged (Pass)</span>
@@ -3075,7 +3075,7 @@
             <div class="trap-item-row marginal" id="radarRowNoSignal">
               <i class="fa-solid fa-clock-rotate-left" style="color: var(--high-amber);"></i>
               <div class="trap-item-details">
-                <div class="t-title">Pairs without a current signal · <span id="radarDiagnosticNoSignal">—</span></div>
+                <div class="t-title">Pairs without a current signal ┬╖ <span id="radarDiagnosticNoSignal">ΓÇö</span></div>
                 <div class="t-desc">No signal is not an execution recommendation; it reports only the backend pair classification.</div>
               </div>
               <span id="radarTagNoSignal" class="trap-tag-eliminated trap-tag-neutral">Stage 5: 3 Inactive</span>
@@ -3129,28 +3129,28 @@
         <!-- Statistical Parameters Bar (6 claymorphic chips) -->
         <div class="stats-parameter-strip" id="statsParameterStrip">
           <div class="param-chip">
-            <div class="p-name">Historical Mean (μ) <i class="fa-solid fa-calculator"></i></div>
-          <div class="p-val" id="stat-mean">—</div>
+            <div class="p-name">Historical Mean (╬╝) <i class="fa-solid fa-calculator"></i></div>
+          <div class="p-val" id="stat-mean">ΓÇö</div>
           </div>
           <div class="param-chip">
-            <div class="p-name">Std Deviation (1σ) <i class="fa-solid fa-arrows-split-up-and-left"></i></div>
-          <div class="p-val" id="stat-sigma">—</div>
+            <div class="p-name">Std Deviation (1╧â) <i class="fa-solid fa-arrows-split-up-and-left"></i></div>
+          <div class="p-val" id="stat-sigma">ΓÇö</div>
           </div>
           <div class="param-chip">
             <div class="p-name">Median Spread <i class="fa-solid fa-grip-lines"></i></div>
-          <div class="p-val" id="stat-median">—</div>
+          <div class="p-val" id="stat-median">ΓÇö</div>
           </div>
           <div class="param-chip">
             <div class="p-name">Kurtosis (Fat Tails) <i class="fa-solid fa-mountain"></i></div>
-          <div class="p-val" id="stat-kurtosis">—</div>
+          <div class="p-val" id="stat-kurtosis">ΓÇö</div>
           </div>
           <div class="param-chip">
             <div class="p-name">Skewness <i class="fa-solid fa-bezier-curve"></i></div>
-          <div class="p-val" id="stat-skewness">—</div>
+          <div class="p-val" id="stat-skewness">ΓÇö</div>
           </div>
           <div class="param-chip highlight-gold">
             <div class="p-name">Distribution-Window Z-Score <i class="fa-solid fa-flag"></i></div>
-          <div class="p-val" id="stat-current-z">—</div>
+          <div class="p-val" id="stat-current-z">ΓÇö</div>
           </div>
         </div>
 
@@ -3158,15 +3158,15 @@
         <div class="dist-zones-legend">
           <div class="zone-indicator-pill">
             <span class="zone-color-swatch" style="background: rgba(56, 189, 248, 0.4); border: 1px solid var(--cyan-accent);"></span>
-            <span>Normal Equilibrium Zone (±1σ | 68.2%)</span>
+            <span>Normal Equilibrium Zone (┬▒1╧â | 68.2%)</span>
           </div>
           <div class="zone-indicator-pill">
             <span class="zone-color-swatch" style="background: rgba(255, 165, 2, 0.45); border: 1px solid var(--high-amber);"></span>
-            <span>Attention Zone (±1σ to ±2σ | 27.2%)</span>
+            <span>Attention Zone (┬▒1╧â to ┬▒2╧â | 27.2%)</span>
           </div>
           <div class="zone-indicator-pill">
             <span class="zone-color-swatch" style="background: rgba(255, 71, 87, 0.55); border: 1px solid var(--critical-red);"></span>
-            <span>Statistical Anomaly Zone (&gt; ±2σ | 4.2%)</span>
+            <span>Statistical Anomaly Zone (&gt; ┬▒2╧â | 4.2%)</span>
           </div>
           <div class="zone-indicator-pill">
             <span class="zone-color-swatch" style="background: var(--gold-bright); border: 1px solid #FFF; box-shadow: 0 0 8px var(--gold-glow);"></span>
@@ -3333,7 +3333,7 @@
             pointBackgroundColor: '#c9a650'
           },
           {
-            label: 'Cost-Hurdle Boundary (σ-scaled)',
+            label: 'Cost-Hurdle Boundary (╧â-scaled)',
             data: frictionBoundaryData,
             fill: false,
             borderColor: 'rgba(255, 71, 87, 0.45)',
@@ -3439,7 +3439,7 @@
               bodyFont: { family: 'JetBrains Mono', size: 10 },
               padding: 6,
               callbacks: {
-                label: function(ctx) { return `Spread: ₹${ctx.raw}`; }
+                label: function(ctx) { return `Spread: Γé╣${ctx.raw}`; }
               }
             }
           },
@@ -3595,7 +3595,7 @@
     function clearDistributionPlaceholders() {
       ['stat-mean', 'stat-sigma', 'stat-median', 'stat-kurtosis', 'stat-skewness', 'stat-current-z'].forEach(id => {
         const element = document.getElementById(id);
-        if (element) element.textContent = '—';
+        if (element) element.textContent = 'ΓÇö';
       });
       if (distributionChart) {
         distributionChart.data.labels = [];
@@ -3605,7 +3605,7 @@
     }
 
     function selectPairFromMatrix(pairName) {
-      // Preserve the row→column direction selected in the matrix. The
+      // Preserve the rowΓåÆcolumn direction selected in the matrix. The
       // backend accepts either orientation and returns signed spread stats.
       switchDistributionPair(pairName);
       
@@ -3755,7 +3755,7 @@
       if (empty) empty.hidden = visibleCount > 0;
       if (typeof window.AURORA_SYNC_RADAR_FILTER_STATE === 'function') window.AURORA_SYNC_RADAR_FILTER_STATE();
 
-      triggerToast(`Filters applied: ${selectedStatus} · ${selectedSeverity}`);
+      triggerToast(`Filters applied: ${selectedStatus} ┬╖ ${selectedSeverity}`);
     }
 
     statusFilter.addEventListener('change', applySignalFilters);
@@ -3791,11 +3791,11 @@
       const body = modal.querySelector('.modal-body');
       const requestId = ++investigationRequestId;
       const snapshot = window.AURORA_RADAR_PAIRS?.[pairKey];
-      const escape = value => String(value ?? '—').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
-      const value = number => number == null ? '—' : Number(number).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+      const escape = value => String(value ?? 'ΓÇö').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+      const value = number => number == null ? 'ΓÇö' : Number(number).toLocaleString('en-IN', { maximumFractionDigits: 2 });
       title.textContent = `Deep-Dive Investigation: ${pairKey.replace('-', ' vs ')}`;
-      sub.textContent = snapshot ? 'Loading the matched backend observations…' : 'No current backend pair result is available.';
-      if (body) body.innerHTML = '<div class="modal-breakdown-card">Loading matched backend observations…</div>';
+      sub.textContent = snapshot ? 'Loading the matched backend observationsΓÇª' : 'No current backend pair result is available.';
+      if (body) body.innerHTML = '<div class="modal-breakdown-card">Loading matched backend observationsΓÇª</div>';
       modal.classList.add('open');
       document.body.style.overflow = 'hidden';
       if (!snapshot || snapshot.spread == null || !body) return;
@@ -3807,28 +3807,28 @@
           const points = json?.success && Array.isArray(json?.data?.data_points) ? json.data.data_points : [];
           const point = points.find(item => item.trade_date === snapshot.trade_date && item.expiry_date === snapshot.expiry_date);
           if (!point) throw new Error('No same-date, same-expiry pair point was returned');
-          sub.textContent = `${snapshot.classification} · ${point.trade_date} · shared expiry ${point.expiry_date}`;
+          sub.textContent = `${snapshot.classification} ┬╖ ${point.trade_date} ┬╖ shared expiry ${point.expiry_date}`;
           body.innerHTML = `
             <div class="modal-details-grid">
-              <div class="modal-breakdown-card"><h4>${escape(snapshot.leg_a)} · matched observation</h4>
-                <div class="modal-kv-row"><span class="k">Quoted close</span><span class="v">₹${value(point.raw_price_a)}</span></div>
-                <div class="modal-kv-row"><span class="k">Normalized close / 10g</span><span class="v">₹${value(point.price_a)}</span></div>
-                <div class="modal-kv-row"><span class="k">Volume · open interest</span><span class="v">${value(point.volume_a)} · ${value(point.open_interest_a)}</span></div>
+              <div class="modal-breakdown-card"><h4>${escape(snapshot.leg_a)} ┬╖ matched observation</h4>
+                <div class="modal-kv-row"><span class="k">Quoted close</span><span class="v">Γé╣${value(point.raw_price_a)}</span></div>
+                <div class="modal-kv-row"><span class="k">Normalized close / 10g</span><span class="v">Γé╣${value(point.price_a)}</span></div>
+                <div class="modal-kv-row"><span class="k">Volume ┬╖ open interest</span><span class="v">${value(point.volume_a)} ┬╖ ${value(point.open_interest_a)}</span></div>
                 <div class="modal-kv-row"><span class="k">Days to expiry</span><span class="v">${value(point.dte_a)}</span></div>
               </div>
-              <div class="modal-breakdown-card"><h4>${escape(snapshot.leg_b)} · matched observation</h4>
-                <div class="modal-kv-row"><span class="k">Quoted close</span><span class="v">₹${value(point.raw_price_b)}</span></div>
-                <div class="modal-kv-row"><span class="k">Normalized close / 10g</span><span class="v">₹${value(point.price_b)}</span></div>
-                <div class="modal-kv-row"><span class="k">Volume · open interest</span><span class="v">${value(point.volume_b)} · ${value(point.open_interest_b)}</span></div>
+              <div class="modal-breakdown-card"><h4>${escape(snapshot.leg_b)} ┬╖ matched observation</h4>
+                <div class="modal-kv-row"><span class="k">Quoted close</span><span class="v">Γé╣${value(point.raw_price_b)}</span></div>
+                <div class="modal-kv-row"><span class="k">Normalized close / 10g</span><span class="v">Γé╣${value(point.price_b)}</span></div>
+                <div class="modal-kv-row"><span class="k">Volume ┬╖ open interest</span><span class="v">${value(point.volume_b)} ┬╖ ${value(point.open_interest_b)}</span></div>
                 <div class="modal-kv-row"><span class="k">Days to expiry</span><span class="v">${value(point.dte_b)}</span></div>
               </div>
             </div>
-            <div class="modal-breakdown-card"><h4>Backend relative-value result · ₹/10g</h4>
-              <div class="modal-kv-row"><span class="k">Spread</span><span class="v">₹${value(snapshot.spread)}</span></div>
-              <div class="modal-kv-row"><span class="k">Rolling Z-score · percentile</span><span class="v">${snapshot.z_score == null ? '—' : `${value(snapshot.z_score)}σ`} · ${snapshot.percentile_rank == null ? '—' : `${value(snapshot.percentile_rank)}%`}</span></div>
-              <div class="modal-kv-row"><span class="k">Opportunity score · trap risk</span><span class="v">${value(snapshot.opportunity_score)} · ${value(snapshot.trap_risk_score)}</span></div>
-              <div class="modal-kv-row"><span class="k">Estimated cost hurdle</span><span class="v">₹${value(snapshot.estimated_cost_hurdle)}</span></div>
-              <div class="modal-kv-row"><span class="k">Gross edge · net edge</span><span class="v">₹${value(snapshot.gross_edge)} · ₹${value(snapshot.net_edge)}</span></div>
+            <div class="modal-breakdown-card"><h4>Backend relative-value result ┬╖ Γé╣/10g</h4>
+              <div class="modal-kv-row"><span class="k">Spread</span><span class="v">Γé╣${value(snapshot.spread)}</span></div>
+              <div class="modal-kv-row"><span class="k">Rolling Z-score ┬╖ percentile</span><span class="v">${snapshot.z_score == null ? 'ΓÇö' : `${value(snapshot.z_score)}╧â`} ┬╖ ${snapshot.percentile_rank == null ? 'ΓÇö' : `${value(snapshot.percentile_rank)}%`}</span></div>
+              <div class="modal-kv-row"><span class="k">Opportunity score ┬╖ trap risk</span><span class="v">${value(snapshot.opportunity_score)} ┬╖ ${value(snapshot.trap_risk_score)}</span></div>
+              <div class="modal-kv-row"><span class="k">Estimated cost hurdle</span><span class="v">Γé╣${value(snapshot.estimated_cost_hurdle)}</span></div>
+              <div class="modal-kv-row"><span class="k">Gross edge ┬╖ net edge</span><span class="v">Γé╣${value(snapshot.gross_edge)} ┬╖ Γé╣${value(snapshot.net_edge)}</span></div>
               <p>${escape(snapshot.reason)}</p>
             </div>`;
         })

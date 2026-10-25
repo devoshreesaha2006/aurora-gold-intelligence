@@ -164,6 +164,23 @@ def test_empty_radar_wedge_is_css_sweep_not_a_plotted_data_value():
     assert "p.spread != null && p.deviation_intensity != null" in pipeline
 
 
+def test_radar_does_not_fill_polygon_across_unavailable_pairs_or_claim_realtime_history():
+    page = (ROOT / "opportunity-radar.html").read_text(encoding="utf-8")
+
+    assert "fill: false,\n            spanGaps: false," in page
+    assert "Latest Historical Spread Position" in page
+    assert "Current Real-Time Spread Position" not in page
+
+
+def test_import_history_displays_utc_timestamps_in_india_time():
+    pipeline = (ROOT / "aurora-pipeline.js").read_text(encoding="utf-8")
+
+    assert "formatImportTimestamp(b.created_at)" in pipeline
+    assert "timeZone: 'Asia/Kolkata'" in pipeline
+    assert "`${value}Z`" in pipeline
+    assert "IST`" in pipeline
+
+
 def test_dashboard_live_label_requires_a_connected_verified_feed():
     dashboard = (ROOT / "dashboard-live.js").read_text(encoding="utf-8")
 
@@ -194,7 +211,7 @@ def test_radar_cards_and_dashboard_kpis_do_not_seed_snapshot_values():
 
     assert "function updateRadarSignalCards(pairs)" in pipeline
     assert "const displayPair = orientRadarPair(pair, card.getAttribute('data-pair'))" in pipeline
-    assert "if (scoreNote) scoreNote.textContent = score == null ? 'Unavailable' : `${score}%`" in pipeline
+    assert "if (scoreNote) scoreNote.textContent = score == null ? 'Unavailable' : `${score}/100`" in pipeline
     assert "displayPair.trap_risk_score == null ? 'unavailable'" in pipeline
     for sample in ("3 Live", "CRITICAL DISLOCATION", "-1.29", "12.5%", "60%"):
         assert sample not in page
@@ -279,3 +296,38 @@ def test_opportunity_radar_historical_freshness_indicator():
     assert "Historical CSV Data (Not Live)" in pipeline
     assert "Stale Data Warning: Latest observation is" in pipeline
     assert "Feed is UNAVAILABLE. Spreads reflect historical settlement, not live execution opportunities." in pipeline
+
+
+def test_radar_unavailable_pairs_cannot_look_actionable_and_zero_spread_is_neutral():
+    pipeline = (ROOT / "aurora-pipeline.js").read_text(encoding="utf-8")
+    page = (ROOT / "opportunity-radar.html").read_text(encoding="utf-8")
+
+    assert "if (unavailableAction) unavailableAction.textContent = 'Unavailable'" in pipeline
+    assert "button.removeAttribute('onclick')" in pipeline
+    assert "button.title = reason" in pipeline
+    assert "deepDive.removeAttribute('onclick')" in pipeline
+    assert "watch.removeAttribute('onclick')" in pipeline
+    assert "card.querySelectorAll('button').forEach(button => {" in pipeline
+    assert "At normalized parity" in pipeline
+    assert ".card-footer-actions button:disabled" in page
+
+
+def test_detective_score_and_signal_confidence_use_separate_backend_fields():
+    pipeline = (ROOT / "aurora-pipeline.js").read_text(encoding="utf-8")
+
+    assert "scoreVal.textContent = Math.round(evt.opportunity_score)" in pipeline
+    assert "signalConfidence.textContent = 'Not returned by backend'" in pipeline
+    assert "signalConfidenceLabel.textContent = 'SIGNAL CONFIDENCE'" in pipeline
+    assert "const verdictMeta = document.querySelectorAll('.verdict-header-row > div:last-child > div')" not in pipeline
+    assert "Leg A − Leg B" in pipeline
+    assert "At normalized parity (Leg A − Leg B)" in pipeline
+
+
+def test_backtest_history_badge_and_empty_result_are_scoped_and_provenance_safe():
+    page_script = (ROOT / "backtesting-lab.js").read_text(encoding="utf-8")
+
+    assert "data.is_live_connected === true && String(data.feed_status).toUpperCase() === 'LIVE'" in page_script
+    assert "Imported history · unverified" in page_script
+    assert "stored observations across all sources" in page_script
+    assert "Source: unavailable for this run" in page_script
+    assert "No result; see the explanation in the summary below." in page_script
