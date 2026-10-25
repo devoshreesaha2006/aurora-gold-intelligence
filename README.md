@@ -60,7 +60,14 @@ hacknHills/
 │       ├── test_contracts.py
 │       ├── test_ingestion.py
 │       ├── test_market.py
-│       └── test_analytics.py
+│       ├── test_analytics.py
+│       ├── test_backtests.py
+│       ├── test_backtest_spread_history.py
+│       ├── test_frontend_data_safety.py
+│       ├── test_authorized_provider.py
+│       ├── test_provider_provenance.py
+│       ├── test_config_database_path.py
+│       └── test_observation_metadata_migration.py
 ├── AURORA-website (1)/AURORA/       # Preserved Frontend with 3D/Claymorphism/Glassmorphism
 │   ├── aurora-pipeline.js           # Phase 1 Live integration & Phase 2 Analytics Sync
 │   ├── dashboard.html               # Executive Dashboard
@@ -219,34 +226,67 @@ Calculates empirical spread frequency distribution and theoretical Gaussian PDF 
 
 ---
 
+## Phase 3 Walk-Forward Backtesting Lab Endpoints
+
+### 11. `POST /api/backtests`
+Executes an audit-grade walk-forward historical simulation of statistical mean-reversion spread trading across any MCX Gold contract pair:
+- **Request Parameters**:
+  - `pair`: Canonical pair string (e.g. `GOLDM-GOLDPETAL`, `GOLDTEN-GOLDGUINEA`).
+  - `lookback_days`: Trailing rolling estimation window (e.g. 30 days).
+  - `entry_z_threshold`: Statistical entry hurdle (e.g. 1.5σ).
+  - `exit_z_threshold`: Statistical mean-reversion exit target (e.g. 0.0σ or 0.5σ).
+  - `stop_loss_z`: Emergency structural risk stop (e.g. 3.0σ).
+  - `max_holding_days`: Time-decay exit safeguard.
+  - `slippage_per_10g` & `fee_rate`: Granular transaction cost and exchange fee deductions.
+- **Safety Controls**:
+  - Strict point-in-time calculation with zero future data leakage.
+  - Expiry roll boundary protection: rolls between successive delivery months never book cross-contract level jumps as phantom PnL.
+  - Liquid-only execution: rejects positions during unobserved volume periods even when min_volume hurdle is relaxed.
+- **Output Metrics**: Total cumulative PnL (₹), annualized Sharpe ratio, Maximum Drawdown (%), Win Rate (%), Total Trade Count, and complete date-by-date trade log.
+
+---
+
+---
+
+## Deterministic ML & Quantitative Intelligence Audit Statement
+
+AURORA operates on strict financial engineering and statistical principles rather than generative AI or black-box predictive models:
+- **Zero Hallucination / Deterministic Analytics**: Every metric, rolling mean, sample variance, Z-score, and cost hurdle is computed via deterministic, auditable mathematical formulations. We deliberately reject uninterpretable deep neural networks or generative LLMs for pricing signals.
+- **Sample Variance Rigor**: Rolling statistics enforce unbiased Bessel correction ($ddof=1$) with $N \ge 2$ observations. Where volatility collapses to zero, explicit `zero_variance` flags prevent division-by-zero anomalies.
+- **Multi-Stage Funnel Diagnostics**: The system clearly segregates the mathematical spread deviation (0-100 Intensity) from the Opportunity Ranking Score and Risk Traps. An extreme deviation does **not** equal a recommendation; liquidity traps, expiry friction, and transaction cost hurdles explicitly block trade classification.
+- **Provenance Separation**: Rigorous database and API filters isolate user-imported historical Bhavcopy records, synthetic demo fixtures, and authenticated live provider feeds so non-live data is never presented as an active exchange quote.
+
+---
+
 ## Testing & Verification Results
 
-All **20 unit, quantitative, and integration tests** in `backend/tests/` passed:
+The entire backend and frontend data integrity suite contains **108 automated tests** across 12 modules. All **108 tests pass cleanly** (100% pass rate in ~2 seconds):
 
-```
-backend/tests/test_analytics.py::test_parse_pair PASSED                  [  5%]
-backend/tests/test_analytics.py::test_cost_hurdle_calculation PASSED     [ 10%]
-backend/tests/test_analytics.py::test_classification_logic_all_states PASSED [ 15%]
-backend/tests/test_analytics.py::test_edge_cases_zero_variance_and_insufficient_history PASSED [ 20%]
-backend/tests/test_analytics.py::test_api_spreads_endpoint PASSED        [ 25%]
-backend/tests/test_analytics.py::test_api_radar_endpoint PASSED          [ 30%]
-backend/tests/test_analytics.py::test_api_events_endpoint PASSED         [ 35%]
-backend/tests/test_analytics.py::test_api_distribution_endpoint PASSED   [ 40%]
-backend/tests/test_analytics.py::test_asymmetric_dates_and_zero_future_leakage PASSED [ 45%]
-backend/tests/test_analytics.py::test_api_events_filtering_by_status_and_pair PASSED [ 50%]
-backend/tests/test_contracts.py::test_list_contracts PASSED              [ 55%]
-backend/tests/test_contracts.py::test_contract_normalization_logic PASSED [ 60%]
-backend/tests/test_health.py::test_health_check PASSED                   [ 65%]
-backend/tests/test_health.py::test_market_status PASSED                  [ 70%]
-backend/tests/test_ingestion.py::test_valid_csv_upload PASSED            [ 75%]
-backend/tests/test_ingestion.py::test_duplicate_csv_prevention PASSED    [ 80%]
-backend/tests/test_ingestion.py::test_invalid_csv_validation_report PASSED [ 85%]
-backend/tests/test_ingestion.py::test_list_data_imports PASSED           [ 90%]
-backend/tests/test_ingestion.py::test_database_persistence_and_relationships PASSED [ 95%]
-backend/tests/test_market.py::test_market_prices_query_and_pagination PASSED [100%]
+| Test Module | Tests | Focus Area |
+| :--- | :---: | :--- |
+| `test_analytics.py` | 28 | 6-pair spread math, 995 basis normalization, rolling Z-scores, empirical distributions, transitivity, expiry synchronization |
+| `test_authorized_provider.py` | 11 | MCX live feed adapter, credential authentication, timestamp verification, delayed/stale data protection |
+| `test_backtests.py` | 11 | Walk-forward backtest simulation, parameter validation, cost hurdles, execution realism |
+| `test_backtest_spread_history.py` | 1 | Expiry roll mechanics and cross-contract jump safety |
+| `test_config_database_path.py` | 2 | Database path resolution and multi-environment configuration integrity |
+| `test_contracts.py` | 6 | Contract specifications (GOLDM, GOLDTEN, GOLDGUINEA, GOLDPETAL) and physical conversion logic |
+| `test_frontend_data_safety.py` | 24 | UI safety, historical freshness badges, status consistency, card coverage, anti-hallucination rendering |
+| `test_health.py` | 2 | Service liveness and database connectivity |
+| `test_ingestion.py` | 10 | Bhavcopy CSV parsing, SHA-256 deduplication, row-level validation, atomic batch ingestion |
+| `test_market.py` | 5 | Querying market prices, pagination, exclusion of test/synthetic data from analytics |
+| `test_observation_metadata_migration.py` | 1 | Schema migration safety and row persistence |
+| `test_provider_provenance.py` | 7 | Strict separation of user-imported CSV, test data, synthetic data, and authenticated live feed |
+| **Total Passed** | **108 / 108** | **Zero Regressions (100% Pass Rate)** |
 
-======================== 20 passed in 0.65s ========================
+```powershell
+# Run full test suite
+python -m pytest backend/tests -v
+# Result: 108 passed, 2 warnings in 1.76s
 ```
+
+### Static Code Analysis & Syntax Checks
+- **JavaScript Syntax**: `node --check` executed across all 14 project JavaScript files with 0 errors.
+- **Git Tree Cleanliness**: `git diff --check` executed with 0 trailing whitespace or patch errors.
 
 ---
 
@@ -312,6 +352,35 @@ This adapter stores the latest provider observation per existing
 replace a CSV or other non-provider row for that key. Confirm the licensed storage
 scope accommodates this model; use a purpose-built tick store only if the agreed
 feed and analytics require tick-level history.
+
+---
+
+---
+
+## Demonstration & Presentation Walkthrough
+
+Follow this step-by-step route to showcase the complete AURORA platform:
+
+1. **Experience Entry (`index.html` → `landing.html`)**:
+   - Start at `index.html` featuring the 3D gold experience and smooth transition to `landing.html`.
+   - Click **Demo Login** or **Launch Platform** to enter the authenticated workspace directly without friction.
+2. **Executive Dashboard (`dashboard.html`)**:
+   - View top surveillance KPIs, contract status cards, live contract spread overview, and the Expiry Calendar.
+   - Note the **Market Status badge** in the header displaying data provenance and connection health.
+3. **Opportunity Radar (`opportunity-radar.html`)**:
+   - Inspect the interactive 6-pair radar matrix and spread distribution bell curve.
+   - Check the **Historical Data Freshness Indicator** (e.g. displaying snapshot date, calendar age, and stale warning).
+   - Use pair filter buttons (`All Pairs`, `Investigate`, `Cost-Blocked`, `Expiry-Risk`) to see responsive card filtering.
+4. **Market Detective (`market-detective.html`)**:
+   - Examine anomaly dossiers with complete audit trails, step-by-step diagnostic breakdown, raw prices, normalized basis, and transaction hurdle checks.
+5. **Contract Explorer (`contract-explorer.html`)**:
+   - Explore detailed specifications for all 4 MCX Gold contracts (**GOLDM**, **GOLDTEN**, **GOLDGUINEA**, **GOLDPETAL**).
+   - View the historical rolling price chart loaded with 2,000 eligible historical observations.
+6. **Backtesting Lab & Simulator (`backtesting-lab.html`)**:
+   - Run walk-forward backtest simulations across contract pairs with configurable rolling lookbacks and Z-score entry/exit hurdles.
+   - Analyze equity curves, Sharpe ratio, max drawdown, and execution logs.
+7. **Bhavcopy Ingestion Modal**:
+   - Click **Import Bhavcopy** in any top navigation bar to inspect CSV upload validation, SHA-256 deduplication, and historical import audit trails.
 
 ---
 

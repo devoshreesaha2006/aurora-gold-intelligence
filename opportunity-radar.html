@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -1440,6 +1440,12 @@
       align-items: center;
       gap: 10px;
       margin-top: 4px;
+    }
+
+    .card-footer-actions button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      filter: grayscale(1);
     }
 
     .card-investigate-btn {
@@ -3170,7 +3176,7 @@
           </div>
           <div class="zone-indicator-pill">
             <span class="zone-color-swatch" style="background: var(--gold-bright); border: 1px solid #FFF; box-shadow: 0 0 8px var(--gold-glow);"></span>
-            <span>Current Real-Time Spread Position</span>
+            <span>Latest Historical Spread Position</span>
           </div>
         </div>
       </section>
@@ -3308,9 +3314,10 @@
         labels: radarLabels,
         datasets: [
           {
-            label: 'Current Spread Deviation',
+            label: 'Latest Historical Spread Position',
             data: currentDeviationData,
-            fill: true,
+            fill: false,
+            spanGaps: false,
             backgroundColor: 'rgba(212, 175, 55, 0.22)',
             borderColor: '#FEE180',
             borderWidth: 2.5,
