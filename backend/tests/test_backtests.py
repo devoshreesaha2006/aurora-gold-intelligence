@@ -346,7 +346,7 @@ def test_backtest_excludes_non_finite_or_non_positive_normalized_prices(db_sessi
         MarketObservation(
             symbol="GOLDM", trade_date=day, expiry_date=expiry,
             close_price=62500, normalized_price_per_gram=6250,
-            normalized_price_10g_basis=float("nan"),
+            normalized_price_10g_basis=float("inf"),
             data_source="csv_upload", is_synthetic=False,
         ),
         MarketObservation(
