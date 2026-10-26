@@ -176,3 +176,48 @@ def test_forecast_exposes_all_baselines_without_removing_trend_compatibility(cli
         assert step["baseline_price_10g"] == step["model_forecasts"]["linear_trend"]
         assert set(step["model_forecasts"]) == {"naive_last_value", "rolling_mean_5", "linear_trend"}
         assert all(value > 0 for value in step["model_forecasts"].values())
+
+
+
+def test_forecast_stability_compares_separate_chronological_windows(client, db_session):
+    from datetime import timedelta
+
+    start = date(2026, 1, 1)
+    for index in range(100):
+        # Deterministic, non-flat history for chronological diagnostics only.
+        price = 100000 + index * 75 + (index % 7) * 90
+        db_session.add(MarketObservation(
+            symbol="GOLDM", trade_date=start + timedelta(days=index),
+            expiry_date=date(2026, 12, 31), close_price=price,
+            normalized_price_per_gram=price / 10,
+            normalized_price_10g_basis=price, volume=100 + index,
+            open_interest=200 + index, data_source="csv_upload",
+            is_synthetic=False, is_provider_verified=False,
+        ))
+    db_session.commit()
+
+    response = client.get(
+        "/api/research/forecast-stability?symbol=GOLDM&horizon=5&lookback=30&min_train=20&windows=3&folds_per_window=10"
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "evaluated"
+    assert len(payload["windows"]) == 3
+    assert payload["test_folds"] == 30
+    assert payload["first_target_date"] < payload["last_target_date"]
+    assert payload["overall_lowest_mae_model"] in {"naive_last_value", "rolling_mean_5", "linear_trend"}
+    assert payload["stability_verdict"] in {"consistent", "window_dependent"}
+    assert sum(payload["window_wins"].values()) == 3
+    assert all(window["first_target_date"] <= window["last_target_date"] for window in payload["windows"])
+    assert all(window["winner"] in {"naive_last_value", "rolling_mean_5", "linear_trend"} for window in payload["windows"])
+
+
+def test_forecast_stability_reports_insufficient_history(client):
+    response = client.get(
+        "/api/research/forecast-stability?symbol=GOLDM&horizon=5&windows=3&folds_per_window=10"
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "insufficient_history"
+    assert payload["windows"] == []
+    assert payload["minimum_required"] > payload["observations"]
