@@ -117,7 +117,22 @@ class SmartAPIProvider(MarketDataProvider):
                 if not contract:
                     continue
                 ts_raw = q.get("exchFeedTime") or q.get("exchTradeTime")
-                ts = datetime.strptime(str(ts_raw), "%d-%b-%Y %H:%M:%S").replace(tzinfo=IST).astimezone(timezone.utc)
+                ts_text = str(ts_raw or "").strip()
+                ts = None
+                # SmartAPI payload examples may use different timestamp formats.
+                for fmt in ("%d-%b-%Y %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+                    try:
+                        ts = datetime.strptime(ts_text, fmt).replace(tzinfo=IST).astimezone(timezone.utc)
+                        break
+                    except ValueError:
+                        continue
+                if ts is None:
+                    try:
+                        parsed = datetime.fromisoformat(ts_text.replace("Z", "+00:00"))
+                        ts = parsed.replace(tzinfo=IST) if parsed.tzinfo is None else parsed
+                        ts = ts.astimezone(timezone.utc)
+                    except ValueError as exc:
+                        raise ValueError("Invalid SmartAPI exchange timestamp") from exc
                 age = (now - ts).total_seconds()
                 if age < -120 or age > self._max_age:
                     continue
