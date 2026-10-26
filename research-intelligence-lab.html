@@ -48,7 +48,7 @@ async function loadPublicMacro(){
  try{
   const results=await Promise.all(series.map(async item=>{
    const url='https://fred.stlouisfed.org/graph/fredgraph.csv?id='+encodeURIComponent(item.id);
-   const response=await fetch(url,{headers:{Accept:'text/csv'}});
+   const response=await fetch(url,{headers:{Accept:'text/csv'},signal:AbortSignal.timeout(4500)});
    if(!response.ok)throw new Error(item.id+' returned HTTP '+response.status);
    const csv=await response.text();
    const lines=csv.trim().split(/\r?\n/);
@@ -79,12 +79,13 @@ async function loadPublicMacro(){
   $('healthMessage').textContent='Cannot reach '+API+'. '+e.message+' Start/restart FastAPI in the repository root, then retry.';
  }
  $('retryApiBtn').disabled=false;$('retryApiBtn').textContent='Retry API connection';
- await loadPublicMacro();
+ // Start macro and calendar requests concurrently; neither panel should hold up the other.
+ void loadPublicMacro();
  try{
   const today=new Date();const to=new Date(today);to.setDate(to.getDate()+14);
   const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const url='https://www.financecalendar.com/wp-json/fc/v1/calendar?'+new URLSearchParams({from:iso(today),to:iso(to),country:'US,GB,IN',tz:'Asia/Kolkata',limit:'100'});
-  const res=await fetch(url,{headers:{Accept:'application/json'}});
+  const res=await fetch(url,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(4500)});
   if(!res.ok)throw new Error('Finance Calendar returned HTTP '+res.status);
   const d=await res.json();const events=Array.isArray(d.events)?d.events:[];
   const label=e=>e.title||e.name||e.series_name||'Economic release';
