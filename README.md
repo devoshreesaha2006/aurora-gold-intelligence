@@ -420,17 +420,14 @@ The branch `feat/research-intelligence-suite` adds a responsive local research p
 - `GET /api/research/event-calendar`: explicit unavailable state until a verified event-calendar source is configured.
 - `GET /api/research/export-observations`: CSV export of eligible stored historical observations.
 
-### Open the new page locally (Windows PowerShell)
+### Open the Research Suite inside the main AURORA app (Windows PowerShell)
 
-Keep the backend running in one terminal. In a second PowerShell terminal, from the repository root, run:
+The Research Suite is a page in the same frontend as the dashboard, Opportunity Radar, and Backtesting Lab. **Do not start a second frontend server on port 3001.** From the repository root, run one frontend server on port 3000 (if it is not already running):
 
 ```powershell
-python -m http.server 3001 --bind 127.0.0.1
+python -m http.server 3000 --bind 127.0.0.1
 ```
 
-Open `http://127.0.0.1:3001/research-intelligence-lab.html`.
+Open `http://127.0.0.1:3000/research-intelligence-lab.html`, or use the **Research Intelligence** link in the main app navigation. Open Backtesting Lab using its relative in-app link; no hardcoded port is required.
 
-The existing frontend folder remains unchanged. The Research Intelligence page calls the local API at
-`http://127.0.0.1:8000/api` by default. It does not invent macro values, calendar dates, live prices,
-or ML confidence. Macro/news and calendar panels stay explicitly unavailable until an approved data
-source is integrated. Use the existing Backtesting Lab for historical strategy simulations and metrics.
+Keep the FastAPI backend running separately on port 8000, since the frontend and API are different processes. The Research Suite calls the same local API at `http://127.0.0.1:8000/api` by default. Macro/news and calendar panels remain explicitly unavailable until verified providers are configured; no live prices or ML confidence are fabricated.
