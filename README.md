@@ -15,6 +15,19 @@ AURORA transforms Multi Commodity Exchange of India (MCX) gold commodity futures
 
 ---
 
+## Research controls added for the commodity-derivatives problem statement
+
+- **Expiry-aware term structure:** `GET /api/research/term-structure?pair=GOLDM-GOLDPETAL` returns synchronized curves for every shared explicit expiry, per-expiry spread changes, front-contract same-expiry changes, and front-expiry switch gaps. Switch gaps are diagnostics, **not** strategy P&L. Missing sessions are never forward-filled.
+- **Benchmark attribution in backtests:** `POST /api/backtests/run` now includes first-to-last normalized-price returns and capital-scaled P&L for each outright leg, plus strategy-minus-benchmark return differences. These are transparent passive references, not exposure-matched alpha, and they do not replace an outright-gold risk attribution study.
+- **Pair direction:** the term-structure endpoint accepts either pair order and keeps spread/price labels consistent.
+- **Regression coverage:** tests cover expiry-switch separation, reverse pair direction, and benchmark-attribution fields.
+
+### What these controls do not claim
+
+The current system still requires a verified historical MCX bhavcopy source and independent validation of effective-dated specifications, tender/expiry eligibility, and transaction-cost assumptions. An authorized, authenticated live feed is not available merely because the API is running. The existing backtest is chronological and uses trailing observations with next-settlement execution proxies; a dedicated expanding-window out-of-sample fold report, executable bid/ask fills, exposure-matched benchmark attribution, and a fully validated carry/roll-down model must not be claimed until independently implemented and tested. Missing data should remain unavailable / No Signal rather than being filled or synthesized.
+
+---
+
 ## Architecture Overview (Phase 1 & Phase 2)
 
 ```
