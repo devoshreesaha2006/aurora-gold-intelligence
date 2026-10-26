@@ -10,7 +10,7 @@
   #auroraIntelOverlay{position:fixed;inset:0;z-index:12001;background:rgba(3,6,18,.78);backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:18px}
   #auroraIntelOverlay.open{display:flex}
   #auroraIntelPanel{width:min(1040px,100%);max-height:min(88vh,900px);overflow:auto;background:#0b1024;color:#e8edf6;border:1px solid rgba(240,185,11,.32);border-radius:18px;box-shadow:0 25px 90px #000a;font:13px/1.5 Inter,Arial,sans-serif}
-  #auroraIntelPanel *{box-sizing:border-box}
+  #auroraIntelPanel *{box-sizing:border-box}#auroraIntelPanel [hidden]{display:none!important}
   .ai-head{position:sticky;top:0;background:#0b1024f2;border-bottom:1px solid #ffffff18;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:2}
   .ai-eyebrow{color:#f0b90b;font-size:10px;letter-spacing:1.8px;font-weight:800}.ai-title{font-size:20px;font-weight:800;margin:3px 0}.ai-muted{color:#9ca9bf;font-size:12px}
   .ai-close{border:1px solid #ffffff25;background:#151c32;color:#fff;border-radius:9px;padding:8px 12px;cursor:pointer}
@@ -90,7 +90,7 @@
       output.innerHTML='<div class="ai-results">'+[metric('Status',data.status),metric('Data mode',data.data_mode),metric('Observations',data.observations),metric('Training / holdout',String(data.training_observations)+' / '+String(data.holdout_observations)),metric('Training period',(data.training_start||'Unavailable')+' → '+(data.training_end||'Unavailable')),metric('Holdout period',(data.holdout_start||'Unavailable')+' → '+(data.holdout_end||'Unavailable')),metric('Selected threshold',data.entry_threshold_selected_from_training),metric('Holdout signals',data.holdout_signal_count),metric('Gross P&L (₹)',data.gross_pnl),metric('Estimated costs (₹)',data.estimated_costs),metric('Net P&L (₹)',data.net_pnl),metric('Win rate (%)',data.win_rate_pct)].join('')+'</div>'+section('Holdout outcomes',table(['Signal date','Next date','Z-score','Gross P&L','Costs','Net P&L'],(data.holdout_outcomes||[]).map(x=>[x.date,x.next_date,x.z_score,x.gross_pnl,x.estimated_costs,x.net_pnl])))+section('Methodology & limitations',list(data.assumptions||[]));
     }
   }
-  function num(name){const el=form.elements[name];return el&&!el.closest('[hidden]')&&el.value!==''?Number(el.value):undefined;}
+  function num(name){const els=[...form.querySelectorAll('[name="'+name+'"]')];const el=els.find(node=>!node.closest('[hidden]'));return el&&el.value!==''?Number(el.value):undefined;}
   form.addEventListener('submit',async e=>{
     e.preventDefault();if(busy)return;
     const pair=form.elements.pair.value, windowDays=num('window');
