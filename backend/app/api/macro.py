@@ -6,6 +6,7 @@ import csv
 import io
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 from fastapi import APIRouter, HTTPException
 
@@ -21,7 +22,7 @@ SERIES = [
 def _fetch_series(item):
     url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=" + item["id"]
     request = urllib.request.Request(url, headers={"Accept": "text/csv", "User-Agent": "AURORA-Research/1.0"})
-    with urllib.request.urlopen(request, timeout=6) as response:
+    with urllib.request.urlopen(request, timeout=4) as response:
         content = response.read().decode("utf-8-sig")
     rows = csv.DictReader(io.StringIO(content))
     observations = []
@@ -53,11 +54,15 @@ def public_macro_observations():
     """Return the latest available FRED observations through the backend."""
     data = []
     errors = []
-    for item in SERIES:
-        try:
-            data.append(_fetch_series(item))
-        except (urllib.error.URLError, TimeoutError, OSError, UnicodeError, ValueError) as exc:
-            errors.append({"id": item["id"], "message": str(exc) or exc.__class__.__name__})
+    with ThreadPoolExecutor(max_workers=len(SERIES)) as pool:
+        futures = {pool.submit(_fetch_series, item): item for item in SERIES}
+        for future in as_completed(futures):
+            item = futures[future]
+            try:
+                data.append(future.result())
+            except (urllib.error.URLError, TimeoutError, OSError, UnicodeError, ValueError) as exc:
+                errors.append({"id": item["id"], "message": str(exc) or exc.__class__.__name__})
+    data.sort(key=lambda item: next(i for i, source in enumerate(SERIES) if source["id"] == item["id"]))
     if not data:
         detail = "; ".join(item["id"] + ": " + item["message"] for item in errors)
         raise HTTPException(status_code=502, detail="FRED macro feed unavailable from backend. " + detail)
