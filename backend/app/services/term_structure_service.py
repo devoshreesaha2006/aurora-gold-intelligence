@@ -44,8 +44,8 @@ class TermStructureService:
                 "expiry_date": a.expiry_date.isoformat(),
                 "days_to_expiry": (a.expiry_date - a.trade_date).days,
                 "spread": round(spread, 6),
-                "price_a": round(a.normalized_price_10g_basis, 6),
-                "price_b": round(b.normalized_price_10g_basis, 6),
+                "price_a": round(b.normalized_price_10g_basis if inverted else a.normalized_price_10g_basis, 6),
+                "price_b": round(a.normalized_price_10g_basis if inverted else b.normalized_price_10g_basis, 6),
                 "volume_a": a.volume if a.volume_observed else None,
                 "volume_b": b.volume if b.volume_observed else None,
                 "open_interest_a": a.open_interest if a.open_interest_observed else None,
@@ -58,13 +58,18 @@ class TermStructureService:
         previous_front = None
         for day in sorted(by_day):
             points = sorted(by_day[day], key=lambda p: p["expiry_date"])
+            current_expiry_spreads = {}
             for point in points:
                 prior = previous_spread_by_expiry.get(point["expiry_date"])
                 point["same_expiry_spread_change"] = round(point["spread"] - prior, 6) if prior is not None else None
-                previous_spread_by_expiry[point["expiry_date"]] = point["spread"]
+                current_expiry_spreads[point["expiry_date"]] = point["spread"]
             chosen = points[0]
             prior_front = previous_front
-            chosen["front_same_expiry_change"] = chosen["same_expiry_spread_change"]
+            chosen["front_same_expiry_change"] = (
+                chosen["same_expiry_spread_change"]
+                if prior_front is not None and prior_front["expiry_date"] == chosen["expiry_date"]
+                else None
+            )
             chosen["front_switch_gap"] = (
                 round(chosen["spread"] - prior_front["spread"], 6)
                 if prior_front is not None and prior_front["expiry_date"] != chosen["expiry_date"]
@@ -76,6 +81,7 @@ class TermStructureService:
             front.append(dict(chosen))
             curve.append({"trade_date": day.isoformat(), "contracts": points})
             previous_front = chosen
+            previous_spread_by_expiry = current_expiry_spreads
 
         roll_gaps = [p["front_switch_gap"] for p in front if p["front_switch_gap"] is not None]
         same_expiry_moves = [p["front_same_expiry_change"] for p in front if p["front_same_expiry_change"] is not None]
