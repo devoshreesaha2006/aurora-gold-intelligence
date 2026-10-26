@@ -67,15 +67,22 @@ def historical_forecast(
     rmse = float(np.sqrt(np.mean(residual ** 2)))
     last = float(y[-1])
     forecasts = []
+    naive = last
+    rolling_mean = float(np.mean(y[-min(5, len(y)):]))
     for step in range(1, horizon + 1):
-        predicted = float(intercept + slope * (len(y) - 1 + step))
-        # Descriptive residual band only; not a calibrated prediction interval.
+        trend = float(intercept + slope * (len(y) - 1 + step))
+        # Residual band remains descriptive only; not a calibrated prediction interval.
         forecasts.append({
             "step": step,
-            "baseline_price_10g": round(predicted, 2),
-            "baseline_change_pct": round((predicted / last - 1) * 100, 4) if last else None,
-            "descriptive_lower": round(predicted - 1.96 * rmse, 2),
-            "descriptive_upper": round(predicted + 1.96 * rmse, 2),
+            "baseline_price_10g": round(trend, 2),  # Backwards-compatible trend field.
+            "model_forecasts": {
+                "naive_last_value": round(naive, 2),
+                "rolling_mean_5": round(rolling_mean, 2),
+                "linear_trend": round(trend, 2),
+            },
+            "baseline_change_pct": round((trend / last - 1) * 100, 4) if last else None,
+            "descriptive_lower": round(trend - 1.96 * rmse, 2),
+            "descriptive_upper": round(trend + 1.96 * rmse, 2),
         })
     return {
         "status": "baseline_only", "symbol": symbol, "basis": "₹ per 10g, 995 fine-gold benchmark",

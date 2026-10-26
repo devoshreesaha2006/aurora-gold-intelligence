@@ -148,3 +148,31 @@ def test_forecast_horizon_validation_uses_future_target_without_leakage(client, 
     assert all(fold["target_date"] > fold["origin_date"] for fold in payload["folds"])
     assert all(fold["training_observations"] <= 30 for fold in payload["folds"])
     assert "only observations available at its origin" in payload["method"]
+
+
+
+def test_forecast_exposes_all_baselines_without_removing_trend_compatibility(client, db_session):
+    from datetime import timedelta
+
+    start = date(2026, 1, 1)
+    for index in range(45):
+        price = 100000 + index * 100 + (index % 4) * 12
+        db_session.add(MarketObservation(
+            symbol="GOLDM", trade_date=start + timedelta(days=index),
+            expiry_date=date(2026, 12, 31), close_price=price,
+            normalized_price_per_gram=price / 10,
+            normalized_price_10g_basis=price, volume=100 + index,
+            open_interest=200 + index, data_source="csv_upload",
+            is_synthetic=False, is_provider_verified=False,
+        ))
+    db_session.commit()
+
+    response = client.get("/api/research/forecast?symbol=GOLDM&lookback=30&horizon=3")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "baseline_only"
+    assert len(payload["forecast"]) == 3
+    for step in payload["forecast"]:
+        assert step["baseline_price_10g"] == step["model_forecasts"]["linear_trend"]
+        assert set(step["model_forecasts"]) == {"naive_last_value", "rolling_mean_5", "linear_trend"}
+        assert all(value > 0 for value in step["model_forecasts"].values())
