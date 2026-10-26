@@ -3202,7 +3202,37 @@
       </section>
 
 
-      <!-- Historical Pair Coverage: exact trade-date + expiry diagnostics -->
+<!-- Historical forecast diagnostics: intentionally separate from opportunity scoring -->
+      <section class="glass-panel pair-coverage-panel" id="radarForecastValidationPanel" style="margin-bottom:24px;">
+        <div class="pair-coverage-header">
+          <div>
+            <h3><i class="fa-solid fa-chart-line" style="color:var(--gold-light);margin-right:8px;"></i>Forecast Diagnostics</h3>
+            <p>Historical multi-step baseline comparison. This research output does not change Opportunity vs Trap scores or create a trade signal.</p>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:16px 0;">
+          <label style="display:grid;gap:6px;color:var(--text-secondary,#aaa);font-size:12px;">Contract
+            <select id="radarForecastSymbol" style="min-width:150px;padding:10px;border-radius:8px;"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select>
+          </label>
+          <label style="display:grid;gap:6px;color:var(--text-secondary,#aaa);font-size:12px;">Horizon (observations)
+            <input id="radarForecastHorizon" type="number" min="2" max="20" value="5" style="width:150px;padding:10px;border-radius:8px;">
+          </label>
+          <label style="display:grid;gap:6px;color:var(--text-secondary,#aaa);font-size:12px;">Recent test folds
+            <input id="radarForecastFolds" type="number" min="10" max="120" value="30" style="width:130px;padding:10px;border-radius:8px;">
+          </label>
+          <button class="clay-btn" id="runRadarForecastValidation" type="button"><i class="fa-solid fa-play"></i> Run validation</button>
+        </div>
+        <div id="radarForecastValidationStatus" role="status" style="padding:12px;border-radius:8px;background:rgba(255,255,255,.04);">Validation has not been run. Results use eligible stored history only.</div>
+        <div class="pair-coverage-table-wrap" id="radarForecastValidationResults" style="display:none;margin-top:14px;">
+          <table class="pair-coverage-table">
+            <thead><tr><th>Baseline</th><th>MAE (₹/10g)</th><th>RMSE (₹/10g)</th><th>MAPE</th></tr></thead>
+            <tbody id="radarForecastValidationRows"></tbody>
+          </table>
+        </div>
+        <p class="coverage-note">Lowest MAE is descriptive for this evaluation window only. Multi-step accuracy is not evidence of trading profitability; imported observations may not be exchange-verified.</p>
+      </section>
+
+            <!-- Historical Pair Coverage: exact trade-date + expiry diagnostics -->
       <section class="glass-panel pair-coverage-panel" id="pairCoveragePanel">
         <div class="pair-coverage-header">
           <div>
