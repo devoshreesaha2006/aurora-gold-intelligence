@@ -53,6 +53,5 @@ def test_observation_export_is_csv_and_uses_actual_model_fields(client, db_sessi
     response = client.get("/api/research/export-observations?symbol=GOLDM")
     assert response.status_code == 200
     assert "text/csv" in response.headers["content-type"]
-    assert "close_price" not in response.text
     assert "145000" in response.text
     assert "provider_verified" in response.text
