@@ -392,3 +392,132 @@ def forecast_horizon_validation(
         "folds": folds,
         "caveat": "This validates a fixed multi-observation horizon, not calendar-day accuracy or trading profitability. Eligible imported data may not be exchange-verified. Forecasts are research baselines, not investment advice.",
     }
+
+
+@router.get("/forecast-stability")
+def forecast_stability(
+    symbol: str = Query("GOLDM", pattern="^(GOLDM|GOLDTEN|GOLDGUINEA|GOLDPETAL)$"),
+    horizon: int = Query(5, ge=1, le=20, description="Eligible observations ahead"),
+    lookback: int = Query(60, ge=20, le=500, description="Maximum training observations per fold"),
+    min_train: int = Query(30, ge=20, le=500, description="Minimum training observations"),
+    windows: int = Query(3, ge=2, le=5, description="Number of chronological test windows"),
+    folds_per_window: int = Query(10, ge=5, le=30, description="Non-overlapping origins per window"),
+    db: Session = Depends(get_db),
+):
+    """Assess whether a baseline's MAE advantage repeats across chronological windows."""
+    rows = (
+        eligible_analytics_observations_query(db)
+        .filter(MarketObservation.symbol == symbol)
+        .order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc())
+        .all()
+    )
+    by_date = {}
+    for row in rows:
+        by_date.setdefault(row.trade_date, row)
+    history = [
+        (day, float(row.normalized_price_10g_basis))
+        for day, row in sorted(by_date.items())
+        if row.normalized_price_10g_basis is not None
+        and math.isfinite(float(row.normalized_price_10g_basis))
+        and float(row.normalized_price_10g_basis) > 0
+    ]
+    required = min_train + horizon + windows * folds_per_window
+    if len(history) < required:
+        return {
+            "status": "insufficient_history", "symbol": symbol, "horizon_observations": horizon,
+            "observations": len(history), "minimum_required": required, "windows": [],
+            "message": "Not enough eligible distinct dates for the requested separate chronological windows. Reduce folds/windows or import more eligible history.",
+            "caveat": "No winner or stability verdict is declared when the requested test windows cannot be evaluated.",
+        }
+
+    # Reserve separate, non-overlapping origin blocks at the end of history.
+    total_folds = windows * folds_per_window
+    first_origin = len(history) - horizon - total_folds
+    model_keys = ("naive_last_value", "rolling_mean_5", "linear_trend")
+
+    def predict_at_origin(origin):
+        train_start = max(0, origin - lookback + 1)
+        train = history[train_start:origin + 1]
+        if len(train) < min_train:
+            return None
+        y = np.asarray([price for _, price in train], dtype=float)
+        slope, intercept = np.polyfit(np.arange(len(y), dtype=float), y, 1)
+        actual_index = origin + horizon
+        actual = float(history[actual_index][1])
+        predictions = {
+            "naive_last_value": float(y[-1]),
+            "rolling_mean_5": float(np.mean(y[-min(5, len(y)):])),
+            "linear_trend": float(intercept + slope * (len(y) - 1 + horizon)),
+        }
+        return {
+            "origin_date": history[origin][0].isoformat(),
+            "target_date": history[actual_index][0].isoformat(),
+            "actual": actual,
+            "predictions": predictions,
+        }
+
+    def metrics_for(folds):
+        actual = np.asarray([fold["actual"] for fold in folds], dtype=float)
+        metrics = {}
+        for key in model_keys:
+            predicted = np.asarray([fold["predictions"][key] for fold in folds], dtype=float)
+            errors = predicted - actual
+            metrics[key] = {
+                "mae": round(float(np.mean(np.abs(errors))), 2),
+                "rmse": round(float(np.sqrt(np.mean(errors ** 2))), 2),
+                "mape_pct": round(float(np.mean(np.abs(errors / actual)) * 100), 4),
+            }
+        winner = min(model_keys, key=lambda key: metrics[key]["mae"])
+        return metrics, winner
+
+    window_results = []
+    all_folds = []
+    for window_index in range(windows):
+        start = first_origin + window_index * folds_per_window
+        block = [predict_at_origin(origin) for origin in range(start, start + folds_per_window)]
+        block = [fold for fold in block if fold is not None]
+        if len(block) != folds_per_window:
+            continue
+        metrics, winner = metrics_for(block)
+        window_results.append({
+            "window": window_index + 1,
+            "folds": len(block),
+            "first_target_date": block[0]["target_date"],
+            "last_target_date": block[-1]["target_date"],
+            "winner": winner,
+            "models": metrics,
+        })
+        all_folds.extend(block)
+
+    if len(window_results) < 2:
+        return {
+            "status": "insufficient_history", "symbol": symbol, "horizon_observations": horizon,
+            "observations": len(history), "minimum_required": required, "windows": window_results,
+            "message": "Fewer than two complete chronological windows could be evaluated.",
+            "caveat": "No stability verdict is declared with fewer than two complete windows.",
+        }
+
+    overall_metrics, overall_winner = metrics_for(all_folds)
+    win_counts = {key: sum(window["winner"] == key for window in window_results) for key in model_keys}
+    most_wins = max(win_counts.values())
+    consistent_threshold = math.ceil(len(window_results) * (2 / 3))
+    if most_wins >= consistent_threshold:
+        verdict = "consistent"
+        verdict_note = "The same baseline had the lowest MAE in at least two-thirds of the tested windows. This is historical repeatability, not a guarantee."
+    else:
+        verdict = "window_dependent"
+        verdict_note = "No baseline won at least two-thirds of the tested windows; the lowest-error model depends on the period tested."
+    return {
+        "status": "evaluated", "symbol": symbol, "horizon_observations": horizon,
+        "observations": len(history), "test_folds": len(all_folds),
+        "first_target_date": window_results[0]["first_target_date"],
+        "last_target_date": window_results[-1]["last_target_date"],
+        "method": "Separate chronological, non-overlapping test windows. Each prediction uses only eligible observations available at its origin; all models are evaluated at the same observation horizon.",
+        "overall_models": overall_metrics,
+        "overall_lowest_mae_model": overall_winner,
+        "window_wins": win_counts,
+        "stability_verdict": verdict,
+        "stability_note": verdict_note,
+        "windows": window_results,
+        "caveat": "Historical baseline diagnostics only. Windows are a limited sample and may be regime-dependent; this does not establish future accuracy, trading profitability, or investment suitability. Imported data may not be exchange-verified.",
+    }
