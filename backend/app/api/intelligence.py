@@ -113,6 +113,7 @@ def explain_opportunity(
     caveats.append("Opportunity and trap scores are heuristic rule-based indicators, not probabilities of profit.")
     return StandardResponse(success=True, message="Explainability assembled from the existing Radar calculation.", data={
         "pair": item.pair, "classification": item.classification, "reason": item.reason,
+        "evaluation_date": radar.evaluation_date,
         "trade_date": item.trade_date, "expiry_date": item.expiry_date,
         "opportunity_score": item.opportunity_score, "trap_risk_score": item.trap_risk_score,
         "spread": item.spread, "rolling_mean": item.rolling_mean, "z_score": item.z_score,
@@ -148,6 +149,7 @@ def what_if_scenario(request: ScenarioRequest, db: Session = Depends(get_db)):
         assumptions=[
             f"Assumes a spread move of {request.spread_move_pct}% of the absolute latest historical spread; direction is assumed favourable.",
             f"Holding period is a user-selected {request.holding_days} calendar day(s); no future observations are used.",
+            f"Entered costs: transaction ₹{request.transaction_cost_per_10g:.2f}/10g + slippage ₹{request.slippage_per_10g:.2f}/10g; round-trip per unit ₹{(request.transaction_cost_per_10g + request.slippage_per_10g) * 2:.2f}; total for {request.units} unit(s) ₹{costs:.2f}.",
             "Costs are charged as a round-trip per unit from the user-configured transaction-cost and slippage assumptions.",
             "P&L is a simplified normalized ₹ per 10g illustration; it excludes margin, taxes not represented in inputs, and contract-specific execution effects.",
             "This is not a forecast, recommendation, or executable quote."
