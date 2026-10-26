@@ -20,6 +20,7 @@ ASSUMPTIONS = [
     "Configured transaction cost and slippage are charged half on entry and half on exit per 10g unit.",
     "Only synchronized, non-synthetic observations from non-test imports are eligible; settlement fills are proxies, not executable quotes.",
     "P&L is only booked between consecutive sessions of the same expiry pair. If the nearest shared expiry changes while a position is open, the position is closed at the last settlement of the expiring pair (exit costs charged once); the level difference between the two contract pairs is never booked as P&L.",
+    "Passive benchmark returns use first-to-last normalized settlement price changes for each leg, scaled to starting capital; they are transparent reference comparisons, not exposure-matched alpha or executable investment returns.",
 ]
 
 
@@ -237,6 +238,16 @@ class BacktestService:
         wins = sum(trade.net_pnl for trade in trades if trade.net_pnl > 0)
         volatility = stdev(returns) if len(returns) > 1 else 0
         sharpe = (mean(returns) / volatility * sqrt(252)) if volatility > 0 else None
+        # Attribute the strategy result against each outright leg's normalized gold-price
+        # movement over the identical observed window. These capital-scaled passive
+        # benchmarks are explicitly not exposure/risk-matched to a spread strategy.
+        first_a, first_b, _ = pairs[0]
+        last_a, last_b, _ = pairs[-1]
+        benchmark_a_return = ((last_a.normalized_price_10g_basis / first_a.normalized_price_10g_basis) - 1) * 100 if first_a.normalized_price_10g_basis else None
+        benchmark_b_return = ((last_b.normalized_price_10g_basis / first_b.normalized_price_10g_basis) - 1) * 100 if first_b.normalized_price_10g_basis else None
+        benchmark_a_pnl = capital * benchmark_a_return / 100 if benchmark_a_return is not None else None
+        benchmark_b_pnl = capital * benchmark_b_return / 100 if benchmark_b_return is not None else None
+        strategy_return = ((equity - capital) / capital) * 100 if capital else None
         metrics = BacktestMetricSet(
             total_return_pct=round((equity - capital) / capital * 100, 4),
             total_pnl=round(equity - capital, 2), max_drawdown_pct=round(max_drawdown, 4),
@@ -244,6 +255,12 @@ class BacktestService:
             win_rate_pct=round(closed_wins / len(trades) * 100, 2) if trades else None,
             total_trades=len(trades), profit_factor=round(wins / losses, 4) if losses > 0 else None,
             gross_pnl=round(gross_total, 2), total_costs=round(total_costs, 2),
+            benchmark_leg_a_return_pct=round(benchmark_a_return, 4) if benchmark_a_return is not None else None,
+            benchmark_leg_b_return_pct=round(benchmark_b_return, 4) if benchmark_b_return is not None else None,
+            benchmark_leg_a_pnl=round(benchmark_a_pnl, 2) if benchmark_a_pnl is not None else None,
+            benchmark_leg_b_pnl=round(benchmark_b_pnl, 2) if benchmark_b_pnl is not None else None,
+            excess_return_vs_leg_a_pct=round(strategy_return - benchmark_a_return, 4) if strategy_return is not None and benchmark_a_return is not None else None,
+            excess_return_vs_leg_b_pct=round(strategy_return - benchmark_b_return, 4) if strategy_return is not None and benchmark_b_return is not None else None,
         )
         markers = {}
         for trade in trades:
