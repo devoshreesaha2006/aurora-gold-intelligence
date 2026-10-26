@@ -1764,12 +1764,15 @@
       background: linear-gradient(135deg, #18205a, #0e133c);
       border: 1px solid var(--gold-primary);
       border-radius: 14px;
-      padding: 14px 20px;
+      padding: 12px 16px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       color: #fff;
-      font-size: 13px;
+      font-size: 12px;
+      line-height: 1.45;
+      max-width: min(360px, calc(100vw - 32px));
+      box-sizing: border-box;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px var(--gold-glow);
       z-index: 300;
       transform: translateY(100px);
@@ -2005,15 +2008,15 @@
           <div class="filter-pills-bar">
             <button class="filter-pill active" data-filter="all" onclick="filterContracts('all')">
               <span>All Contracts</span>
-              <span class="count">4</span>
+              <span class="count" id="count-all">0</span>
             </button>
             <button class="filter-pill" data-filter="active" onclick="filterContracts('active')">
               <span>Active Only</span>
-              <span class="count">3</span>
+              <span class="count" id="count-active">0</span>
             </button>
             <button class="filter-pill" data-filter="expiring" onclick="filterContracts('expiring')">
               <span>Expiring Soon</span>
-              <span class="count">2</span>
+              <span class="count" id="count-expiring">0</span>
             </button>
           </div>
         </section>
@@ -2889,7 +2892,26 @@
     /* ==========================================================================
        2. CONTRACT FILTERING (All Contracts, Active Only, Expiring Soon)
        ========================================================================== */
+    function updateContractFilterCounts() {
+      const cards = Array.from(document.querySelectorAll('.contract-card'));
+      const activeCount = cards.filter(card => card.getAttribute('data-status') === 'active').length;
+      const expiringCount = cards.filter(card => {
+        const days = Number.parseInt(card.getAttribute('data-days'), 10);
+        return Number.isFinite(days) && days >= 0 && days <= 20;
+      }).length;
+      const counts = {
+        all: cards.length,
+        active: activeCount,
+        expiring: expiringCount
+      };
+      Object.entries(counts).forEach(([key, value]) => {
+        const node = document.getElementById('count-' + key);
+        if (node) node.textContent = String(value);
+      });
+    }
+
     function filterContracts(filterType) {
+      updateContractFilterCounts();
       const pills = document.querySelectorAll('.filter-pill');
       pills.forEach(p => p.classList.remove('active'));
       const activePill = document.querySelector(`.filter-pill[data-filter="${filterType}"]`);
@@ -2922,6 +2944,9 @@
 
       showToast(`Showing filter: ${filterType.toUpperCase()}`);
     }
+
+    // Counts are derived from the same contract metadata used by the filters.
+    updateContractFilterCounts();
 
     /* ==========================================================================
        3. INTERACTIVE NORMALIZATION SANDBOX DATA SWITCHER

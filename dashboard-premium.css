@@ -278,3 +278,50 @@ body { background-image:radial-gradient(ellipse at 76% 4%,rgba(199,161,72,.045),
 .panel,.kpi-card { background:linear-gradient(132deg,rgba(255,255,255,.065),rgba(255,255,255,.012) 27%,transparent 58%),linear-gradient(145deg,rgba(29,30,30,.2),rgba(7,8,9,.28)),rgba(5,6,7,.14) !important; backdrop-filter:blur(12px) saturate(124%); -webkit-backdrop-filter:blur(12px) saturate(124%); }
 @media (max-width:700px) { #aurora-gold-nuggets { opacity:.5 !important; } }
 @media (prefers-reduced-motion:reduce) { #aurora-gold-nuggets { display:block !important; opacity:.4 !important; } }
+
+
+/* Regression guard: keep the dashboard shell above decorative backgrounds. */
+.app-layout {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.app-layout > .main-wrapper {
+  display: flex !important;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.app-layout > .main-wrapper > .top-header {
+  display: flex !important;
+  flex: 0 0 auto;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+.app-layout > .main-wrapper > .main-content {
+  display: flex !important;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-width: 0;
+  min-height: calc(100vh - var(--header-height, 76px));
+  position: relative;
+  z-index: 1;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+#particleCanvas,
+#aurora-gold-nuggets {
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+@media (max-width: 768px) {
+  .app-layout > .main-wrapper > .main-content {
+    min-height: calc(100vh - 66px);
+  }
+}
