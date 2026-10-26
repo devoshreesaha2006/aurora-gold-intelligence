@@ -1,0 +1,168 @@
+"""Research endpoints for historical forecasting, risk sizing, and data exports.
+
+All outputs are derived from stored eligible observations or explicit user inputs.
+No external/live data is fabricated by this module.
+"""
+import csv
+import io
+import math
+from datetime import date
+from typing import Optional
+
+import numpy as np
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
+
+from backend.app.database import get_db
+from backend.app.models.market_observation import MarketObservation
+from backend.app.services.data_provenance import eligible_analytics_observations_query
+
+router = APIRouter(prefix="/research", tags=["Research, Forecasting & Risk"])
+
+
+class RiskSizingRequest(BaseModel):
+    capital: float = Field(gt=0, le=1_000_000_000)
+    risk_pct: float = Field(default=1.0, gt=0, le=10)
+    entry_price: float = Field(gt=0)
+    stop_price: float = Field(gt=0)
+    unit_size: float = Field(default=1.0, gt=0)
+    estimated_cost_per_unit: float = Field(default=0, ge=0)
+
+
+@router.get("/forecast")
+def historical_forecast(
+    symbol: str = Query("GOLDM", pattern="^(GOLDM|GOLDTEN|GOLDGUINEA|GOLDPETAL)$"),
+    horizon: int = Query(5, ge=1, le=20),
+    lookback: int = Query(60, ge=10, le=1000),
+    db: Session = Depends(get_db),
+):
+    """A simple transparent linear-trend baseline, not a validated trading signal."""
+    rows = (
+        eligible_analytics_observations_query(db)
+        .filter(MarketObservation.symbol == symbol)
+        .order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc())
+        .all()
+    )
+    # Collapse multiple expiries to one nearest available observation per date.
+    by_date = {}
+    for row in rows:
+        by_date.setdefault(row.trade_date, row)
+    history = [(day, row.normalized_price_10g_basis) for day, row in sorted(by_date.items())]
+    history = [(day, float(price)) for day, price in history if price is not None and math.isfinite(float(price))]
+    history = history[-lookback:]
+    if len(history) < 10:
+        return {
+            "status": "insufficient_history", "symbol": symbol, "observations": len(history),
+            "message": "At least 10 eligible historical dates are required. Import eligible historical data first.",
+            "forecast": [], "metrics": None,
+            "caveat": "This endpoint never substitutes synthetic/demo observations for eligible history.",
+        }
+    y = np.array([price for _, price in history], dtype=float)
+    x = np.arange(len(y), dtype=float)
+    slope, intercept = np.polyfit(x, y, 1)
+    fitted = intercept + slope * x
+    residual = y - fitted
+    rmse = float(np.sqrt(np.mean(residual ** 2)))
+    last = float(y[-1])
+    forecasts = []
+    for step in range(1, horizon + 1):
+        predicted = float(intercept + slope * (len(y) - 1 + step))
+        # Descriptive residual band only; not a calibrated prediction interval.
+        forecasts.append({
+            "step": step,
+            "baseline_price_10g": round(predicted, 2),
+            "baseline_change_pct": round((predicted / last - 1) * 100, 4) if last else None,
+            "descriptive_lower": round(predicted - 1.96 * rmse, 2),
+            "descriptive_upper": round(predicted + 1.96 * rmse, 2),
+        })
+    return {
+        "status": "baseline_only", "symbol": symbol, "basis": "₹ per 10g, 995 fine-gold benchmark",
+        "last_observation_date": history[-1][0].isoformat(), "observations": len(history),
+        "last_price_10g": round(last, 2), "forecast": forecasts,
+        "metrics": {"trend_slope_per_observation": round(float(slope), 6), "in_sample_rmse": round(rmse, 2)},
+        "caveat": "Linear-trend research baseline only; not a trained production ML model, calibrated interval, probability of profit, or investment recommendation.",
+    }
+
+
+@router.post("/risk-sizing")
+def risk_sizing(request: RiskSizingRequest):
+    """Position-sizing arithmetic based on explicit user-supplied assumptions."""
+    distance = abs(request.entry_price - request.stop_price)
+    if distance <= 0:
+        raise HTTPException(status_code=422, detail="Entry and stop prices must differ.")
+    risk_budget = request.capital * request.risk_pct / 100
+    per_unit_risk = distance * request.unit_size + request.estimated_cost_per_unit
+    if per_unit_risk <= 0:
+        raise HTTPException(status_code=422, detail="Estimated risk per unit must be positive.")
+    units = math.floor(risk_budget / per_unit_risk)
+    return {
+        "capital": request.capital, "risk_pct": request.risk_pct, "risk_budget": round(risk_budget, 2),
+        "price_distance": round(distance, 6), "estimated_risk_per_unit": round(per_unit_risk, 2),
+        "max_units_by_input_assumptions": units, "estimated_total_risk": round(units * per_unit_risk, 2),
+        "remaining_risk_budget": round(risk_budget - units * per_unit_risk, 2),
+        "warning": "Arithmetic illustration only. It excludes margin, liquidity, gaps, contract lot rules, taxes not included in your cost input, and execution risk. Validate actual contract specifications before trading.",
+    }
+
+
+@router.get("/macro-context")
+def macro_context():
+    """Explicitly declare unconfigured external context rather than invent values."""
+    return {
+        "status": "not_configured",
+        "items": [
+            {"name": "International gold (USD/oz)", "status": "unavailable", "value": None, "source": None},
+            {"name": "USD/INR", "status": "unavailable", "value": None, "source": None},
+            {"name": "US real yields / rates", "status": "unavailable", "value": None, "source": None},
+            {"name": "Cross-asset ratios", "status": "unavailable", "value": None, "source": None},
+            {"name": "News sentiment", "status": "unavailable", "value": None, "source": None},
+        ],
+        "message": "No verified external macro/news provider is configured. Values and sentiment are intentionally left unavailable.",
+    }
+
+
+@router.get("/event-calendar")
+def event_calendar():
+    """No fake upcoming dates: a licensed or user-maintained calendar is required."""
+    return {
+        "status": "not_configured", "events": [],
+        "message": "Economic calendar is not connected. Add a verified calendar source before showing event dates or impact labels.",
+    }
+
+
+@router.get("/export-observations")
+def export_observations(
+    symbol: Optional[str] = Query(None, pattern="^(GOLDM|GOLDTEN|GOLDGUINEA|GOLDPETAL)$"),
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    limit: int = Query(10000, ge=1, le=50000),
+    db: Session = Depends(get_db),
+):
+    """Download eligible historical observations as CSV."""
+    if start_date and end_date and start_date > end_date:
+        raise HTTPException(status_code=422, detail="start_date must be on or before end_date.")
+    query = eligible_analytics_observations_query(db)
+    if symbol:
+        query = query.filter(MarketObservation.symbol == symbol)
+    if start_date:
+        query = query.filter(MarketObservation.trade_date >= start_date)
+    if end_date:
+        query = query.filter(MarketObservation.trade_date <= end_date)
+    rows = query.order_by(MarketObservation.trade_date.asc(), MarketObservation.symbol.asc(), MarketObservation.expiry_date.asc()).limit(limit).all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["trade_date", "symbol", "expiry_date", "quoted_price", "normalized_price_per_gram", "normalized_price_10g_basis", "volume", "open_interest", "data_source", "provider_verified"])
+    for row in rows:
+        writer.writerow([
+            row.trade_date, row.symbol, row.expiry_date, row.quoted_price,
+            row.normalized_price_per_gram, row.normalized_price_10g_basis,
+            row.volume, row.open_interest, row.data_source,
+            getattr(row, "provider_verified", False),
+        ])
+    output.seek(0)
+    filename = f"aurora_observations_{symbol or 'all'}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]), media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
