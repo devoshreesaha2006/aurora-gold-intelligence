@@ -53,6 +53,9 @@ class BacktestMetricSet(BaseModel):
     benchmark_leg_b_pnl: Optional[float] = None
     excess_return_vs_leg_a_pct: Optional[float] = None
     excess_return_vs_leg_b_pct: Optional[float] = None
+    # Arithmetic leg decomposition, not exposure-matched alpha.
+    leg_a_gross_pnl: Optional[float] = None
+    leg_b_gross_pnl: Optional[float] = None
 
 
 class EquityPoint(BaseModel):
@@ -79,6 +82,8 @@ class BacktestTrade(BaseModel):
     costs: float
     net_pnl: float
     exit_reason: str
+    leg_a_gross_pnl: Optional[float] = None
+    leg_b_gross_pnl: Optional[float] = None
 
 
 class BacktestResponse(BaseModel):

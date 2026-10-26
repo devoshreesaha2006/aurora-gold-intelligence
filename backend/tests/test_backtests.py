@@ -179,6 +179,21 @@ def test_backtest_runs_on_eligible_observations(db_session):
     assert result.metrics.total_trades > 0
     assert all(trade.units == 3 for trade in result.trades)
     assert result.metrics.total_costs is not None
+    # Leg decomposition must reconcile to gross spread P&L and remain distinct
+    # from the capital-scaled passive outright benchmarks below.
+    assert result.metrics.leg_a_gross_pnl == pytest.approx(
+        sum(trade.leg_a_gross_pnl for trade in result.trades)
+    )
+    assert result.metrics.leg_b_gross_pnl == pytest.approx(
+        sum(trade.leg_b_gross_pnl for trade in result.trades)
+    )
+    assert result.metrics.leg_a_gross_pnl + result.metrics.leg_b_gross_pnl == pytest.approx(
+        result.metrics.gross_pnl, abs=0.02
+    )
+    assert all(
+        trade.leg_a_gross_pnl + trade.leg_b_gross_pnl == pytest.approx(trade.gross_pnl, abs=0.02)
+        for trade in result.trades
+    )
     # Passive normalized-price benchmarks use the same first/last synchronized dates.
     assert result.metrics.benchmark_leg_a_return_pct is not None
     assert result.metrics.benchmark_leg_b_return_pct == pytest.approx(0.0)

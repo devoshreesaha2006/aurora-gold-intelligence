@@ -54,6 +54,10 @@ class WalkForwardRequest(BaseModel):
     units: int = Field(default=1, ge=1, le=10000)
 
 
+class ExpandingWalkForwardRequest(WalkForwardRequest):
+    folds: int = Field(default=5, ge=2, le=12, description="Number of contiguous expanding-window out-of-sample folds")
+
+
 def _pair(value: str):
     try:
         a, b, inverted = parse_pair(value)
@@ -239,3 +243,84 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
             "Historical performance is not a guarantee of future results."
         ]
     })
+
+
+@router.post("/walk-forward-expanding")
+def expanding_walk_forward_validation(request: ExpandingWalkForwardRequest, db: Session = Depends(get_db)):
+    """Evaluate contiguous out-of-sample folds with an expanding training window."""
+    a, b, inverted, canonical_pair = _pair(request.pair)
+    series = RelativeValueAnalyticsService(db).calculate_pairwise_spread_series(
+        leg_a=a, leg_b=b, window_days=request.window, invert_spread=inverted
+    )
+    points = [p for p in series.data_points if p.spread is not None and p.z_score is not None]
+    minimum = max(request.window + request.folds * 2, 30)
+    if len(points) < minimum:
+        raise HTTPException(status_code=422, detail=f"Insufficient eligible history: need at least {minimum} usable points for {request.folds} folds; found {len(points)}.")
+    initial_train_size = int(len(points) * request.train_fraction)
+    test_points = len(points) - initial_train_size
+    if initial_train_size < request.window or test_points < request.folds * 2:
+        raise HTTPException(status_code=422, detail="The selected training fraction and fold count leave fewer than two test observations per fold.")
+    per_roundtrip_cost = (request.transaction_cost_per_10g + request.slippage_per_10g) * 2 * request.units
+    fold_sizes = [test_points // request.folds] * request.folds
+    for index in range(test_points % request.folds):
+        fold_sizes[index] += 1
+    results, outcomes = [], []
+    cursor = initial_train_size
+    for number, size in enumerate(fold_sizes, start=1):
+        training = points[:cursor]
+        testing = points[cursor:cursor + size]
+        threshold = _select_training_threshold([point.z_score for point in training], request.entry_z)
+        fold_outcomes = []
+        expiry_transition_exclusions = 0
+        for index in range(len(testing) - 1):
+            current, following = testing[index], testing[index + 1]
+            # A return is only meaningful when both spread observations refer
+            # to the same explicit contract expiry. Never book a roll gap.
+            if current.expiry_date != following.expiry_date:
+                expiry_transition_exclusions += 1
+                continue
+            z = current.z_score
+            if z is None or abs(z) < threshold:
+                continue
+            direction = -1.0 if z > 0 else 1.0
+            gross = (following.spread - current.spread) * direction * request.units
+            fold_outcomes.append({"date": str(current.trade_date), "next_date": str(following.trade_date),
+                                  "z_score": round(z, 4), "gross_pnl": round(gross, 2),
+                                  "estimated_costs": round(per_roundtrip_cost, 2),
+                                  "net_pnl": round(gross - per_roundtrip_cost, 2)})
+        outcomes.extend(fold_outcomes)
+        results.append({"fold": number, "training_start": training[0].trade_date,
+                        "training_end": training[-1].trade_date, "training_observations": len(training),
+                        "testing_start": testing[0].trade_date, "testing_end": testing[-1].trade_date,
+                        "testing_observations": len(testing),
+                        "expiry_transition_exclusions": expiry_transition_exclusions,
+                        "entry_threshold_selected_from_training": round(threshold, 4),
+                        "signal_count": len(fold_outcomes),
+                        "gross_pnl": round(sum(item["gross_pnl"] for item in fold_outcomes), 2),
+                        "estimated_costs": round(per_roundtrip_cost * len(fold_outcomes), 2),
+                        "net_pnl": round(sum(item["net_pnl"] for item in fold_outcomes), 2)})
+        cursor += size
+    test = points[initial_train_size:]
+    total_gross = sum(item["gross_pnl"] for item in outcomes)
+    total_net = sum(item["net_pnl"] for item in outcomes)
+    wins = sum(item["net_pnl"] > 0 for item in outcomes)
+    return StandardResponse(success=True, message="Expanding-window historical validation completed; fold outcomes are settlement-to-settlement estimates.", data={
+        "pair": canonical_pair, "status": "completed", "data_mode": "historical_csv_not_provider_verified",
+        "observations": len(points), "training_observations": initial_train_size,
+        "holdout_observations": len(test), "training_start": points[0].trade_date,
+        "training_end": points[initial_train_size - 1].trade_date,
+        "holdout_start": test[0].trade_date, "holdout_end": test[-1].trade_date,
+        "train_fraction": request.train_fraction, "fold_count": len(results), "folds": results,
+        "holdout_signal_count": len(outcomes), "gross_pnl": round(total_gross, 2),
+        "expiry_transition_exclusions": sum(fold["expiry_transition_exclusions"] for fold in results),
+        "estimated_costs": round(per_roundtrip_cost * len(outcomes), 2), "net_pnl": round(total_net, 2),
+        "win_rate_pct": round(wins / len(outcomes) * 100, 2) if outcomes else None,
+        "holdout_outcomes": outcomes,
+        "assumptions": [
+            "Each fold's training data includes only the initial training segment and earlier chronology; the training window expands between folds.",
+            "Entry threshold is selected from training-only trailing Z-scores, subject to the configured minimum; the test fold does not influence its threshold.",
+            "Each signal is scored against the next synchronized observation inside the same test fold; fold-boundary returns are intentionally omitted.",
+            "Signals whose next observation uses a different explicit expiry are excluded; contract-roll level changes are not booked as returns.",
+            "Settlement changes are not executable bid/ask fills. Costs and slippage are user-entered estimates, not independently verified MCX cost assumptions.",
+            "This is a one-step signal experiment, not a portfolio position simulator; results are not a forecast or guarantee."
+        ]})
