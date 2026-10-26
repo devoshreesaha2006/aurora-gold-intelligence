@@ -80,7 +80,7 @@
   function render(data){
     if(activeTab==='explain'){
       output.innerHTML='<div class="ai-results">'+[
-        metric('Classification',data.classification),metric('Opportunity score',data.opportunity_score),metric('Trap risk score',data.trap_risk_score),metric('Evaluation / trade date',data.trade_date),
+        metric('Classification',data.classification),metric('Opportunity score',data.opportunity_score),metric('Trap risk score',data.trap_risk_score),metric('Evaluation snapshot date',data.evaluation_date),metric('Matched trade date',data.trade_date),
         metric('Expiry date',data.expiry_date),metric('Spread (₹/10g)',data.spread),metric('Z-score',data.z_score),metric('Historical percentile',data.percentile_rank),
         metric('Gross edge (₹/10g)',data.gross_edge),metric('Net edge (₹/10g)',data.net_edge),metric('Cost hurdle (₹/10g)',data.estimated_cost_hurdle),metric('Data mode',data.data_mode)
       ].join('')+'</div>'+section('Classification reason','<p>'+escape(data.reason||'No reason supplied')+'</p>')+section('Rule evidence',table(['Factor','Value','Unit','Effect','Available'],(data.evidence||[]).map(e=>[e.factor,e.value,e.unit,e.effect,e.available?'Yes':'No'])))+section('Caveats',list(data.caveats||[]));
@@ -106,7 +106,7 @@
       if(!response.ok)throw new Error(payload.detail?typeof payload.detail==='string'?payload.detail:JSON.stringify(payload.detail):'Request failed with HTTP '+response.status);
       if(payload.success===false)throw new Error(payload.message||'The API reported that the request failed.');
       const data=payload.data;if(!data||typeof data!=='object')throw new Error('The API response did not contain a data object.');
-      status.textContent='Analysis received · '+(data.data_mode||'historical observations')+' · '+(data.trade_date||data.evaluation_date||data.holdout_end||'date unavailable');
+      status.textContent='Analysis received · '+(data.data_mode||'historical observations')+' · '+(data.evaluation_date||data.trade_date||data.holdout_end||'date unavailable');
       render(data);
     }catch(err){status.className='ai-status error';status.textContent='Could not load analysis: '+err.message+' Check that the backend is running and CORS allows this frontend origin.';output.replaceChildren();}
     finally{busy=false;run.disabled=false;}
