@@ -79,7 +79,6 @@ def _select_training_threshold(training_z_scores: List[Optional[float]], entry_z
     return max(entry_z_floor, min(3.0, training_quantile))
 
 
-@router.get("/explain")
 def _scenario_horizon_warnings(
     evaluation_date: date,
     expiry_date: Optional[date],
@@ -103,6 +102,7 @@ def _scenario_horizon_warnings(
     return warnings
 
 
+@router.get("/explain")
 def explain_opportunity(
     pair: str = Query("GOLDM-GOLDPETAL"),
     window: int = Query(30, ge=2, le=365),
