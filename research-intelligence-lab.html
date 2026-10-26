@@ -97,7 +97,7 @@ $('forecastBtn').onclick=async()=>{
   const recoveryText=previousSnapshot&&previousSnapshot.status!==reliabilityStatus?'Status transition: '+previousSnapshot.status+' → '+reliabilityStatus+'.':previousSnapshot?'Status unchanged from previous saved calculation.':'First saved reliability snapshot for this contract and horizon.';
   const statusCounts=reliabilityHistory.reduce((counts,item)=>{const status=item.status||'UNKNOWN';counts[status]=(counts[status]||0)+1;return counts;},{});
   const statusTransitions=reliabilityHistory.slice(1).map((item,index)=>({from:reliabilityHistory[index].status,to:item.status,date:item.date||'unknown date'})).filter(item=>item.from!==item.to);
-  const historyDatesValid=reliabilityHistory.every(item=>typeof item.date==='string'&&/^\\d{4}-\\d{2}-\\d{2}$/.test(item.date));
+  const historyDatesValid=reliabilityHistory.every(item=>typeof item.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(item.date));
   const reliabilityEvidenceReady=recentBlock.length===5&&previousBlock.length===5&&Number.isFinite(selectedErrorChange)&&!!pooledWinner&&!!recentWinner;
   let stability=null;
   try{const sq=new URLSearchParams({symbol,lookback:String(Math.max(20,Math.min(500,lookback))),min_train:String(Math.max(20,Math.min(30,lookback))),horizon:String(horizon),windows:'3',folds_per_window:'10'});stability=await getJson('/research/forecast-stability?'+sq);}catch(stabilityError){stability=null;}
