@@ -1285,6 +1285,10 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
     if (selectedPair) await loadLiveDistributionData(selectedPair);
     else clearDistributionSampleData();
     loadRadarPriceSnapshots();
+    loadPairCoverageDiagnostics();
+
+    const coverageBtn = document.getElementById('refreshPairCoverageBtn');
+    if (coverageBtn) coverageBtn.addEventListener('click', loadPairCoverageDiagnostics);
 
     const refreshBtn = document.getElementById('refresh-radar-btn');
     if (refreshBtn) {
@@ -1294,6 +1298,7 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
           if (selectedPair) loadLiveDistributionData(selectedPair);
           else clearDistributionSampleData();
           loadRadarPriceSnapshots();
+          loadPairCoverageDiagnostics();
         } finally {
           refreshBtn.querySelector('i')?.classList.remove('fa-spin');
         }
@@ -1306,6 +1311,71 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
         if (selectedPair) loadLiveDistributionData(selectedPair);
         else clearDistributionSampleData();
       });
+    }
+  }
+
+  function coverageEscape(value) {
+    return String(value ?? '—').replace(/[&<>"']/g, char => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[char]);
+  }
+
+  function coverageDate(value) {
+    if (!value) return '—';
+    const dateText = String(value).slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(dateText) ? dateText : '—';
+  }
+
+  async function loadPairCoverageDiagnostics() {
+    const meta = document.getElementById('pairCoverageMeta');
+    const rows = document.getElementById('pairCoverageRows');
+    const footnote = document.getElementById('pairCoverageFootnote');
+    if (!meta || !rows) return;
+    meta.innerHTML = '<span class="pair-coverage-chip">Refreshing coverage…</span>';
+    try {
+      const response = await fetch(`${API_BASE}/api/analytics/pair-coverage`, { mode: 'cors' });
+      if (!response.ok) throw new Error(`Coverage endpoint returned ${response.status}`);
+      const payload = await response.json();
+      const data = payload?.success ? payload.data : null;
+      if (!data || !Array.isArray(data.pairs)) throw new Error('Unexpected pair-coverage response.');
+      const pairs = data.pairs;
+      const latestDate = coverageDate(data.dataset_latest_trade_date);
+      const currentMatches = pairs.filter(pair => pair.freshness === 'matches-latest-dataset-date').length;
+      const historicalMatches = pairs.filter(pair => pair.freshness === 'historical-only').length;
+      const unavailable = pairs.filter(pair => pair.status === 'no-shared-expiry-history').length;
+      meta.innerHTML = [
+        `<span class="pair-coverage-chip">Dataset latest: ${coverageEscape(latestDate)}</span>`,
+        `<span class="pair-coverage-chip">Pairs matching latest date: ${currentMatches}/${pairs.length}</span>`,
+        `<span class="pair-coverage-chip">Historical-only: ${historicalMatches}</span>`,
+        `<span class="pair-coverage-chip">No shared expiry history: ${unavailable}</span>`,
+        `<span class="pair-coverage-chip">Mode: ${coverageEscape(data.data_mode || 'stored history')}</span>`
+      ].join('');
+      rows.innerHTML = pairs.map(pair => {
+        const freshness = pair.freshness || 'unavailable';
+        const statusClass = freshness === 'matches-latest-dataset-date' ? 'match'
+          : freshness === 'historical-only' || freshness === 'future-dated' ? 'historical' : 'unavailable';
+        const statusLabel = freshness === 'matches-latest-dataset-date' ? 'LATEST DATA DATE'
+          : freshness === 'historical-only' ? 'HISTORICAL ONLY'
+          : freshness === 'future-dated' ? 'FUTURE-DATED' : 'NO MATCH';
+        const age = pair.days_since_shared_observation == null ? '' : ` · ${coverageEscape(pair.days_since_shared_observation)}d old`;
+        const detail = pair.status === 'no-shared-expiry-history'
+          ? 'No exact same-date + same-expiry match'
+          : `Shared observation${age}`;
+        return `<tr>
+          <td><strong>${coverageEscape(pair.pair)}</strong><div style="color:#9ca9bd;font-size:.69rem;margin-top:4px;">${coverageEscape(detail)}</div></td>
+          <td>${coverageEscape(coverageDate(pair.latest_leg_a_date))}</td>
+          <td>${coverageEscape(coverageDate(pair.latest_leg_b_date))}</td>
+          <td>${coverageEscape(coverageDate(pair.latest_shared_trade_date))}</td>
+          <td>${coverageEscape(coverageDate(pair.latest_shared_expiry))}</td>
+          <td>${coverageEscape(pair.synchronized_observation_count ?? 0)}</td>
+          <td><span class="coverage-status ${statusClass}">${statusLabel}</span></td>
+        </tr>`;
+      }).join('');
+      if (footnote) footnote.textContent = `Exact trade-date + expiry matching only. Latest eligible dataset date: ${latestDate}. Data mode: ${data.data_mode || 'stored history'}; not provider-verified live market data.`;
+    } catch (error) {
+      meta.innerHTML = '<span class="pair-coverage-chip">Diagnostics unavailable</span>';
+      rows.innerHTML = `<tr><td colspan="7" class="coverage-empty">${coverageEscape(error?.message || 'Unable to load pair coverage.')} Ensure the backend is running and updated with the pair-coverage endpoint.</td></tr>`;
+      if (footnote) footnote.textContent = 'Pair coverage could not be loaded. Other dashboard panels remain available.';
     }
   }
 
