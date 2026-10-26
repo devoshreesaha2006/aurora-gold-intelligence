@@ -166,3 +166,107 @@ def export_observations(
         iter([output.getvalue()]), media_type="text/csv",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+@router.get("/forecast-validation")
+def forecast_validation(
+    symbol: str = Query("GOLDM", pattern="^(GOLDM|GOLDTEN|GOLDGUINEA|GOLDPETAL)$"),
+    lookback: int = Query(60, ge=20, le=500, description="Maximum prior observations used per fold"),
+    min_train: int = Query(30, ge=20, le=500, description="Minimum chronological training observations"),
+    max_folds: int = Query(120, ge=10, le=250, description="Maximum most-recent one-step test folds"),
+    db: Session = Depends(get_db),
+):
+    """Evaluate naive and linear-trend forecasts with expanding chronology and no future rows in training."""
+    rows = (
+        eligible_analytics_observations_query(db)
+        .filter(MarketObservation.symbol == symbol)
+        .order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc())
+        .all()
+    )
+    # Keep one eligible observation per date, consistently choosing the first expiry
+    # under the deterministic expiry ordering above.
+    by_date = {}
+    for row in rows:
+        by_date.setdefault(row.trade_date, row)
+    history = [
+        (day, float(row.normalized_price_10g_basis))
+        for day, row in sorted(by_date.items())
+        if row.normalized_price_10g_basis is not None
+        and math.isfinite(float(row.normalized_price_10g_basis))
+        and float(row.normalized_price_10g_basis) > 0
+    ]
+    if len(history) < min_train + 10:
+        return {
+            "status": "insufficient_history",
+            "symbol": symbol,
+            "observations": len(history),
+            "minimum_required": min_train + 10,
+            "metrics": None,
+            "folds": [],
+            "message": "Not enough eligible distinct dates for chronological out-of-sample validation. Import more eligible history.",
+        }
+
+    first_test = max(min_train, len(history) - max_folds)
+    folds = []
+    actuals, naive_predictions, trend_predictions = [], [], []
+    for test_index in range(first_test, len(history)):
+        train_start = max(0, test_index - lookback)
+        train = history[train_start:test_index]
+        if len(train) < min_train:
+            continue
+        train_y = np.array([price for _, price in train], dtype=float)
+        x_train = np.arange(len(train_y), dtype=float)
+        slope, intercept = np.polyfit(x_train, train_y, 1)
+        actual = float(history[test_index][1])
+        previous = float(train_y[-1])
+        naive = previous
+        trend = float(intercept + slope * len(train_y))
+        actuals.append(actual)
+        naive_predictions.append(naive)
+        trend_predictions.append(trend)
+        folds.append({
+            "date": history[test_index][0].isoformat(),
+            "actual_price_10g": round(actual, 2),
+            "previous_price_10g": round(previous, 2),
+            "naive_prediction_10g": round(naive, 2),
+            "trend_prediction_10g": round(trend, 2),
+            "naive_absolute_error": round(abs(actual - naive), 2),
+            "trend_absolute_error": round(abs(actual - trend), 2),
+            "training_observations": len(train),
+        })
+
+    def metric_pack(actual_values, predicted_values):
+        actual_arr = np.asarray(actual_values, dtype=float)
+        predicted_arr = np.asarray(predicted_values, dtype=float)
+        errors = predicted_arr - actual_arr
+        return {
+            "mae": round(float(np.mean(np.abs(errors))), 2),
+            "rmse": round(float(np.sqrt(np.mean(errors ** 2))), 2),
+            "mape_pct": round(float(np.mean(np.abs(errors / actual_arr)) * 100), 4),
+        }
+
+    naive_metrics = metric_pack(actuals, naive_predictions)
+    trend_metrics = metric_pack(actuals, trend_predictions)
+    trend_wins = sum(abs(a - t) < abs(a - n) for a, t, n in zip(actuals, trend_predictions, naive_predictions))
+    ties = sum(abs(a - t) == abs(a - n) for a, t, n in zip(actuals, trend_predictions, naive_predictions))
+    return {
+        "status": "evaluated",
+        "symbol": symbol,
+        "basis": "₹ per 10g, 995 fine-gold benchmark",
+        "observations": len(history),
+        "test_folds": len(folds),
+        "first_test_date": folds[0]["date"] if folds else None,
+        "last_test_date": folds[-1]["date"] if folds else None,
+        "method": "Chronological one-step walk-forward; each prediction uses only earlier eligible distinct dates; linear trend is refit at each fold.",
+        "models": {
+            "naive_last_value": naive_metrics,
+            "linear_trend": trend_metrics,
+        },
+        "comparison": {
+            "trend_lower_mae_than_naive": trend_metrics["mae"] < naive_metrics["mae"],
+            "trend_wins": trend_wins,
+            "ties": ties,
+            "trend_win_rate_pct": round(trend_wins / len(folds) * 100, 2) if folds else None,
+        },
+        "folds": folds,
+        "caveat": "Historical out-of-sample error comparison only. Not a trading signal or evidence of future performance; imported data may not be exchange-verified. One-step validation does not validate multi-step forecasts.",
+    }
