@@ -37,9 +37,13 @@ def test_term_structure_separates_same_expiry_change_from_front_switch_gap(db_se
     assert report["observations"] == 3
     assert report["front_series"][1]["front_same_expiry_change"] == 10
     assert report["front_series"][2]["front_same_expiry_change"] is None
-    assert report["front_series"][2]["front_switch_gap"] == 90
-    assert report["decomposition"]["front_expiry_switch_count"] == 1
-    assert report["decomposition"]["cumulative_front_switch_gaps"] == 90
+    # The old expiry is absent on the switch date, so a same-session roll gap
+    # is not identifiable; yesterday-vs-today would mix market movement and roll.
+    assert report["front_series"][2]["front_switch_gap"] is None
+    assert report["front_series"][2]["front_switch_gap_available"] is False
+    assert report["front_series"][2]["front_expiry_changed"] is True
+    assert report["decomposition"]["front_expiry_switch_count"] == 0
+    assert report["decomposition"]["cumulative_front_switch_gaps"] == 0
 
 
 def test_term_structure_accepts_reversed_pair_direction(db_session):
