@@ -175,7 +175,7 @@ def forecast_validation(
     max_folds: int = Query(120, ge=10, le=250, description="Maximum most-recent one-step test folds"),
     db: Session = Depends(get_db),
 ):
-    """Evaluate naive and linear-trend forecasts with expanding chronology and no future rows in training."""
+    """Compare naive, rolling-mean, and linear-trend forecasts with chronological folds."""
     rows = (
         eligible_analytics_observations_query(db)
         .filter(MarketObservation.symbol == symbol)
@@ -207,7 +207,7 @@ def forecast_validation(
 
     first_test = max(min_train, len(history) - max_folds)
     folds = []
-    actuals, naive_predictions, trend_predictions = [], [], []
+    actuals, naive_predictions, mean_predictions, trend_predictions = [], [], [], []
     for test_index in range(first_test, len(history)):
         train_start = max(0, test_index - lookback)
         train = history[train_start:test_index]
@@ -219,17 +219,21 @@ def forecast_validation(
         actual = float(history[test_index][1])
         previous = float(train_y[-1])
         naive = previous
+        rolling_mean = float(np.mean(train_y[-min(5, len(train_y)):]))
         trend = float(intercept + slope * len(train_y))
         actuals.append(actual)
         naive_predictions.append(naive)
+        mean_predictions.append(rolling_mean)
         trend_predictions.append(trend)
         folds.append({
             "date": history[test_index][0].isoformat(),
             "actual_price_10g": round(actual, 2),
             "previous_price_10g": round(previous, 2),
             "naive_prediction_10g": round(naive, 2),
+            "rolling_mean_prediction_10g": round(rolling_mean, 2),
             "trend_prediction_10g": round(trend, 2),
             "naive_absolute_error": round(abs(actual - naive), 2),
+            "rolling_mean_absolute_error": round(abs(actual - rolling_mean), 2),
             "trend_absolute_error": round(abs(actual - trend), 2),
             "training_observations": len(train),
         })
@@ -245,9 +249,18 @@ def forecast_validation(
         }
 
     naive_metrics = metric_pack(actuals, naive_predictions)
+    mean_metrics = metric_pack(actuals, mean_predictions)
     trend_metrics = metric_pack(actuals, trend_predictions)
+    previous_values = [float(history[max(0, first_test + i - 1)][1]) for i in range(len(actuals))]
+    def direction_accuracy(predicted_values):
+        correct = [np.sign(p - prev) == np.sign(actual - prev) for p, prev, actual in zip(predicted_values, previous_values, actuals) if actual != prev]
+        return round(sum(correct) / len(correct) * 100, 2) if correct else None
+    naive_metrics["directional_accuracy_pct"] = direction_accuracy(naive_predictions)
+    mean_metrics["directional_accuracy_pct"] = direction_accuracy(mean_predictions)
+    trend_metrics["directional_accuracy_pct"] = direction_accuracy(trend_predictions)
     trend_wins = sum(abs(a - t) < abs(a - n) for a, t, n in zip(actuals, trend_predictions, naive_predictions))
     ties = sum(abs(a - t) == abs(a - n) for a, t, n in zip(actuals, trend_predictions, naive_predictions))
+    best_model = min({"naive_last_value": naive_metrics, "rolling_mean_5": mean_metrics, "linear_trend": trend_metrics}, key=lambda name: {"naive_last_value": naive_metrics, "rolling_mean_5": mean_metrics, "linear_trend": trend_metrics}[name]["mae"])
     return {
         "status": "evaluated",
         "symbol": symbol,
@@ -259,8 +272,10 @@ def forecast_validation(
         "method": "Chronological one-step walk-forward; each prediction uses only earlier eligible distinct dates; linear trend is refit at each fold.",
         "models": {
             "naive_last_value": naive_metrics,
+            "rolling_mean_5": mean_metrics,
             "linear_trend": trend_metrics,
         },
+        "selection": {"lowest_mae_model": best_model, "rule": "Descriptive winner among tested baselines on this evaluation window only; not a guarantee of future performance."},
         "comparison": {
             "trend_lower_mae_than_naive": trend_metrics["mae"] < naive_metrics["mae"],
             "trend_wins": trend_wins,
@@ -268,5 +283,5 @@ def forecast_validation(
             "trend_win_rate_pct": round(trend_wins / len(folds) * 100, 2) if folds else None,
         },
         "folds": folds,
-        "caveat": "Historical out-of-sample error comparison only. Not a trading signal or evidence of future performance; imported data may not be exchange-verified. One-step validation does not validate multi-step forecasts.",
+        "caveat": "Historical out-of-sample error comparison only. Lowest MAE is descriptive and can vary by test window. Not a trading signal or evidence of future performance; imported data may not be exchange-verified. One-step validation does not validate multi-step forecasts.",
     }
