@@ -5,7 +5,7 @@
   if (!document.getElementById('aurora-sparkle-style')) {
     const style = document.createElement('style');
     style.id = 'aurora-sparkle-style';
-    style.textContent = `#${canvasId}{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;opacity:.78}.aurora-sparkles-over-media{z-index:0!important;opacity:.58!important}@media (max-width:700px){#${canvasId}{opacity:.68}}@media (prefers-reduced-motion:reduce){#${canvasId}{opacity:.56}}`;
+    style.textContent = `#${canvasId}{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;opacity:.22}.aurora-sparkles-over-media{z-index:0!important;opacity:.22!important}@media (max-width:700px){#${canvasId}{opacity:.16}}@media (prefers-reduced-motion:reduce){#${canvasId}{opacity:.12}}`;
     document.head.appendChild(style);
   }
   const canvas = document.createElement('canvas');
