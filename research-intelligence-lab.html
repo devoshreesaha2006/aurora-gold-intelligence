@@ -50,7 +50,18 @@ async function loadContext(){
  }
  $('retryApiBtn').disabled=false;$('retryApiBtn').textContent='Retry API connection';
  try{const d=await getJson('/research/macro-context');$('macroOutput').innerHTML='<div class="rowitem"><span>Provider status</span><span class="status">'+esc(d.status)+'</span></div>'+((d.items||[]).map(x=>'<div class="rowitem"><span>'+esc(x.name)+'</span><span class="status">Unavailable</span></div>').join(''))+'<p class="muted">'+esc(d.message||'External macro/news data is not configured.')+'</p>';}catch(e){$('macroOutput').textContent='Macro/news status unavailable because the API could not be reached. '+e.message;}
- try{const d=await getJson('/research/event-calendar');$('calendarOutput').innerHTML='<div class="rowitem"><span>Calendar status</span><span class="status">'+esc(d.status)+'</span></div><p>'+esc(d.message||'External calendar data is not configured.')+'</p>';}catch(e){$('calendarOutput').textContent='Calendar status unavailable because the API could not be reached. '+e.message;}
+ try{
+  const today=new Date();const to=new Date(today);to.setDate(to.getDate()+14);
+  const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const url='https://www.financecalendar.com/wp-json/fc/v1/calendar?'+new URLSearchParams({from:iso(today),to:iso(to),country:'US,GB,IN',tz:'Asia/Kolkata',limit:'100'});
+  const res=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!res.ok)throw new Error('Finance Calendar returned HTTP '+res.status);
+  const d=await res.json();const events=Array.isArray(d.events)?d.events:[];
+  const label=e=>e.title||e.name||e.series_name||'Economic release';
+  const dateLabel=e=>e.time_local||e.date||e.release_at_utc||'Time not published';
+  const rows=events.slice(0,20).map(e=>'<div class="rowitem"><div><strong>'+esc(label(e))+'</strong><div class="muted">'+esc(e.country||'Global')+' · '+esc(dateLabel(e))+' · '+esc(e.status||'schedule status unavailable')+'</div>'+(e.url?'<div><a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">Publisher/source details</a></div>':'')+'</div><span class="status">'+esc(e.impact||'Impact n/a')+'</span></div>').join('');
+  $('calendarOutput').innerHTML='<div class="rowitem"><span>Calendar status</span><span class="status fine">Connected · public feed</span></div><div class="rowitem"><span>Window</span><span>'+esc(iso(today))+' → '+esc(iso(to))+'</span></div><div class="rowitem"><span>Events returned</span><span>'+events.length+'</span></div>'+(rows||'<p>No events were returned for this date range.</p>')+'<p class="muted">Source: <a href="https://www.financecalendar.com/api/" target="_blank" rel="noopener noreferrer">Finance Calendar</a>. Free public feed; attribution retained. Event coverage and verification vary by publisher. A missing time or impact is not inferred.</p>';
+ }catch(e){$('calendarOutput').innerHTML='<div class="rowitem"><span>Calendar status</span><span class="status warn">Unavailable</span></div><p>Could not load the public economic calendar: '+esc(e.message)+'. Retry the page or check network access. No dates are fabricated.</p><p><a href="https://www.financecalendar.com/calendar/" target="_blank" rel="noopener noreferrer">Open Finance Calendar</a></p>';}
 }
 $('retryApiBtn').addEventListener('click',loadContext);
 $('forecastBtn').onclick=async()=>{
