@@ -43,6 +43,16 @@ class BacktestService:
             source = row.data_source
             if is_test_source(source) or is_synthetic_source(source):
                 continue
+            # Backtests operate on the normalized ₹/10g basis. Missing,
+            # non-finite, or non-positive values must never enter spread math.
+            normalized_price = row.normalized_price_10g_basis
+            if (
+                isinstance(normalized_price, bool)
+                or not isinstance(normalized_price, (int, float))
+                or not isfinite(normalized_price)
+                or normalized_price <= 0
+            ):
+                continue
             if row.import_batch_id:
                 batch = self.db.get(ImportBatch, row.import_batch_id)
                 if batch and (batch.is_synthetic or is_test_source(batch.data_source) or is_synthetic_source(batch.data_source)):
