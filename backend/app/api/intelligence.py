@@ -106,7 +106,7 @@ def _scenario_horizon_warnings(
 def explain_opportunity(
     pair: str = Query("GOLDM-GOLDPETAL"),
     window: int = Query(30, ge=2, le=365),
-    evaluation_date: Optional[date] = None,
+    evaluation_date: Optional[date] = Query(None, description="Optional historical evaluation date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
 ):
     """Explain a Radar classification with its actual calculated fields and rule evidence."""
