@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # CORS origins (comma-separated or '*')
     cors_origins: str = "*"
 
-    # Data Mode: "demo_synthetic", "staged_csv", "live_feed_authorized", or "smartapi"
+    # Data Mode: "demo_synthetic", "staged_csv", or "live_feed_authorized"
     data_mode: str = "demo_synthetic"
 
     # Authorized provider HTTPS bridge credentials; never expose these in API responses.
@@ -50,18 +50,6 @@ class Settings(BaseSettings):
     # Explicit operator attestation that the subscribed product's license permits
     # AURORA's intended processing and storage. Credentials alone are insufficient.
     mcx_feed_license_confirmed: bool = False
-    # Angel One SmartAPI; secrets are read from the local, untracked .env only.
-    smartapi_api_key: Optional[str] = None
-    smartapi_jwt_token: Optional[str] = None
-    smartapi_client_code: Optional[str] = None
-    smartapi_local_ip: Optional[str] = None
-    smartapi_public_ip: Optional[str] = None
-    smartapi_mac_address: Optional[str] = None
-    smartapi_mcx_token_map: str = "[]"
-    smartapi_license_confirmed: bool = False
-    smartapi_timeout_seconds: float = 5.0
-    smartapi_max_age_seconds: int = 90
-    smartapi_poll_interval_seconds: int = 5
 
 
     @field_validator("database_url")
