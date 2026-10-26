@@ -46,6 +46,13 @@ class BacktestMetricSet(BaseModel):
     profit_factor: Optional[float] = None
     gross_pnl: Optional[float] = None
     total_costs: Optional[float] = None
+    # Capital-scaled passive normalized-price benchmarks; not exposure-matched alpha.
+    benchmark_leg_a_return_pct: Optional[float] = None
+    benchmark_leg_b_return_pct: Optional[float] = None
+    benchmark_leg_a_pnl: Optional[float] = None
+    benchmark_leg_b_pnl: Optional[float] = None
+    excess_return_vs_leg_a_pct: Optional[float] = None
+    excess_return_vs_leg_b_pct: Optional[float] = None
 
 
 class EquityPoint(BaseModel):

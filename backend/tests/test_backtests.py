@@ -179,6 +179,17 @@ def test_backtest_runs_on_eligible_observations(db_session):
     assert result.metrics.total_trades > 0
     assert all(trade.units == 3 for trade in result.trades)
     assert result.metrics.total_costs is not None
+    # Passive normalized-price benchmarks use the same first/last synchronized dates.
+    assert result.metrics.benchmark_leg_a_return_pct is not None
+    assert result.metrics.benchmark_leg_b_return_pct == pytest.approx(0.0)
+    assert result.metrics.benchmark_leg_a_pnl is not None
+    assert result.metrics.benchmark_leg_b_pnl == pytest.approx(0.0)
+    assert result.metrics.excess_return_vs_leg_a_pct == pytest.approx(
+        result.metrics.total_return_pct - result.metrics.benchmark_leg_a_return_pct
+    )
+    assert result.metrics.excess_return_vs_leg_b_pct == pytest.approx(
+        result.metrics.total_return_pct - result.metrics.benchmark_leg_b_return_pct
+    )
     assert abs(result.metrics.total_pnl - (result.equity_curve[-1].equity - req.capital)) < 0.01
 
 
