@@ -105,3 +105,46 @@ def test_forecast_validation_is_chronological_and_compares_baselines(client, db_
     assert len(payload["folds"]) == 10
     assert all(fold["training_observations"] <= 30 for fold in payload["folds"])
     assert "only earlier" in payload["method"]
+
+
+def test_forecast_horizon_validation_reports_insufficient_history(client):
+    response = client.get("/api/research/forecast-horizon-validation?symbol=GOLDM&horizon=5")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "insufficient_history"
+    assert payload["folds"] == []
+    assert payload["metrics"] is None
+
+
+def test_forecast_horizon_validation_uses_future_target_without_leakage(client, db_session):
+    from datetime import timedelta
+
+    start = date(2026, 1, 1)
+    for index in range(55):
+        price = 100000 + index * 120 + (index % 5) * 18
+        db_session.add(MarketObservation(
+            symbol="GOLDM", trade_date=start + timedelta(days=index),
+            expiry_date=date(2026, 12, 31), close_price=price,
+            normalized_price_per_gram=price / 10,
+            normalized_price_10g_basis=price, volume=100 + index,
+            open_interest=200 + index, data_source="csv_upload",
+            is_synthetic=False, is_provider_verified=False,
+        ))
+    db_session.commit()
+
+    response = client.get(
+        "/api/research/forecast-horizon-validation?symbol=GOLDM&horizon=5&lookback=30&min_train=20&max_folds=10"
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "evaluated"
+    assert payload["horizon_observations"] == 5
+    assert payload["test_folds"] == 10
+    assert payload["first_target_date"] < payload["last_target_date"]
+    assert payload["models"]["naive_last_value"]["mae"] >= 0
+    assert payload["models"]["rolling_mean_5"]["rmse"] >= 0
+    assert payload["models"]["linear_trend"]["mape_pct"] >= 0
+    assert all(fold["horizon_observations"] == 5 for fold in payload["folds"])
+    assert all(fold["target_date"] > fold["origin_date"] for fold in payload["folds"])
+    assert all(fold["training_observations"] <= 30 for fold in payload["folds"])
+    assert "only observations available at its origin" in payload["method"]

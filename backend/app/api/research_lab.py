@@ -285,3 +285,103 @@ def forecast_validation(
         "folds": folds,
         "caveat": "Historical out-of-sample error comparison only. Lowest MAE is descriptive and can vary by test window. Not a trading signal or evidence of future performance; imported data may not be exchange-verified. One-step validation does not validate multi-step forecasts.",
     }
+
+
+@router.get("/forecast-horizon-validation")
+def forecast_horizon_validation(
+    symbol: str = Query("GOLDM", pattern="^(GOLDM|GOLDTEN|GOLDGUINEA|GOLDPETAL)$"),
+    horizon: int = Query(5, ge=2, le=20, description="Trading observations ahead to evaluate"),
+    lookback: int = Query(60, ge=20, le=500, description="Maximum prior observations used per fold"),
+    min_train: int = Query(30, ge=20, le=500, description="Minimum chronological training observations"),
+    max_folds: int = Query(60, ge=10, le=120, description="Maximum most-recent horizon test folds"),
+    db: Session = Depends(get_db),
+):
+    """Compare baseline models at a genuine multi-observation forecast horizon."""
+    rows = (
+        eligible_analytics_observations_query(db)
+        .filter(MarketObservation.symbol == symbol)
+        .order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc())
+        .all()
+    )
+    by_date = {}
+    for row in rows:
+        by_date.setdefault(row.trade_date, row)
+    history = [
+        (day, float(row.normalized_price_10g_basis))
+        for day, row in sorted(by_date.items())
+        if row.normalized_price_10g_basis is not None
+        and math.isfinite(float(row.normalized_price_10g_basis))
+        and float(row.normalized_price_10g_basis) > 0
+    ]
+    if len(history) < min_train + horizon + 1:
+        return {
+            "status": "insufficient_history", "symbol": symbol, "horizon": horizon,
+            "observations": len(history), "minimum_required": min_train + horizon + 1,
+            "metrics": None, "folds": [],
+            "message": "Not enough eligible distinct dates for multi-step chronological validation. Import more eligible history.",
+        }
+
+    # Forecast horizon observations ahead using only data available at each origin.
+    first_origin = max(min_train - 1, len(history) - horizon - max_folds)
+    folds = []
+    actuals, naive_predictions, mean_predictions, trend_predictions = [], [], [], []
+    for origin in range(first_origin, len(history) - horizon):
+        train_start = max(0, origin - lookback + 1)
+        train = history[train_start:origin + 1]
+        if len(train) < min_train:
+            continue
+        train_y = np.asarray([price for _, price in train], dtype=float)
+        x_train = np.arange(len(train_y), dtype=float)
+        slope, intercept = np.polyfit(x_train, train_y, 1)
+        previous = float(train_y[-1])
+        actual_index = origin + horizon
+        actual = float(history[actual_index][1])
+        naive = previous
+        rolling_mean = float(np.mean(train_y[-min(5, len(train_y)):]))
+        trend = float(intercept + slope * (len(train_y) - 1 + horizon))
+        actuals.append(actual)
+        naive_predictions.append(naive)
+        mean_predictions.append(rolling_mean)
+        trend_predictions.append(trend)
+        folds.append({
+            "origin_date": history[origin][0].isoformat(),
+            "target_date": history[actual_index][0].isoformat(),
+            "actual_price_10g": round(actual, 2),
+            "naive_prediction_10g": round(naive, 2),
+            "rolling_mean_prediction_10g": round(rolling_mean, 2),
+            "trend_prediction_10g": round(trend, 2),
+            "naive_absolute_error": round(abs(actual - naive), 2),
+            "rolling_mean_absolute_error": round(abs(actual - rolling_mean), 2),
+            "trend_absolute_error": round(abs(actual - trend), 2),
+            "training_observations": len(train),
+            "horizon_observations": horizon,
+        })
+
+    def metric_pack(actual_values, predicted_values):
+        actual_arr = np.asarray(actual_values, dtype=float)
+        predicted_arr = np.asarray(predicted_values, dtype=float)
+        errors = predicted_arr - actual_arr
+        return {
+            "mae": round(float(np.mean(np.abs(errors))), 2),
+            "rmse": round(float(np.sqrt(np.mean(errors ** 2))), 2),
+            "mape_pct": round(float(np.mean(np.abs(errors / actual_arr)) * 100), 4),
+        }
+
+    models = {
+        "naive_last_value": metric_pack(actuals, naive_predictions),
+        "rolling_mean_5": metric_pack(actuals, mean_predictions),
+        "linear_trend": metric_pack(actuals, trend_predictions),
+    }
+    best_model = min(models, key=lambda name: models[name]["mae"])
+    return {
+        "status": "evaluated", "symbol": symbol, "horizon_observations": horizon,
+        "basis": "₹ per 10g, 995 fine-gold benchmark", "observations": len(history),
+        "test_folds": len(folds),
+        "first_target_date": folds[0]["target_date"] if folds else None,
+        "last_target_date": folds[-1]["target_date"] if folds else None,
+        "method": f"Chronological rolling-origin validation at {horizon} eligible observations ahead; each fold uses only observations available at its origin.",
+        "models": models,
+        "selection": {"lowest_mae_model": best_model, "rule": "Descriptive winner on this horizon and evaluation window only; not a guarantee of future performance."},
+        "folds": folds,
+        "caveat": "This validates a fixed multi-observation horizon, not calendar-day accuracy or trading profitability. Eligible imported data may not be exchange-verified. Forecasts are research baselines, not investment advice.",
+    }
