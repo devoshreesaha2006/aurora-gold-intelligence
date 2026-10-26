@@ -9,12 +9,9 @@
   canvas.setAttribute('aria-hidden', 'true');
   Object.assign(canvas.style, {
     position: 'fixed', inset: '0', width: '100%', height: '100%',
-    pointerEvents: 'none', zIndex: '0', opacity: '0.52'
+    pointerEvents: 'none', zIndex: '-1', opacity: '0.36'
   });
   document.body.prepend(canvas);
-  const layerStyle = document.createElement('style');
-  layerStyle.textContent = 'body > :not(#aurora-starfield) { position: relative; z-index: 1; } #aurora-starfield { z-index: 0 !important; }';
-  document.head.appendChild(layerStyle);
   const ctx = canvas.getContext('2d', { alpha: true });
   if (!ctx) { canvas.remove(); return; }
 
