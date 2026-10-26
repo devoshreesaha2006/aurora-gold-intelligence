@@ -38,7 +38,7 @@ body.aurora-market-detective .step-body-grid { font-size: 13.5px; line-height: 1
 body.aurora-market-detective .detail-label { font-size: 13px; }
 body.aurora-market-detective .detail-val { font-size: 13px; }
 body button, body input, body select, body textarea { font-family: inherit; }
-#aurora-gold-nuggets { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: .78; }
+#aurora-gold-nuggets { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: .22; }
 .sidebar, .main-wrapper, .app-layout, .main-content, .page-container { position: relative; z-index: 1; }
 .sidebar {
   background: rgba(13, 12, 9, .93) !important;
@@ -238,7 +238,7 @@ body { background-image:radial-gradient(ellipse at 73% 3%,rgba(199,161,72,.045),
 .contract-top-header .market-badge { padding:6px 10px; white-space:nowrap; font-size:10px; }
 .contract-top-header .header-btn { flex:0 0 36px; width:36px; height:36px; }
 .contract-top-header .user-profile-badge { flex:0 0 auto; gap:7px; padding:4px 9px 4px 5px; white-space:nowrap; }
-@media(max-width:1500px) { .contract-top-header .header-ticker { display:none; } }
+@media(max-width:1600px) { .contract-top-header .header-ticker { display:none !important; } }
 @media(max-width:900px) { .contract-top-header { padding-inline:12px; gap:8px; } .contract-top-header .header-right { gap:6px; } .contract-top-header .user-info { display:none; } .contract-top-header .aurora-pipeline-btn span { display:none; } .contract-top-header .aurora-pipeline-btn { width:36px; height:36px; justify-content:center; padding:0; } }
 .panel,.card,.chart-section,.metric-card,.stat-card,.section-card,.analytics-card,.radar-card,.filter-panel,.table-container,.chart-container-wrapper,.chart-container-box,.contract-card,.price-hero-box,.normalization-sandbox,.comparison-section,.step-box,.formula-card,.spec-item,.page-header-card,.section-headline-box,.step-card,.evidence-panel,.verdict-clay-card,.verdict-box,.ai-explanation-panel,.config-card,.results-section,.kpi-card,.chart-panel,.robustness-panel,.methodology-card,.meth-box,.limitations-alert-box,.contract-detail-card,.spread-card,.signal-card,.event-card,.table-responsive,.glass-panel,.health-card,.radar-container-card,.radar-summary-panel,.hero-stat-claybox,.pairwise-matrix-card,.signals-section,.trap-filter-panel,.distribution-panel,.traps-list-box,.funnel-visual-box,.modal-box,.modal-math-box,.modal-breakdown-card,.engine-status-box,.normalization-panel,.formula-showcase-box,.flow-card,.flow-input-box,.system-health-card {
   background:linear-gradient(132deg,rgba(255,255,255,.075),rgba(255,255,255,.018) 27%,transparent 58%),linear-gradient(145deg,rgba(38,40,42,.48),rgba(9,10,11,.58)),rgba(8,9,10,.34) !important;
@@ -255,11 +255,11 @@ input,select,textarea,.search-input,.filter-select { background:rgba(5,6,7,.64) 
 }
 
 /* Let the shared moving gold facets remain visible through the glass surfaces. */
-#aurora-gold-nuggets { opacity:.78 !important; }
+#aurora-gold-nuggets { opacity:.22 !important; }
 .panel,.card,.chart-section,.metric-card,.stat-card,.section-card,.analytics-card,.radar-card,.filter-panel,.table-container,.chart-container-wrapper,.chart-container-box,.contract-card,.price-hero-box,.normalization-sandbox,.comparison-section,.step-box,.formula-card,.spec-item,.page-header-card,.section-headline-box,.step-card,.evidence-panel,.verdict-clay-card,.verdict-box,.ai-explanation-panel,.config-card,.results-section,.kpi-card,.chart-panel,.robustness-panel,.methodology-card,.meth-box,.limitations-alert-box,.contract-detail-card,.spread-card,.signal-card,.event-card,.table-responsive,.glass-panel,.health-card,.radar-container-card,.radar-summary-panel,.hero-stat-claybox,.pairwise-matrix-card,.signals-section,.trap-filter-panel,.distribution-panel,.traps-list-box,.funnel-visual-box,.modal-box,.modal-math-box,.modal-breakdown-card,.engine-status-box,.normalization-panel,.formula-showcase-box,.flow-card,.flow-input-box,.system-health-card {
   background:linear-gradient(132deg,rgba(255,255,255,.065),rgba(255,255,255,.012) 27%,transparent 58%),linear-gradient(145deg,rgba(29,30,30,.2),rgba(7,8,9,.28)),rgba(5,6,7,.14) !important;
   backdrop-filter:blur(12px) saturate(124%) !important;
   -webkit-backdrop-filter:blur(12px) saturate(124%) !important;
 }
-@media(max-width:700px){#aurora-gold-nuggets{opacity:.54!important}}
-@media(prefers-reduced-motion:reduce){#aurora-gold-nuggets{display:block!important;opacity:.4!important}}
+@media(max-width:700px){#aurora-gold-nuggets{opacity:.16!important}}
+@media(prefers-reduced-motion:reduce){#aurora-gold-nuggets{display:block!important;opacity:.12!important}}
