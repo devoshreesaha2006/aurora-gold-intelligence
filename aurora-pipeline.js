@@ -1271,12 +1271,62 @@ GOLDTEN,2026-10-15,2026-10-01,62700,62990,62630,62890,3850,9720`;
      4. Phase 2 Relative-Value Intelligence Engine Frontend Integration
      -------------------------------------------------------------------------- */
   function initPhase2AnalyticsSync() {
+    setupRadarForecastValidation();
     if (document.getElementById('radarChartCanvas')) {
       setupOpportunityRadarSync();
     }
     if (document.getElementById('eventSelector')) {
       setupMarketDetectiveSync();
     }
+  }
+
+  function setupRadarForecastValidation() {
+    const button = document.getElementById('runRadarForecastValidation');
+    if (!button || button.dataset.bound === 'true') return;
+    button.dataset.bound = 'true';
+    const status = document.getElementById('radarForecastValidationStatus');
+    const results = document.getElementById('radarForecastValidationResults');
+    const rows = document.getElementById('radarForecastValidationRows');
+    button.addEventListener('click', async () => {
+      const symbol = document.getElementById('radarForecastSymbol')?.value || 'GOLDM';
+      const horizon = Math.max(2, Math.min(20, Number(document.getElementById('radarForecastHorizon')?.value) || 5));
+      const folds = Math.max(10, Math.min(120, Number(document.getElementById('radarForecastFolds')?.value) || 30));
+      status.textContent = 'Running chronological multi-step validation…';
+      results.style.display = 'none';
+      button.disabled = true;
+      try {
+        const query = new URLSearchParams({symbol, horizon: String(horizon), max_folds: String(folds)});
+        const response = await fetch(`${API_BASE}/api/research/forecast-horizon-validation?${query.toString()}`, {mode: 'cors'});
+        if (!response.ok) throw new Error('Research API returned HTTP ' + response.status);
+        const data = await response.json();
+        if (data.status !== 'evaluated') {
+          status.textContent = (data.message || 'Insufficient eligible history.') + ' Eligible observations: ' + (data.observations ?? '—') + '; minimum required: ' + (data.minimum_required ?? '—') + '.';
+          return;
+        }
+        const modelRows = [
+          ['Naive · last value', data.models?.naive_last_value],
+          ['Rolling mean · 5 observations', data.models?.rolling_mean_5],
+          ['Linear trend', data.models?.linear_trend]
+        ];
+        rows.replaceChildren();
+        modelRows.forEach(([label, metrics]) => {
+          const tr = document.createElement('tr');
+          [label, metrics?.mae, metrics?.rmse, metrics?.mape_pct == null ? '—' : metrics.mape_pct + '%'].forEach(value => {
+            const td = document.createElement('td');
+            td.textContent = value == null ? '—' : String(value);
+            tr.appendChild(td);
+          });
+          if (label.toLowerCase().replaceAll(' · ', '_').replaceAll(' ', '_') === data.selection?.lowest_mae_model) tr.style.fontWeight = '700';
+          rows.appendChild(tr);
+        });
+        status.textContent = symbol + ' · ' + data.horizon_observations + '-observation horizon · ' + data.test_folds + ' folds · target dates ' + (data.first_target_date || '—') + ' to ' + (data.last_target_date || '—') + '. Lowest MAE baseline: ' + String(data.selection?.lowest_mae_model || 'unavailable').replaceAll('_', ' ') + '. ' + data.caveat;
+        results.style.display = 'block';
+      } catch (error) {
+        status.textContent = 'Forecast validation unavailable: ' + error.message + '. Confirm the local AURORA API is running.';
+      } finally {
+        button.disabled = false;
+      }
+    });
   }
 
   async function setupOpportunityRadarSync() {
