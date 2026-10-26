@@ -38,34 +38,25 @@ async function getJson(path, options={}){const controller=new AbortController();
 
 async function loadPublicMacro(){
  const out=$('macroOutput');const health=$('macroHealthValue');
- health.textContent='Loading…';health.className='warn';out.textContent='Fetching free public observations from FRED…';
- const series=[
-  {id:'DGS10',name:'US 10-year Treasury yield',unit:'% per year',meaning:'Nominal long-term yield'},
-  {id:'DFII10',name:'US 10-year real yield',unit:'% per year',meaning:'Inflation-indexed Treasury yield'},
-  {id:'DTWEXBGS',name:'US broad trade-weighted dollar index',unit:'index points',meaning:'Broad USD strength proxy'}
- ];
- const daysOld=date=>Math.floor((Date.now()-new Date(date+'T00:00:00Z').getTime())/86400000);
+ health.textContent='Loading…';health.className='warn';out.textContent='Fetching latest public macro observations through the local FastAPI backend…';
  try{
-  const results=await Promise.all(series.map(async item=>{
-   const url='https://fred.stlouisfed.org/graph/fredgraph.csv?id='+encodeURIComponent(item.id);
-   const response=await fetch(url,{headers:{Accept:'text/csv'},signal:AbortSignal.timeout(4500)});
-   if(!response.ok)throw new Error(item.id+' returned HTTP '+response.status);
-   const csv=await response.text();
-   const lines=csv.trim().split(/\r?\n/);
-   if(lines.length<2)throw new Error(item.id+' returned no observations');
-   const observations=lines.slice(1).map(line=>{const m=line.match(/^([^,]+),"?([^"]*)"?$/);return m?{date:m[1].trim(),value:m[2].trim()}:null;}).filter(x=>x&&/^\d{4}-\d{2}-\d{2}$/.test(x.date)&&x.value!==''&&x.value!=='.'&&Number.isFinite(Number(x.value)));
-   if(!observations.length)throw new Error(item.id+' has no usable values');
-   const latest=observations[observations.length-1];return {...item,...latest,age:daysOld(latest.date)};
-  }));
-  const rows=results.map(item=>'<div class="rowitem"><div><strong>'+esc(item.name)+'</strong><div class="muted">'+esc(item.meaning)+' · observation date '+esc(item.date)+'</div><div class="muted">Source: <a href="https://fred.stlouisfed.org/series/'+esc(item.id)+'" target="_blank" rel="noopener noreferrer">FRED · '+esc(item.id)+'</a> · '+esc(item.age)+' day(s) old</div></div><div style="text-align:right"><strong>'+esc(fmt(item.value))+'</strong><div class="muted">'+esc(item.unit)+'</div><span class="status '+(item.age>7?'warn':'fine')+'">'+(item.age>7?'Stale':'Latest available')+'</span></div></div>').join('');
-  const stale=results.some(x=>x.age>7);health.textContent=stale?'Connected · stale data':'Connected';health.className=stale?'warn':'fine';
-  out.innerHTML='<div class="rowitem"><span>Provider</span><span class="status fine">FRED public CSV · no API key</span></div>'+rows+'<p class="muted">Values are the latest non-missing observations returned by FRED; the observation date is not a real-time timestamp. Stale threshold: more than 7 days. This panel does not yet provide a verified gold spot series, USD/INR, market news, or sentiment. No market price or directional signal is inferred.</p>';
+  const payload=await getJson('/research/macro');
+  const results=Array.isArray(payload.data)?payload.data:[];
+  if(!results.length)throw new Error('The backend returned no macro observations.');
+  const rows=results.map(item=>{
+   const age=Number(item.age_days);
+   return '<div class="rowitem"><div><strong>'+esc(item.name)+'</strong><div class="muted">'+esc(item.meaning)+' · observation date '+esc(item.date)+'</div><div class="muted">Source: <a href="'+esc(item.source_url||('https://fred.stlouisfed.org/series/'+item.id))+'" target="_blank" rel="noopener noreferrer">FRED · '+esc(item.id)+'</a> · '+esc(age)+' day(s) old</div></div><div style="text-align:right"><strong>'+esc(fmt(item.value))+'</strong><div class="muted">'+esc(item.unit)+'</div><span class="status '+(age>7?'warn':'fine')+'">'+(age>7?'Stale':'Latest available')+'</span></div></div>';
+  }).join('');
+  const stale=results.some(x=>Number(x.age_days)>7);
+  const partial=!!payload.partial;
+  health.textContent=partial?'Partially connected':(stale?'Connected · stale data':'Connected');
+  health.className=(partial||stale)?'warn':'fine';
+  out.innerHTML='<div class="rowitem"><span>Provider</span><span class="status '+(partial?'warn':'fine')+'">'+esc(payload.provider||'FRED public CSV · backend proxy')+'</span></div>'+rows+(partial?'<p class="warn">Some FRED series could not be retrieved: '+esc((payload.errors||[]).map(x=>x.id+': '+x.message).join('; '))+'</p>':'')+'<p class="muted">Values are the latest non-missing observations returned by FRED; observation dates are not real-time timestamps. Stale threshold: more than 7 days. This panel does not provide a verified gold spot series, USD/INR, market news, or sentiment. No market price or directional signal is inferred.</p>';
  }catch(e){
   health.textContent='Unavailable';health.className='warn';
-  out.innerHTML='<div class="rowitem"><span>Public macro feed</span><span class="status warn">Unavailable</span></div><p>Could not load FRED CSV observations: '+esc(e.message)+'. The browser/network may block the upstream request. No cached or invented values are shown.</p><p><a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener noreferrer">Open FRED</a></p>';
+  out.innerHTML='<div class="rowitem"><span>Public macro feed</span><span class="status warn">Unavailable</span></div><p>Could not load FRED observations through the backend: '+esc(e.message)+'. Check backend connectivity to FRED. No cached or invented values are shown.</p><p><a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener noreferrer">Open FRED</a></p>';
  }
 }
-
 async function loadContext(){
  const status=$('apiStatusValue');
  status.textContent='Checking (max 5s)…';status.className='warn';
