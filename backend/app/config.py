@@ -50,6 +50,19 @@ class Settings(BaseSettings):
     # Explicit operator attestation that the subscribed product's license permits
     # AURORA's intended processing and storage. Credentials alone are insufficient.
     mcx_feed_license_confirmed: bool = False
+    # Angel One SmartAPI; secrets are read from the local, untracked .env only.
+    smartapi_api_key: Optional[str] = None
+    smartapi_jwt_token: Optional[str] = None
+    smartapi_client_code: Optional[str] = None
+    smartapi_local_ip: Optional[str] = None
+    smartapi_public_ip: Optional[str] = None
+    smartapi_mac_address: Optional[str] = None
+    smartapi_mcx_token_map: str = "[]"
+    smartapi_license_confirmed: bool = False
+    smartapi_timeout_seconds: float = 5.0
+    smartapi_max_age_seconds: int = 90
+    smartapi_poll_interval_seconds: int = 5
+
 
     @field_validator("database_url")
     @classmethod
