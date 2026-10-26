@@ -81,8 +81,9 @@ $('forecastBtn').onclick=async()=>{
   const meanError=arr=>arr.length?arr.reduce((sum,value)=>sum+value,0)/arr.length:null;
   const recentSelectedMae=meanError(recentBlock),previousSelectedMae=meanError(previousBlock);
   const selectedErrorChange=previousSelectedMae>0?(recentSelectedMae-previousSelectedMae)/previousSelectedMae*100:null;
-  const reliabilityStatus=recentBlock.length<5||previousBlock.length<5?'WATCH':selectedErrorChange>=50?'UNSTABLE':selectedErrorChange>=20?'WATCH':'STABLE';
-  const reliabilityDescription=recentBlock.length<5||previousBlock.length<5?'Not enough recent and preceding folds for a full comparison.':reliabilityStatus==='UNSTABLE'?'Recent error is at least 50% higher than the preceding five-fold block.':reliabilityStatus==='WATCH'?'Recent error is 20–49.99% higher than the preceding five-fold block.':'Recent error is not more than 20% above the preceding five-fold block.';
+  const modelDisagreement=!!(pooledWinner&&recentWinner&&pooledWinner!==recentWinner);
+  const reliabilityStatus=recentBlock.length<5||previousBlock.length<5?'WATCH':selectedErrorChange>=50?'UNSTABLE':selectedErrorChange>=20||modelDisagreement?'WATCH':'STABLE';
+  const reliabilityDescription=recentBlock.length<5||previousBlock.length<5?'Not enough recent and preceding folds for a full comparison.':selectedErrorChange>=50?'Recent error is at least 50% higher than the preceding five-fold block.':modelDisagreement&&selectedErrorChange<20?'Recent and pooled validation winners disagree; monitor the next folds.':selectedErrorChange>=20?'Recent error is at least 20% higher than the preceding five-fold block.':'Recent error is not more than 20% above the preceding five-fold block.';
   let stability=null;
   try{const sq=new URLSearchParams({symbol,lookback:String(Math.max(20,Math.min(500,lookback))),min_train:String(Math.max(20,Math.min(30,lookback))),horizon:String(horizon),windows:'3',folds_per_window:'10'});stability=await getJson('/research/forecast-stability?'+sq);}catch(stabilityError){stability=null;}
   const pooledWinnerWindowWins=pooledWinner&&stability&&stability.window_wins?Number(stability.window_wins[pooledWinner]||0):0;
