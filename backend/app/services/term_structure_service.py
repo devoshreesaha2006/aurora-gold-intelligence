@@ -104,7 +104,8 @@ class TermStructureService:
             "front_series": front,
             "decomposition": {
                 "same_expiry_front_change_count": len(same_expiry_moves),
-                "front_expiry_switch_count": len(roll_gaps),
+                "front_expiry_switch_count": sum(1 for p in front if p.get("front_expiry_changed")),
+                "measurable_front_switch_gap_count": len(roll_gaps),
                 "cumulative_same_expiry_front_change": round(sum(same_expiry_moves), 6),
                 "cumulative_front_switch_gaps": round(sum(roll_gaps), 6),
                 "note": "Front-switch gaps are reported separately and are not strategy P&L. Same-expiry changes compare the same explicit expiry across adjacent observed dates; gaps in dates are not forward-filled.",
