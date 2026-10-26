@@ -2,9 +2,12 @@ from datetime import date
 from typing import Optional, List
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from backend.app.database import get_db
 from backend.app.schemas.common import StandardResponse
+from backend.app.models.market_observation import MarketObservation
+from backend.app.services.data_provenance import eligible_analytics_observations_query
 from backend.app.schemas.analytics import (
     PairSpreadResponse, RadarResponse, EventsResponse, DistributionResponse
 )
@@ -158,3 +161,76 @@ def get_spread_distribution(
         data=dist_data,
         message=f"Generated empirical distribution and Gaussian curve for {pair}."
     )
+
+@router.get("/pair-coverage", response_model=StandardResponse[dict])
+def get_historical_pair_coverage(
+    db: Session = Depends(get_db)
+):
+    """Diagnose synchronized historical coverage for all six supported contract pairs.
+
+    Reports each leg's latest eligible observation and the latest exact
+    trade-date + expiry match. Historical-only matches are never represented as
+    current-session coverage.
+    """
+    service = RelativeValueAnalyticsService(db)
+    latest_overall_date = eligible_analytics_observations_query(db).with_entities(
+        func.max(MarketObservation.trade_date)
+    ).scalar()
+
+    items = []
+    today = date.today()
+    for leg_a, leg_b in VALID_PAIRS:
+        latest_leg_dates = {}
+        for symbol in (leg_a, leg_b):
+            latest_leg_dates[symbol] = eligible_analytics_observations_query(db).filter(
+                MarketObservation.symbol == symbol
+            ).with_entities(func.max(MarketObservation.trade_date)).scalar()
+
+        synchronized = service.get_synchronized_observations(leg_a, leg_b)
+        if synchronized:
+            latest_a, latest_b = synchronized[-1]
+            matched_date = latest_a.trade_date
+            expiry = latest_a.expiry_date
+            age_days = (today - matched_date).days
+            if matched_date > today:
+                freshness = "future-dated"
+            elif latest_overall_date is not None and matched_date == latest_overall_date:
+                freshness = "matches-latest-dataset-date"
+            else:
+                freshness = "historical-only"
+            status_text = "shared-expiry-history-available"
+        else:
+            matched_date = None
+            expiry = None
+            age_days = None
+            freshness = "unavailable"
+            status_text = "no-shared-expiry-history"
+
+        items.append({
+            "pair": f"{leg_a}-{leg_b}",
+            "leg_a": leg_a,
+            "leg_b": leg_b,
+            "latest_leg_a_date": latest_leg_dates[leg_a],
+            "latest_leg_b_date": latest_leg_dates[leg_b],
+            "latest_shared_trade_date": matched_date,
+            "latest_shared_expiry": expiry,
+            "synchronized_observation_count": len(synchronized),
+            "days_since_shared_observation": age_days,
+            "freshness": freshness,
+            "status": status_text,
+            "note": (
+                "Only exact trade-date and expiry matches are counted; this endpoint does not infer live availability."
+            ),
+        })
+
+    return StandardResponse(
+        success=True,
+        message="Historical synchronized coverage diagnostics computed for all six contract pairs.",
+        data={
+            "dataset_latest_trade_date": latest_overall_date,
+            "evaluated_on": today,
+            "data_mode": "eligible stored observations; not provider-verified",
+            "pairs": items,
+        },
+    )
+
