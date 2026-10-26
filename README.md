@@ -405,3 +405,32 @@ Do not put provider credentials in this frontend setting. Keep them only in the 
 - `backup-phase0-baseline`: Preserved snapshot of original repository state before Phase 1 implementation.
 - `feature/phase1-backend-pipeline`: Working branch with the complete Phase 1 implementation.
 - `backup_frontend_baseline/`: Local directory backup of original frontend assets.
+
+
+---
+
+## Research Intelligence Lab (historical-only additions)
+
+The branch `feat/research-intelligence-suite` adds a responsive local research page at
+`research-intelligence-lab.html` and these API routes:
+
+- `GET /api/research/forecast?symbol=GOLDM&lookback=60&horizon=5`: transparent linear-trend baseline from eligible stored history. This is not a trained production ML model or a trading signal.
+- `POST /api/research/risk-sizing`: position-risk arithmetic from explicit capital, stop, and cost assumptions.
+- `GET /api/research/macro-context`: explicit unavailable state until a verified macro/cross-asset/news provider is configured.
+- `GET /api/research/event-calendar`: explicit unavailable state until a verified event-calendar source is configured.
+- `GET /api/research/export-observations`: CSV export of eligible stored historical observations.
+
+### Open the new page locally (Windows PowerShell)
+
+Keep the backend running in one terminal. In a second PowerShell terminal, from the repository root, run:
+
+```powershell
+python -m http.server 3001 --bind 127.0.0.1
+```
+
+Open `http://127.0.0.1:3001/research-intelligence-lab.html`.
+
+The existing frontend folder remains unchanged. The Research Intelligence page calls the local API at
+`http://127.0.0.1:8000/api` by default. It does not invent macro values, calendar dates, live prices,
+or ML confidence. Macro/news and calendar panels stay explicitly unavailable until an approved data
+source is integrated. Use the existing Backtesting Lab for historical strategy simulations and metrics.
