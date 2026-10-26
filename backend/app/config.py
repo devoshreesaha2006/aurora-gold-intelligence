@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # CORS origins (comma-separated or '*')
     cors_origins: str = "*"
 
-    # Data Mode: "demo_synthetic", "staged_csv", or "live_feed_authorized"
+    # Data Mode: "demo_synthetic", "staged_csv", "live_feed_authorized", or "smartapi"
     data_mode: str = "demo_synthetic"
 
     # Authorized provider HTTPS bridge credentials; never expose these in API responses.
