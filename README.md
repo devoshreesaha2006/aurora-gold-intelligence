@@ -17,7 +17,7 @@ AURORA transforms Multi Commodity Exchange of India (MCX) gold commodity futures
 
 ## Research controls added for the commodity-derivatives problem statement
 
-- **Expiry-aware term structure:** `GET /api/research/term-structure?pair=GOLDM-GOLDPETAL` returns synchronized curves for every shared explicit expiry, per-expiry spread changes, front-contract same-expiry changes, and front-expiry switch gaps. Switch gaps are diagnostics, **not** strategy P&L. Missing sessions are never forward-filled.
+- **Expiry-aware term structure:** `GET /api/research/term-structure?pair=GOLDM-GOLDPETAL` returns synchronized curves for every shared explicit expiry, per-expiry spread changes, front-contract same-expiry changes, and front-expiry switch diagnostics. A numeric switch gap is returned only when both expiries overlap on the same date; if the old expiry disappears, the gap is explicitly unavailable instead of mixing yesterday's market move with a roll. Switch gaps are diagnostics, **not** strategy P&L. Missing sessions are never forward-filled.
 - **Benchmark attribution in backtests:** `POST /api/backtests/run` now includes first-to-last normalized-price returns and capital-scaled P&L for each outright leg, plus strategy-minus-benchmark return differences. These are transparent passive references, not exposure-matched alpha, and they do not replace an outright-gold risk attribution study.
 - **Pair direction:** the term-structure endpoint accepts either pair order and keeps spread/price labels consistent.
 - **Regression coverage:** tests cover expiry-switch separation, reverse pair direction, and benchmark-attribution fields.
