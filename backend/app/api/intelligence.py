@@ -62,6 +62,19 @@ def _pair(value: str):
     return a, b, inverted, f"{b}-{a}" if inverted else f"{a}-{b}"
 
 
+def _select_training_threshold(training_z_scores: List[Optional[float]], entry_z_floor: float) -> float:
+    """Choose a training-only threshold while honoring the user's configured minimum."""
+    abs_z = sorted(
+        abs(value)
+        for value in training_z_scores
+        if value is not None and isfinite(value)
+    )
+    if not abs_z:
+        return entry_z_floor
+    training_quantile = abs_z[int(0.9 * (len(abs_z) - 1))]
+    return max(entry_z_floor, min(3.0, training_quantile))
+
+
 @router.get("/explain")
 def explain_opportunity(
     pair: str = Query("GOLDM-GOLDPETAL"),
@@ -162,10 +175,9 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
     if split < request.window or len(points) - split < 10:
         raise HTTPException(status_code=422, detail="The chronological split leaves too few training or holdout observations.")
     train, test = points[:split], points[split:]
-    # Threshold is selected from training-only absolute z-scores, bounded to avoid an
-    # extreme threshold that simply eliminates all test observations.
-    abs_z = sorted(abs(p.z_score) for p in train if p.z_score is not None)
-    threshold = max(1.0, min(3.0, abs_z[int(0.9 * (len(abs_z) - 1))])) if abs_z else request.entry_z
+    # Select the threshold from training-only absolute z-scores, but treat the
+    # user-entered entry_z as a minimum. The UI parameter must never be silently ignored.
+    threshold = _select_training_threshold([p.z_score for p in train], request.entry_z)
     cost_per_roundtrip = (request.transaction_cost_per_10g + request.slippage_per_10g) * 2 * request.units
     outcomes = []
     for idx in range(len(test) - 1):
@@ -195,7 +207,7 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
         "holdout_outcomes": outcomes,
         "assumptions": [
             "Rolling Z-scores are computed causally from trailing history; no future observation is used to form a signal.",
-            "Threshold selection uses only the training segment; holdout outcomes are not used to choose it.",
+            "The training-only 90th-percentile threshold is bounded by the user-configured entry Z minimum; holdout outcomes do not influence threshold selection.",
             "Each signal is evaluated over the next synchronized observation, not a portfolio-level position simulator.",
             "Settlement prices are proxies, not executable quotes. Costs are estimates and actual contract/margin/tax effects may differ.",
             "Historical performance is not a guarantee of future results."
