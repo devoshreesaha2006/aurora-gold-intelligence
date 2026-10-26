@@ -98,6 +98,10 @@ def test_forecast_validation_is_chronological_and_compares_baselines(client, db_
     assert payload["first_test_date"] < payload["last_test_date"]
     assert payload["models"]["naive_last_value"]["mae"] >= 0
     assert payload["models"]["linear_trend"]["rmse"] >= 0
+    assert payload["models"]["rolling_mean_5"]["mae"] >= 0
+    assert payload["selection"]["lowest_mae_model"] in {"naive_last_value", "rolling_mean_5", "linear_trend"}
+    assert "directional_accuracy_pct" in payload["models"]["naive_last_value"]
+    assert "rolling_mean_prediction_10g" in payload["folds"][0]
     assert len(payload["folds"]) == 10
     assert all(fold["training_observations"] <= 30 for fold in payload["folds"])
     assert "only earlier" in payload["method"]
