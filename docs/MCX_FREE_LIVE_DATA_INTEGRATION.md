@@ -24,9 +24,9 @@ The official FAQ states SmartAPI is free, supports historical commodity data, an
 
 1. Create/enable a SmartAPI app through the broker's official portal and confirm MCX segment access.
 2. Obtain the current instrument master from the official SmartAPI instrument source; map each AURORA contract to the correct MCX exchange token and explicit expiry. Never guess or hardcode a token across expiries.
-3. Implement a dedicated SmartAPI adapter. It must handle login/session expiry, WebSocket reconnects, subscription failures, binary tick parsing, rate limits, and graceful shutdown. Keep all API keys, JWT/feed tokens, TOTP secrets and account identifiers server-side in environment variables; never commit them or expose them in API responses.
+3. A first-pass dedicated SmartAPI REST FULL-quote polling adapter is now present in `backend/app/providers/smartapi_provider.py`, and `data_mode=smartapi` selects it. It uses a manually provisioned JWT and explicit local token-to-contract mapping. Automatic login/session refresh and WebSocket streaming are not implemented yet. Keep API keys, JWT/feed tokens, TOTP secrets and account identifiers only in the untracked project-root `.env`; never commit them or expose them in API responses.
 4. Normalize incoming ticks into AURORA's existing contract model and data-provenance rules. Preserve exchange timestamps; mark volume/OI as unavailable when not actually supplied.
-5. Test against a paper/test account session and recorded fixture payloads before enabling it in the active provider factory.
+5. The provider is wired into the factory, but tests and a real broker session still need to be run locally before relying on it.
 6. Only mark the feed LIVE when authenticated MCX data is actually arriving and timestamps pass the configured freshness check. Show STALE/OFFLINE otherwise.
 
 ## Important limitations
