@@ -1,8 +1,8 @@
-# Free live MCX data integration — implementation notes
+# MCX live data integration — implementation notes
 
 ## Current AURORA state
 
-AURORA already has a provider interface and an authorized-distributor HTTPS bridge:
+AURORA has a provider interface and an authorized-distributor HTTPS bridge:
 - `backend/app/providers/base.py`
 - `backend/app/providers/live_mock.py` (despite its historical filename, this is the authorized-provider adapter)
 - `backend/app/providers/__init__.py`
@@ -11,27 +11,26 @@ AURORA already has a provider interface and an authorized-distributor HTTPS brid
 
 The bridge is intentionally not a generic broker adapter. It expects a provider endpoint returning AURORA's documented JSON payload. Do not point it at a broker's API endpoint unless that endpoint implements the bridge contract.
 
-## Zero-cost broker candidate: Angel One SmartAPI
+## Data access and licensing
 
-Official docs:
-- FAQ: https://smartapi.angelone.in/faq
-- API docs: https://smartapi.angelbroking.com/docs
-- Official Python SDK: https://github.com/angel-one/smartapi-python
+No authenticated live MCX feed is currently configured by default. Contact a market-data distributor to confirm:
+- MCX GOLD/GOLDM instruments and current contracts are included
+- Live versus delayed data, historical coverage, and quote fields available
+- API protocol, credentials, rate limits, and trial/pricing
+- The license permits AURORA's intended processing, storage, and display
 
-The official FAQ states SmartAPI is free, supports historical commodity data, and offers live WebSocket prices. Its live market-data FULL mode documents volume and open interest. The API docs list MCX as a supported historical-data exchange. This makes it a reasonable candidate to test first, not a guarantee that every instrument or entitlement is enabled for every account.
+Keep credentials in the untracked project-root `.env`; never commit secrets or expose them in API responses.
 
-## Safe implementation sequence
+## Safe integration sequence
 
-1. Create/enable a SmartAPI app through the broker's official portal and confirm MCX segment access.
-2. Obtain the current instrument master from the official SmartAPI instrument source; map each AURORA contract to the correct MCX exchange token and explicit expiry. Never guess or hardcode a token across expiries.
-3. A first-pass dedicated SmartAPI REST FULL-quote polling adapter is now present in `backend/app/providers/smartapi_provider.py`, and `data_mode=smartapi` selects it. It uses a manually provisioned JWT and explicit local token-to-contract mapping. Automatic login/session refresh and WebSocket streaming are not implemented yet. Keep API keys, JWT/feed tokens, TOTP secrets and account identifiers only in the untracked project-root `.env`; never commit them or expose them in API responses.
-4. Normalize incoming ticks into AURORA's existing contract model and data-provenance rules. Preserve exchange timestamps; mark volume/OI as unavailable when not actually supplied.
-5. The provider is wired into the factory, but tests and a real broker session still need to be run locally before relying on it.
-6. Only mark the feed LIVE when authenticated MCX data is actually arriving and timestamps pass the configured freshness check. Show STALE/OFFLINE otherwise.
+1. Obtain written confirmation of data coverage and the applicable license.
+2. Configure the distributor's HTTPS bridge to match the documented response contract.
+3. Normalize incoming quotes into AURORA's existing contract model and data-provenance rules. Preserve source timestamps and mark unavailable volume/open interest as unavailable.
+4. Only mark the feed LIVE when authenticated MCX data is actually arriving and timestamps pass the configured freshness check. Show STALE/OFFLINE otherwise.
 
 ## Important limitations
 
-- A free API plan is not the same as permission to redistribute exchange data. Confirm the broker's terms for the intended display/storage use.
+- A data API plan is not automatically permission to redistribute exchange data. Confirm the provider's terms for the intended display/storage use.
 - AURORA's current `MarketObservation` schema is daily-grain (one row per symbol/trade date/expiry); it is not a tick archive. For intraday analytics, use a separate tick/snapshot table or explicitly document the snapshot cadence rather than pretending daily rows are a tick history.
 - Do not create fake live prices or silently relabel historical/bhavcopy observations as live.
 - No API credentials are required in GitHub. Configure local secrets only in the untracked project-root `.env`.
