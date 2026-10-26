@@ -155,10 +155,10 @@ def export_observations(
     writer.writerow(["trade_date", "symbol", "expiry_date", "quoted_price", "normalized_price_per_gram", "normalized_price_10g_basis", "volume", "open_interest", "data_source", "provider_verified"])
     for row in rows:
         writer.writerow([
-            row.trade_date, row.symbol, row.expiry_date, row.quoted_price,
+            row.trade_date, row.symbol, row.expiry_date, row.close_price,
             row.normalized_price_per_gram, row.normalized_price_10g_basis,
             row.volume, row.open_interest, row.data_source,
-            getattr(row, "provider_verified", False),
+            getattr(row, "is_provider_verified", False),
         ])
     output.seek(0)
     filename = f"aurora_observations_{symbol or 'all'}.csv"
