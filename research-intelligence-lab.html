@@ -65,7 +65,8 @@ async function loadPublicMacro(){
   out.innerHTML='<div class="rowitem"><span>Public macro feed</span><span class="status warn">Unavailable</span></div><p>Could not load FRED CSV observations: '+esc(e.message)+'. The browser/network may block the upstream request. No cached or invented values are shown.</p><p><a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener noreferrer">Open FRED</a></p>';
  }
 }
-\nasync function loadContext(){
+
+async function loadContext(){
  const status=$('apiStatusValue');
  status.textContent='Checking (max 5s)…';status.className='warn';
  $('healthMessage').textContent='Checking '+API+'/health …';
