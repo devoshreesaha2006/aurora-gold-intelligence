@@ -70,11 +70,22 @@ class TermStructureService:
                 if prior_front is not None and prior_front["expiry_date"] == chosen["expiry_date"]
                 else None
             )
+            # A pure same-session switch gap is measurable only when both the
+            # previous front expiry and the new front expiry are observed today.
+            # Never subtract yesterday's settlement: that would mix market move
+            # and contract-switch effects.
+            prior_front_today = next(
+                (point for point in points if prior_front is not None and point["expiry_date"] == prior_front["expiry_date"]),
+                None,
+            )
             chosen["front_switch_gap"] = (
-                round(chosen["spread"] - prior_front["spread"], 6)
-                if prior_front is not None and prior_front["expiry_date"] != chosen["expiry_date"]
+                round(chosen["spread"] - prior_front_today["spread"], 6)
+                if prior_front is not None
+                and prior_front["expiry_date"] != chosen["expiry_date"]
+                and prior_front_today is not None
                 else None
             )
+            chosen["front_switch_gap_available"] = chosen["front_switch_gap"] is not None
             chosen["front_expiry_changed"] = bool(
                 prior_front is not None and prior_front["expiry_date"] != chosen["expiry_date"]
             )
