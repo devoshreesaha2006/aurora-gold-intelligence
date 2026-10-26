@@ -76,6 +76,29 @@ def _select_training_threshold(training_z_scores: List[Optional[float]], entry_z
 
 
 @router.get("/explain")
+def _scenario_horizon_warnings(
+    evaluation_date: date,
+    expiry_date: Optional[date],
+    holding_days: int,
+) -> List[str]:
+    """Describe expiry conflicts; the what-if does not simulate expiry settlement."""
+    if expiry_date is None:
+        return ["Contract expiry is unavailable; the selected holding horizon cannot be checked against expiry."]
+    horizon_end = evaluation_date + timedelta(days=holding_days)
+    warnings = []
+    if expiry_date <= evaluation_date:
+        warnings.append(
+            f"Historical contract expiry ({expiry_date}) is on or before the evaluation date "
+            f"({evaluation_date}); this scenario is based on an expired contract."
+        )
+    if expiry_date <= horizon_end:
+        warnings.append(
+            f"The selected holding horizon ends {horizon_end}, on or after contract expiry "
+            f"{expiry_date}; this scenario does not model expiry settlement or a forced exit."
+        )
+    return warnings
+
+
 def explain_opportunity(
     pair: str = Query("GOLDM-GOLDPETAL"),
     window: int = Query(30, ge=2, le=365),
@@ -152,6 +175,7 @@ def what_if_scenario(request: ScenarioRequest, db: Session = Depends(get_db)):
             f"Entered costs: transaction ₹{request.transaction_cost_per_10g:.2f}/10g + slippage ₹{request.slippage_per_10g:.2f}/10g; round-trip per unit ₹{(request.transaction_cost_per_10g + request.slippage_per_10g) * 2:.2f}; total for {request.units} unit(s) ₹{costs:.2f}.",
             "Costs are charged as a round-trip per unit from the user-configured transaction-cost and slippage assumptions.",
             "P&L is a simplified normalized ₹ per 10g illustration; it excludes margin, taxes not represented in inputs, and contract-specific execution effects.",
+            *_scenario_horizon_warnings(latest.trade_date, latest.expiry_date, request.holding_days),
             "This is not a forecast, recommendation, or executable quote."
         ],
     )
