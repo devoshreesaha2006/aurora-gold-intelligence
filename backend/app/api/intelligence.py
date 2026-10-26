@@ -33,6 +33,12 @@ class ScenarioResult(BaseModel):
     evaluation_date: Optional[date] = None
     expiry_date: Optional[date] = None
     current_spread: Optional[float] = None
+    window: int
+    window_observations: int
+    rolling_mean: Optional[float] = None
+    rolling_std: Optional[float] = None
+    z_score: Optional[float] = None
+    percentile_rank: Optional[float] = None
     assumed_spread_change: Optional[float] = None
     units: int
     gross_pnl: Optional[float] = None
@@ -169,12 +175,18 @@ def what_if_scenario(request: ScenarioRequest, db: Session = Depends(get_db)):
     break_even = (costs / (abs(latest.spread) * request.units) * 100.0) if latest.spread else None
     result = ScenarioResult(
         pair=canonical_pair, evaluation_date=latest.trade_date, expiry_date=latest.expiry_date,
-        current_spread=latest.spread, assumed_spread_change=change, units=request.units,
+        current_spread=latest.spread, window=request.window,
+        window_observations=min(request.window, series.total_points),
+        rolling_mean=latest.rolling_mean, rolling_std=latest.rolling_std,
+        z_score=latest.z_score, percentile_rank=latest.percentile_rank,
+        assumed_spread_change=change, units=request.units,
         gross_pnl=round(gross, 2), estimated_costs=round(costs, 2),
         estimated_net_pnl=round(net, 2), break_even_move_pct=round(break_even, 4) if break_even is not None else None,
         holding_days=request.holding_days, status="hypothetical_scenario",
         assumptions=[
             f"Assumes a spread move of {request.spread_move_pct}% of the absolute latest historical spread; direction is assumed favourable.",
+            f"Rolling statistics use up to the latest {request.window} synchronized observations; {min(request.window, series.total_points)} observation(s) were available in the selected window.",
+            "The window changes the displayed rolling mean, standard deviation, Z-score and percentile; scenario P&L remains based on the user-assumed move applied to the latest spread.",
             f"Holding period is a user-selected {request.holding_days} calendar day(s); no future observations are used.",
             f"Entered costs: transaction ₹{request.transaction_cost_per_10g:.2f}/10g + slippage ₹{request.slippage_per_10g:.2f}/10g; round-trip per unit ₹{(request.transaction_cost_per_10g + request.slippage_per_10g) * 2:.2f}; total for {request.units} unit(s) ₹{costs:.2f}.",
             "Costs are charged as a round-trip per unit from the user-configured transaction-cost and slippage assumptions.",
