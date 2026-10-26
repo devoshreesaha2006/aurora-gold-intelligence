@@ -271,7 +271,7 @@ class BacktestService:
             for oa, _ob, spread in pairs
         ]
         message = (
-            f"Historical walk-forward simulation completed with {len(trades)} completed trade(s) "
+            f"Historical chronological simulation completed with {len(trades)} completed trade(s) "
             f"across {len(pairs)} synchronized observations. "
             f"{entry_setups} entry-threshold check(s); {volume_blocked_entries} blocked by observed-volume "
             f"requirements and {expiry_blocked_entries} blocked by the expiry buffer."
