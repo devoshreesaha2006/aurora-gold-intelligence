@@ -42,7 +42,8 @@ def test_term_structure_separates_same_expiry_change_from_front_switch_gap(db_se
     assert report["front_series"][2]["front_switch_gap"] is None
     assert report["front_series"][2]["front_switch_gap_available"] is False
     assert report["front_series"][2]["front_expiry_changed"] is True
-    assert report["decomposition"]["front_expiry_switch_count"] == 0
+    assert report["decomposition"]["front_expiry_switch_count"] == 1
+    assert report["decomposition"]["measurable_front_switch_gap_count"] == 0
     assert report["decomposition"]["cumulative_front_switch_gaps"] == 0
 
 
