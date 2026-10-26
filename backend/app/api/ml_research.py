@@ -18,7 +18,7 @@ def features(prices, i):
 
 @router.get("/ml-spread-forecast")
 def ml_spread_forecast(symbol: str = Query("GOLDM", pattern=SYMBOL_PATTERN),
-                       max_folds: int = Query(30, ge=10, le=60),
+                       max_folds: int = Query(10, ge=5, le=30),
                        db: Session = Depends(get_db)):
     """Experimental Random Forest forecast with chronological out-of-sample evaluation."""
     try:
@@ -41,15 +41,17 @@ def ml_spread_forecast(symbol: str = Query("GOLDM", pattern=SYMBOL_PATTERN),
                 "minimum_required":60,"metrics":None,"folds":[],
                 "message":"At least 60 eligible historical dates are required; no synthetic data is used."}
     def new_model():
-        return RandomForestRegressor(n_estimators=100,max_depth=4,min_samples_leaf=3,
+        return RandomForestRegressor(n_estimators=30,max_depth=4,min_samples_leaf=3,
                                      max_features=0.9,random_state=42,n_jobs=1)
     folds=[]; actual=[]; predicted=[]; naive=[]
+    feature_cache = [_features for _features in (features(p, j) for j in range(len(p)))]
+    target_returns = [float(p[j+1]/p[j]-1) for j in range(len(p)-1)]
     for i in range(max(40,len(p)-max_folds-1),len(p)-1):
-        x=[features(p,j) for j in range(10,i)]
-        y=[p[j+1]/p[j]-1 for j in range(10,i)]
+        x=feature_cache[10:i]
+        y=target_returns[10:i]
         if len(x)<30: continue
         model=new_model(); model.fit(np.asarray(x),np.asarray(y))
-        pred=float(model.predict(np.asarray([features(p,i)]))[0]); act=float(p[i+1]/p[i]-1)
+        pred=float(model.predict(np.asarray([feature_cache[i]]))[0]); act=float(target_returns[i])
         actual.append(act); predicted.append(pred); naive.append(0.0)
         folds.append({"origin_date":hist[i][0].isoformat(),"target_date":hist[i+1][0].isoformat(),
                       "actual_change_pct":round(act*100,5),"ml_predicted_change_pct":round(pred*100,5),
@@ -62,9 +64,9 @@ def ml_spread_forecast(symbol: str = Query("GOLDM", pattern=SYMBOL_PATTERN),
                 "rmse_change_pct_points":round(float(np.sqrt(np.mean(((a-b)*100)**2))),6),
                 "directional_accuracy_pct":round(float(np.mean(np.sign(a[mask])==np.sign(b[mask]))*100),2) if np.any(mask) else None}
     mm=metrics(actual,predicted); nm=metrics(actual,naive)
-    x=[features(p,j) for j in range(10,len(p)-1)]; y=[p[j+1]/p[j]-1 for j in range(10,len(p)-1)]
+    x=feature_cache[10:len(p)-1]; y=target_returns[10:len(p)-1]
     model=new_model(); model.fit(np.asarray(x),np.asarray(y))
-    change=float(model.predict(np.asarray([features(p,len(p)-1)]))[0])
+    change=float(model.predict(np.asarray([feature_cache[len(p)-1]]))[0])
     return {"status":"evaluated","model":"RandomForestRegressor","symbol":symbol,
             "basis":"₹ per 10g, 995 fine-gold benchmark","observations":len(p),"test_folds":len(folds),
             "first_test_date":folds[0]["target_date"],"last_test_date":folds[-1]["target_date"],
