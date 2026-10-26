@@ -55,3 +55,49 @@ def test_observation_export_is_csv_and_uses_actual_model_fields(client, db_sessi
     assert "text/csv" in response.headers["content-type"]
     assert "145000" in response.text
     assert "provider_verified" in response.text
+
+
+def test_forecast_validation_reports_insufficient_history_without_fabrication(client):
+    response = client.get("/api/research/forecast-validation?symbol=GOLDM")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "insufficient_history"
+    assert payload["folds"] == []
+    assert payload["metrics"] is None
+
+
+def test_forecast_validation_is_chronological_and_compares_baselines(client, db_session):
+    # 45 distinct dates with a deterministic upward series.
+    from datetime import timedelta
+
+    start = date(2026, 1, 1)
+    for index in range(45):
+        price = 100000 + index * 100 + (index % 4) * 12
+        db_session.add(MarketObservation(
+            symbol="GOLDM",
+            trade_date=start + timedelta(days=index),
+            expiry_date=date(2026, 12, 31),
+            close_price=price,
+            normalized_price_per_gram=price / 10,
+            normalized_price_10g_basis=price,
+            volume=100 + index,
+            open_interest=200 + index,
+            data_source="csv_upload",
+            is_synthetic=False,
+            is_provider_verified=False,
+        ))
+    db_session.commit()
+
+    response = client.get(
+        "/api/research/forecast-validation?symbol=GOLDM&lookback=30&min_train=20&max_folds=10"
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "evaluated"
+    assert payload["test_folds"] == 10
+    assert payload["first_test_date"] < payload["last_test_date"]
+    assert payload["models"]["naive_last_value"]["mae"] >= 0
+    assert payload["models"]["linear_trend"]["rmse"] >= 0
+    assert len(payload["folds"]) == 10
+    assert all(fold["training_observations"] <= 30 for fold in payload["folds"])
+    assert "only earlier" in payload["method"]
