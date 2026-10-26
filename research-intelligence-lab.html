@@ -8,6 +8,76 @@
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#3a2b12 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,Segoe UI,Arial,sans-serif}a{color:var(--gold)}.wrap{max-width:1240px;margin:auto;padding:28px 22px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:22px}.brand{letter-spacing:.22em;font-size:12px;color:var(--gold);font-weight:800}.top h1{font-size:clamp(28px,4vw,44px);line-height:1.05;margin:8px 0}.sub,.muted{color:var(--muted)}.pill{border:1px solid #65532f;color:var(--gold);border-radius:99px;padding:7px 12px;font-size:12px}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;margin-top:20px}.card{grid-column:span 6;background:linear-gradient(145deg,#151920,#101217);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0;box-shadow:0 12px 35px #0002}.wide{grid-column:span 12}.third{grid-column:span 4}h2{font-size:17px;margin:0 0 5px}h3{font-size:13px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;margin:18px 0 8px}.desc{font-size:13px;color:var(--muted);margin:0 0 16px}label{display:block;color:#bbc1cc;font-size:12px;margin:0 0 6px}input,select{width:100%;background:#0a0c10;border:1px solid #303642;border-radius:9px;padding:11px;color:var(--text);outline:none}input:focus,select:focus{border-color:var(--gold)}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}button,.btn{border:1px solid #a9843f;background:linear-gradient(135deg,#f1d38a,#bd8d36);color:#16130c;padding:10px 14px;border-radius:9px;font-weight:750;cursor:pointer;text-decoration:none;display:inline-block;margin-top:12px}button.secondary{background:#171b22;color:var(--text);border-color:#343b47}.output{margin-top:15px;border:1px solid var(--line);border-radius:10px;padding:13px;background:#0c0f13;overflow:auto}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.metric{padding:12px;background:#171b22;border:1px solid #252b35;border-radius:10px}.metric small{display:block;color:var(--muted);font-size:11px}.metric strong{font-size:18px;overflow-wrap:anywhere}.rowitem{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.rowitem:last-child{border:0}.status{font-size:11px;color:var(--muted);border:1px solid #3a414c;border-radius:99px;padding:3px 8px;white-space:nowrap}.warn{color:#f0ca7a}.fine{color:var(--green)}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600}.footer{margin-top:22px;color:var(--muted);font-size:12px}@media(max-width:760px){.card,.third{grid-column:span 12}.fields,.fields.two,.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:18px 14px}}
 
 .app-nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 4px;padding:10px 0;border-bottom:1px solid var(--line)}.app-nav a{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;color:var(--muted);text-decoration:none;font-size:12px}.app-nav a:hover,.app-nav a[aria-current="page"]{color:var(--gold);border-color:#65532f;background:#1a1711}.app-nav a[aria-current="page"]{font-weight:750}@media(max-width:760px){.app-nav a{flex:1 1 42%;justify-content:center}}
+
+/* AURORA shared dashboard skin — aligned with dashboard.html */
+:root{
+ color-scheme:dark;
+ --bg:#060919;--panel:rgba(16,22,60,.72);--line:rgba(240,185,11,.18);
+ --muted:#94a3b8;--gold:#f0b90b;--text:#f1f5f9;--green:#10b981;--red:#ef4444;
+ --bg-deep:#060919;--bg-primary:#0a0e27;--bg-secondary:#101538;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{
+ margin:0;min-height:100vh;overflow-x:hidden;color:var(--text);
+ font:14px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ background:radial-gradient(circle at 15% 15%,rgba(20,28,85,.4),transparent 45%),
+ radial-gradient(circle at 85% 25%,rgba(240,185,11,.08),transparent 50%),
+ radial-gradient(circle at 50% 85%,rgba(16,22,60,.6),transparent 60%),#060919;
+}
+a{color:#fbbf24}
+.wrap{width:auto;max-width:none;margin-left:270px;padding:34px clamp(20px,3vw,48px) 56px}
+.top{border-bottom:1px solid rgba(240,185,11,.16);padding:0 0 24px}
+.brand{font-family:Orbitron,Inter,sans-serif;letter-spacing:.22em;font-size:11px;color:#fbbf24}
+.top h1{font-family:Orbitron,Inter,sans-serif;font-weight:600;font-size:clamp(25px,2.7vw,38px);letter-spacing:-.035em;margin:10px 0}
+.sub,.muted{color:#94a3b8}
+.pill{border:1px solid rgba(240,185,11,.3);background:rgba(240,185,11,.07);color:#fbbf24;border-radius:999px;padding:7px 12px;font-size:11px;letter-spacing:.04em}
+.app-nav{
+ position:fixed;z-index:50;left:0;top:0;bottom:0;width:246px;overflow-y:auto;
+ display:flex;flex-direction:column;align-items:stretch;gap:7px;margin:0;padding:28px 16px;
+ border:0;border-right:1px solid rgba(240,185,11,.16);
+ background:linear-gradient(180deg,rgba(10,14,39,.98),rgba(6,9,25,.99));
+ box-shadow:12px 0 40px rgba(0,0,0,.2)
+}
+.app-nav:before{content:"AURORA";display:block;padding:4px 10px 22px;color:#fbbf24;font:700 17px Orbitron,Inter,sans-serif;letter-spacing:.2em}
+.app-nav:after{content:"GOLD INTELLIGENCE";display:block;order:2;padding:18px 10px 0;color:#64748b;font-size:10px;letter-spacing:.16em}
+.app-nav a{display:flex;align-items:center;min-height:42px;padding:11px 13px;border:1px solid transparent;border-radius:10px;color:#94a3b8;font-size:12px;transition:all .18s ease}
+.app-nav a:hover,.app-nav a[aria-current="page"]{color:#fbbf24;border-color:rgba(240,185,11,.2);background:linear-gradient(100deg,rgba(240,185,11,.12),rgba(240,185,11,.035))}
+.app-nav a[aria-current="page"]{font-weight:700;box-shadow:inset 2px 0 #f0b90b}
+.grid{gap:18px;margin-top:24px}
+.card{background:linear-gradient(135deg,rgba(20,27,72,.78),rgba(13,18,52,.88));border:1px solid rgba(240,185,11,.14);border-radius:18px;padding:22px;box-shadow:10px 10px 24px rgba(3,5,15,.32),inset 1px 1px 2px rgba(255,255,255,.035);transition:border-color .2s ease,transform .2s ease}
+.card:hover{border-color:rgba(240,185,11,.27)}
+h2{font-size:15px;font-weight:650;letter-spacing:-.01em}
+h3{color:#fbbf24}
+.desc{color:#94a3b8;line-height:1.65}
+label{color:#cbd5e1}
+input,select{background:rgba(6,9,25,.8);border:1px solid #283252;border-radius:9px;color:#f1f5f9}
+input:focus,select:focus{border-color:#f0b90b;box-shadow:0 0 0 3px rgba(240,185,11,.08)}
+button,.btn{background:linear-gradient(135deg,#ffd700,#d4a017);border:1px solid rgba(255,215,0,.45);color:#111827;border-radius:10px;box-shadow:0 5px 16px rgba(240,185,11,.08);transition:transform .18s ease,filter .18s ease}
+button:hover,.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+button.secondary{background:rgba(22,28,72,.8);color:#e2e8f0;border-color:rgba(240,185,11,.18);box-shadow:none}
+.output{background:rgba(6,9,25,.56);border-color:rgba(148,163,184,.15);border-radius:12px}
+.metric{background:rgba(6,9,25,.38);border-color:rgba(240,185,11,.12);border-radius:12px}
+.metric small{color:#94a3b8}
+.metric strong{color:#f8fafc}
+.status{border-color:rgba(148,163,184,.22)}
+th{color:#94a3b8}
+td{border-color:rgba(148,163,184,.12)}
+.footer{border-top:1px solid rgba(240,185,11,.12);padding-top:16px;line-height:1.7}
+@media(max-width:1080px){
+ .wrap{margin-left:0;padding:24px 22px 48px}
+ .app-nav{position:relative;inset:auto;width:auto;display:flex;flex-direction:row;flex-wrap:wrap;gap:7px;padding:12px 22px;border-right:0;border-bottom:1px solid rgba(240,185,11,.16);box-shadow:none}
+ .app-nav:before{width:100%;padding:2px 0 7px}
+ .app-nav:after{display:none}
+ .app-nav a{flex:1 1 150px;justify-content:center}
+}
+@media(max-width:760px){
+ .wrap{padding:22px 14px 40px}
+ .app-nav{padding:12px 14px}
+ .app-nav a{flex:1 1 42%;justify-content:flex-start}
+ .card{padding:17px;border-radius:15px}
+ .top{align-items:flex-start}
+}
+
 </style></head>
 <body><main class="wrap">
 <header class="top"><div><div class="brand">A U R O R A / RESEARCH SUITE</div><h1>Research. Model. Manage risk.</h1><div class="sub">Historical-only intelligence · Transparent assumptions · No fabricated live quotes</div></div><span class="pill">LIVE DATA EXCLUDED</span></header>
