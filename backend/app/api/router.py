@@ -8,6 +8,7 @@ from backend.app.api.backtests import router as backtests_router
 from backend.app.api.intelligence import router as intelligence_router
 from backend.app.api.research import router as research_router
 from backend.app.api.research_lab import router as research_lab_router
+from backend.app.api.macro import router as macro_router
 
 api_router = APIRouter(prefix="/api")
 
@@ -20,3 +21,4 @@ api_router.include_router(backtests_router)
 api_router.include_router(intelligence_router)
 api_router.include_router(research_router)
 api_router.include_router(research_lab_router)
+api_router.include_router(macro_router)
