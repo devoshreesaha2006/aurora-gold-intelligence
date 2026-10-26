@@ -253,7 +253,7 @@ def forecast_validation(
     trend_metrics = metric_pack(actuals, trend_predictions)
     previous_values = [float(history[max(0, first_test + i - 1)][1]) for i in range(len(actuals))]
     def direction_accuracy(predicted_values):
-        correct = [((p - prev) > 0) == ((actual - prev) > 0) for p, prev, actual in zip(predicted_values, previous_values, actuals) if actual != prev]
+        correct = [np.sign(p - prev) == np.sign(actual - prev) for p, prev, actual in zip(predicted_values, previous_values, actuals) if actual != prev]
         return round(sum(correct) / len(correct) * 100, 2) if correct else None
     naive_metrics["directional_accuracy_pct"] = direction_accuracy(naive_predictions)
     mean_metrics["directional_accuracy_pct"] = direction_accuracy(mean_predictions)
