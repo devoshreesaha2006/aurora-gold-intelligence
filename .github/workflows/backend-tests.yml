@@ -37,5 +37,5 @@ jobs:
       - name: Install dependencies
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
-      - name: Run backend tests
-        run: python -m pytest backend/tests -v
+      - name: Run backend and importer tests
+        run: python -m pytest backend/tests tests -v
