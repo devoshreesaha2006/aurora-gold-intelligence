@@ -222,8 +222,15 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
     threshold = _select_training_threshold([p.z_score for p in train], request.entry_z)
     cost_per_roundtrip = (request.transaction_cost_per_10g + request.slippage_per_10g) * 2 * request.units
     outcomes = []
+    expiry_transition_exclusions = 0
     for idx in range(len(test) - 1):
         current, nxt = test[idx], test[idx + 1]
+        # Settlement-level spread changes across different contract expiries
+        # include a roll gap, not a same-contract return. Keep the observation
+        # in the sample, but never score that transition as a trade outcome.
+        if current.expiry_date != nxt.expiry_date:
+            expiry_transition_exclusions += 1
+            continue
         z = current.z_score
         if z is None or abs(z) < threshold:
             continue
@@ -231,6 +238,7 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
         direction = -1.0 if z > 0 else 1.0
         gross = (nxt.spread - current.spread) * direction * request.units
         outcomes.append({"date": str(current.trade_date), "next_date": str(nxt.trade_date),
+                         "expiry_date": str(current.expiry_date) if current.expiry_date else None,
                          "z_score": round(z, 4), "gross_pnl": round(gross, 2),
                          "estimated_costs": round(cost_per_roundtrip, 2),
                          "net_pnl": round(gross - cost_per_roundtrip, 2)})
@@ -243,6 +251,7 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
         "training_start": train[0].trade_date, "training_end": train[-1].trade_date,
         "holdout_start": test[0].trade_date, "holdout_end": test[-1].trade_date,
         "train_fraction": request.train_fraction, "entry_threshold_selected_from_training": round(threshold, 4),
+        "expiry_transition_exclusions": expiry_transition_exclusions,
         "holdout_signal_count": len(outcomes), "gross_pnl": round(gross_total, 2),
         "estimated_costs": round(cost_per_roundtrip * len(outcomes), 2), "net_pnl": round(net_total, 2),
         "win_rate_pct": round(wins / len(outcomes) * 100, 2) if outcomes else None,
@@ -251,6 +260,7 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
             "Rolling Z-scores are computed causally from trailing history; no future observation is used to form a signal.",
             "The training-only 90th-percentile threshold is bounded by the user-configured entry Z minimum; holdout outcomes do not influence threshold selection.",
             "Each signal is evaluated over the next synchronized observation, not a portfolio-level position simulator.",
+            "Transitions between different explicit expiries are excluded from outcome scoring; no contract-roll level gap is booked as P&L.",
             "Settlement prices are proxies, not executable quotes. Costs are estimates and actual contract/margin/tax effects may differ.",
             "Historical performance is not a guarantee of future results."
         ]
