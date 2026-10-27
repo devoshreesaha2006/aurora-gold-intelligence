@@ -25,8 +25,8 @@ def test_html_table_xls_is_converted_to_canonical_csv():
     rows = list(__import__("csv").DictReader(__import__("io").StringIO(converted.decode("utf-8"))))
     assert symbols == {"GOLDM"}
     assert len(rows) == 1
-    assert rows[0]["date"] == "28/10/2026"
-    assert rows[0]["expiry_date"] == "05NOV2026"
+    assert rows[0]["date"] == "2026-10-28"
+    assert rows[0]["expiry_date"] == "2026-11-05"
     assert rows[0]["close"] == "142509"
     assert rows[0]["volume"] == "12"
     assert rows[0]["open_interest"] == "34"
@@ -36,5 +36,15 @@ def test_csv_with_mcx_headers_is_canonicalized():
     raw = "Date,Symbol,Expiry Date,Open,High,Low,Close,Volume(Lots),Open Interest(Lots)\n28/10/2026,GOLDPETAL,31OCT2026,14000,14100,13900,14050,7,9\n"
     converted, symbols = MODULE.canonicalize_rows(list(__import__("csv").reader(__import__("io").StringIO(raw))))
     assert symbols == {"GOLDPETAL"}
+    assert b"2026-10-28,GOLDPETAL,2026-10-31" in converted
     assert b"14050" in converted
     assert b",7,9" in converted
+
+def test_mcx_spaced_display_dates_are_normalized_to_iso():
+    raw = "Date,Symbol,Expiry Date,Open,High,Low,Close,Volume(Lots),Open Interest(Lots)\n26 Oct 2026,GOLDM,05NOV2026,140511,141800,140333,141451,30036,39046\n"
+    converted, symbols = MODULE.canonicalize_rows(list(__import__("csv").reader(__import__("io").StringIO(raw))))
+    rows = list(__import__("csv").DictReader(__import__("io").StringIO(converted.decode("utf-8"))))
+    assert symbols == {"GOLDM"}
+    assert rows[0]["date"] == "2026-10-26"
+    assert rows[0]["expiry_date"] == "2026-11-05"
+    assert rows[0]["close"] == "141451"
