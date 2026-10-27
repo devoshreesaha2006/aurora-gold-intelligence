@@ -435,9 +435,21 @@ class RelativeValueAnalyticsService:
         expiry_risk_count = 0
         watch_count = 0
 
-        latest_date = evaluation_date or eligible_analytics_observations_query(self.db).with_entities(
-            func.max(MarketObservation.trade_date)
-        ).scalar()
+        latest_date = evaluation_date
+        if latest_date is None:
+            # Prefer the latest eligible observation row over an aggregate-only
+            # lookup. This keeps the radar snapshot aligned with the same eligible
+            # observation query used by pairwise spread history, and avoids a
+            # null evaluation date when historical pair observations are present.
+            latest_observation = (
+                eligible_analytics_observations_query(self.db)
+                .order_by(
+                    MarketObservation.trade_date.desc(),
+                    MarketObservation.expiry_date.desc()
+                )
+                .first()
+            )
+            latest_date = latest_observation.trade_date if latest_observation else None
 
         for leg_a, leg_b in VALID_PAIRS:
             pair_name = f"{leg_a}-{leg_b}"
