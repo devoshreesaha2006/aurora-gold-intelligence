@@ -51,8 +51,8 @@ def non_test_observations_query(db):
     from backend.app.models.market_observation import MarketObservation
 
     test_rows = or_(
-        sql_test_source_condition(MarketObservation.data_source),
-        sql_test_source_condition(ImportBatch.data_source),
+        sql_sql_test_source_condition(MarketObservation.data_source),
+        sql_sql_test_source_condition(ImportBatch.data_source),
     )
     return (
         db.query(MarketObservation)
@@ -68,8 +68,8 @@ def eligible_analytics_observations_query(db):
     from backend.app.models.market_observation import MarketObservation
 
     ineligible = or_(
-        test_source_condition(MarketObservation.data_source),
-        test_source_condition(ImportBatch.data_source),
+        sql_test_source_condition(MarketObservation.data_source),
+        sql_test_source_condition(ImportBatch.data_source),
         MarketObservation.is_synthetic.is_(True),
         ImportBatch.is_synthetic.is_(True),
         synthetic_source_condition(MarketObservation.data_source),
