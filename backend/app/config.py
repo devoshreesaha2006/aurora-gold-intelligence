@@ -51,6 +51,14 @@ class Settings(BaseSettings):
     # AURORA's intended processing and storage. Credentials alone are insufficient.
     mcx_feed_license_confirmed: bool = False
 
+    # Opt-in public Market Watch snapshot importer. This is unverified data, not
+    # a substitute for a contracted MCX feed. Disabled unless the operator confirms terms.
+    mcx_watch_url: str = "https://www.mcxindia.com/market-data/market-watch/GetMarketWatch?culture=en"
+    mcx_watch_timeout_seconds: float = 8.0
+    mcx_watch_poll_interval_seconds: int = 300
+    mcx_watch_stale_after_seconds: int = 1800
+    mcx_watch_terms_confirmed: bool = False
+
 
     @field_validator("database_url")
     @classmethod
