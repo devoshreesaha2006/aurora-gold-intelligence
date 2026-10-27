@@ -557,6 +557,7 @@ class RelativeValueAnalyticsService:
                 expiry_date=last_pt.expiry_date,
                 data_age_days=max(0, (date.today() - last_pt.trade_date).days),
                 snapshot_freshness=("current-session" if (date.today() - last_pt.trade_date).days == 0 else "recent-history" if (date.today() - last_pt.trade_date).days == 1 else "historical"),
+                is_actionable=((date.today() - last_pt.trade_date).days <= 1 and classification != "No Signal"),
                 spread=last_pt.spread,
                 rolling_mean=last_pt.rolling_mean,
                 rolling_std=last_pt.rolling_std,
@@ -577,7 +578,7 @@ class RelativeValueAnalyticsService:
                 estimated_cost_hurdle=cost_hurdle,
                 gross_edge=gross_edge,
                 net_edge=net_edge,
-                reason=reason
+                reason=(reason if (date.today() - last_pt.trade_date).days <= 1 else reason + f" Historical observation is {(date.today() - last_pt.trade_date).days} calendar days old; do not treat this as a current trading signal.")
             ))
 
         return RadarResponse(
