@@ -71,10 +71,23 @@ def ml_spread_forecast(symbol: str = Query("GOLDM", pattern=SYMBOL_PATTERN),
         actual.append(act)
         predicted.append(pred)
         naive.append(0.0)
-        folds.append({"origin_date": hist[i][0].isoformat(), "target_date": hist[i + 1][0].isoformat(),
-                      "actual_change_pct": round(act * 100, 5),
-                      "ml_predicted_change_pct": round(pred * 100, 5),
-                      "naive_predicted_change_pct": 0.0, "training_targets": len(x)})
+        origin_price = float(p[i])
+        actual_price = float(p[i + 1])
+        folds.append({
+            "origin_date": hist[i][0].isoformat(),
+            "target_date": hist[i + 1][0].isoformat(),
+            "origin_price_10g": round(origin_price, 2),
+            "actual_price_10g": round(actual_price, 2),
+            "ml_predicted_price_10g": round(origin_price * (1 + pred), 2),
+            "naive_predicted_price_10g": round(origin_price, 2),
+            "actual_change_pct": round(act * 100, 5),
+            "ml_predicted_change_pct": round(pred * 100, 5),
+            "naive_predicted_change_pct": 0.0,
+            "absolute_error_pct_points": round(abs(act - pred) * 100, 6),
+            "naive_absolute_error_pct_points": round(abs(act) * 100, 6),
+            "direction_correct": bool(np.sign(act) == np.sign(pred)) if act != 0 else None,
+            "training_targets": len(x),
+        })
     if not folds:
         return {"status": "insufficient_history", "symbol": symbol, "observations": len(p),
                 "metrics": None, "folds": []}
