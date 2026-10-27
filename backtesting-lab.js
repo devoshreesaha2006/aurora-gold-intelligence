@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const API_BASE = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? location.origin : 'http://127.0.0.1:8000')).replace(/\/$/, '');
+  const API_BASE = (window.AURORA_API_BASE || (['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://127.0.0.1:8000' : 'https://aurora-gold-intelligence.onrender.com')).replace(/\/$/, '');
   const form = document.getElementById('backtestForm');
   const runButton = document.getElementById('runButton');
   const formError = document.getElementById('formError');
