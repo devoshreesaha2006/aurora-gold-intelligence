@@ -20,9 +20,9 @@ def is_synthetic_source(value):
     return source in SYNTHETIC_SOURCES or source.startswith(("synthetic_", "demo_", "sample_"))
 
 
-def test_source_condition(column):
+def sql_test_source_condition(column):
     """SQL equivalent of is_test_source for row and import-batch filters."""
-    source = func.lower(func.coalesce(column, ""))
+    source = func.lower(func.trim(func.coalesce(column, "")))
     return or_(
         source.in_(TEST_SOURCES),
         source.startswith("test_", autoescape=True),
