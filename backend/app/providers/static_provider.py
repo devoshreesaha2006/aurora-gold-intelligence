@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, not_, or_
+from sqlalchemy import and_, case, func, not_, or_
 
 from backend.app.providers.base import MarketDataProvider
 from backend.app.schemas.market import MarketStatusRead
@@ -31,65 +31,69 @@ class StaticDatabaseProvider(MarketDataProvider):
     Transparently labels data source mode as 'staged_csv' or 'demo_synthetic'.
     """
 
-    def get_provider_name(self) -> str:
-        return "AURORA Local Database & CSV Ingestion Engine"
+    
+def get_provider_name(self) -> str:
+    return "AURORA Local Database & CSV Ingestion Engine"
 
-    def is_live_connected(self) -> bool:
-        return False
+def is_live_connected(self) -> bool:
+    return False
 
-    def get_market_status(self, db: Session) -> MarketStatusRead:
-        """Return database health using bounded aggregate queries, without loading rows."""
-        from sqlalchemy import case
+def get_market_status(self, db: Session) -> MarketStatusRead:
+    """Return database health using bounded aggregate queries, without loading rows."""
+    total_contracts = (
+        db.query(func.count(Contract.id))
+        .filter(Contract.is_active.is_(True))
+        .scalar() or 0
+    )
+    total_obs = db.query(func.count(MarketObservation.id)).scalar() or 0
+    latest_date = db.query(func.max(MarketObservation.trade_date)).scalar()
+    last_ingestion = db.query(func.max(ImportBatch.created_at)).scalar()
 
-        total_contracts = db.query(func.count(Contract.id)).filter(Contract.is_active.is_(True)).scalar() or 0
-        total_obs = db.query(func.count(MarketObservation.id)).scalar() or 0
-        latest_date = db.query(func.max(MarketObservation.trade_date)).scalar()
-        last_ingestion = db.query(func.max(ImportBatch.created_at)).scalar()
+    # Classify provenance in a single joined aggregate scan instead of three
+    # separate COUNT queries over the complete observations history.
+    is_test = or_(
+        _source_condition(MarketObservation.data_source, is_test_source),
+        _source_condition(ImportBatch.data_source, is_test_source),
+    )
+    is_synthetic = or_(
+        MarketObservation.is_synthetic.is_(True),
+        ImportBatch.is_synthetic.is_(True),
+        _source_condition(MarketObservation.data_source, is_synthetic_source),
+        _source_condition(ImportBatch.data_source, is_synthetic_source),
+    )
+    provenance_counts = db.query(
+        func.coalesce(func.sum(case((is_test, 1), else_=0)), 0).label("test_count"),
+        func.coalesce(func.sum(case((and_(not_(is_test), is_synthetic), 1), else_=0)), 0).label("synthetic_count"),
+        func.coalesce(func.sum(case((and_(not_(is_test), not_(is_synthetic)), 1), else_=0)), 0).label("csv_count"),
+    ).select_from(MarketObservation).outerjoin(
+        ImportBatch, MarketObservation.import_batch_id == ImportBatch.id
+    ).one()
 
-        # Compute provenance counts in one grouped scan rather than running three
-        # separate joined COUNT queries. This matters on hosted databases and
-        # prevents the status endpoint from repeatedly scanning imported history.
-        is_test = or_(
-            _source_condition(MarketObservation.data_source, is_test_source),
-            _source_condition(ImportBatch.data_source, is_test_source),
-        )
-        is_synthetic = or_(
-            MarketObservation.is_synthetic.is_(True),
-            ImportBatch.is_synthetic.is_(True),
-            _source_condition(MarketObservation.data_source, is_synthetic_source),
-            _source_condition(ImportBatch.data_source, is_synthetic_source),
-        )
-        provenance_counts = db.query(
-            func.coalesce(func.sum(case((is_test, 1), else_=0)), 0).label("test_count"),
-            func.coalesce(func.sum(case((and_(not_(is_test), is_synthetic), 1), else_=0)), 0).label("synthetic_count"),
-            func.coalesce(func.sum(case((and_(not_(is_test), not_(is_synthetic)), 1), else_=0)), 0).label("csv_count"),
-        ).select_from(MarketObservation).outerjoin(
-            ImportBatch, MarketObservation.import_batch_id == ImportBatch.id
-        ).one()
+    test_count = int(provenance_counts.test_count or 0)
+    synthetic_count = int(provenance_counts.synthetic_count or 0)
+    csv_count = int(provenance_counts.csv_count or 0)
 
-        test_count = int(provenance_counts.test_count or 0)
-        synthetic_count = int(provenance_counts.synthetic_count or 0)
-        csv_count = int(provenance_counts.csv_count or 0)
+    labels = []
+    if csv_count:
+        labels.append("User-imported historical CSV (not provider-verified)")
+    if synthetic_count:
+        labels.append("Synthetic data present")
+    if test_count:
+        labels.append("Test data present")
+    if not labels:
+        labels.append("No data ingested (awaiting CSV)")
+    labels.append("No verified provider observations")
 
-        labels = []
-        if csv_count:
-            labels.append("User-imported historical CSV (not provider-verified)")
-        if synthetic_count:
-            labels.append("Synthetic data present")
-        if test_count:
-            labels.append("Test data present")
-        if not labels:
-            labels.append("No data ingested (awaiting CSV)")
-        labels.append("No verified provider observations")
+    if csv_count:
+        mode = "staged_csv"
+    elif test_count:
+        mode = "test_data"
+    elif synthetic_count:
+        mode = "demo_synthetic"
+    else:
+        # Keep the remainder of your existing else-block and return statement.
+        pass
 
-        if csv_count:
-            mode = "staged_csv"
-        elif test_count:
-            mode = "test_data"
-        elif synthetic_count:
-            mode = "demo_synthetic"
-        else:
-            mode = "live_feed_disconnected" if settings.data_mode == "live_feed_authorized" else settings.data_mode
 
         return MarketStatusRead(
             market_open=None,
