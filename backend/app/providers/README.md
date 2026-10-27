@@ -72,3 +72,21 @@ this daily persistence model before enabling storage.
 
 Authentication credentials are sent only from the backend; responses never echo
 them. Provider exceptions and HTTP bodies are not logged or returned to callers.
+
+
+## Optional public Market Watch snapshot mode (unverified)
+
+AURORA includes an opt-in best-effort importer for the public webpage JSON endpoint you inspected. It is **not an authenticated or licensed feed**, is not guaranteed to remain available, and never reports `is_live_connected=true` or `feed_status=LIVE`. Check MCX terms and deployment permissions before enabling. The opt-in setting is an operator acknowledgement, not a legal or technical authorization check.
+
+Only after confirming your intended use is permitted, configure the backend environment (local `.env` or Render backend environment variables):
+
+```dotenv
+DATA_MODE=mcx_market_watch
+MCX_MARKET_WATCH_TERMS_CONFIRMED=true
+MCX_WATCH_POLL_INTERVAL_SECONDS=300
+MCX_WATCH_STALE_AFTER_SECONDS=1800
+```
+
+The endpoint defaults to `https://www.mcxindia.com/market-data/market-watch/GetMarketWatch?culture=en`. Polling occurs on market status/price requests, not in a background worker. It filters to `FUTCOM` and GOLDM/GOLDTEN/GOLDGUINEA/GOLDPETAL, validates prices/OHLC/expiry/timestamps, rejects implausible quotes (including a ₹5 gold quote), normalizes using configured AURORA contract specs, and will not overwrite CSV or authorized-provider rows. A quote timestamp older than the stale threshold is shown as stale; polling more frequently does not make the underlying quote newer. The database keeps one observation per symbol/trade date/expiry, not a tick archive.
+
+If MCX blocks server-side requests, changes the response, or the endpoint cannot be used under the applicable terms, turn this mode off and use a contracted provider bridge instead. Do not use this mode for production trading or represent its snapshots as authenticated exchange data.

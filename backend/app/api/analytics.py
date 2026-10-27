@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from backend.app.database import get_db
+from backend.app.providers import get_market_provider
 from backend.app.schemas.common import StandardResponse
 from backend.app.models.market_observation import MarketObservation
 from backend.app.services.data_provenance import eligible_analytics_observations_query
@@ -72,6 +73,9 @@ def get_opportunity_radar(
     This is not a claim of live market connectivity. Includes deviation intensities,
     heuristic ranking scores, trap-risk scores, and rule-based classifications.
     """
+    # A radar refresh should trigger the configured provider's rate-limited poll,
+    # so a user need not visit the market-status page before fresh quotes arrive.
+    get_market_provider().get_market_status(db)
     service = RelativeValueAnalyticsService(db)
     radar_data = service.get_radar_summary(
         window_days=window,
