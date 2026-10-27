@@ -21,6 +21,21 @@ def features(prices, i):
         float(p[-1] / np.mean(p[-5:]) - 1), float(p[-1] / np.mean(p[-20:]) - 1)
     ]
 
+def select_front_expiry_history(rows):
+    """Select the nearest listed expiry per trade date and retain its identity."""
+    by_date = {}
+    for row in sorted(rows, key=lambda item: (item.trade_date, item.expiry_date)):
+        by_date.setdefault(row.trade_date, row)
+    history = []
+    for day, row in sorted(by_date.items()):
+        value = row.normalized_price_10g_basis
+        if value is None:
+            continue
+        value = float(value)
+        if math.isfinite(value) and value > 0:
+            history.append((day, value, row.expiry_date))
+    return history
+
 
 @router.get("/ml-spread-forecast")
 def ml_spread_forecast(symbol: str = Query("GOLDM", pattern=SYMBOL_PATTERN),
@@ -37,13 +52,8 @@ def ml_spread_forecast(symbol: str = Query("GOLDM", pattern=SYMBOL_PATTERN),
     by_date = {}
     for row in rows:
         by_date.setdefault(row.trade_date, row)
-    # Keep the chosen front-expiry identity alongside each price so expiry-roll
-    # transitions can be identified instead of silently treated as ordinary returns.
-    hist = [(day, float(row.normalized_price_10g_basis), row.expiry_date)
-            for day, row in sorted(by_date.items())
-            if row.normalized_price_10g_basis is not None
-            and math.isfinite(float(row.normalized_price_10g_basis))
-            and float(row.normalized_price_10g_basis) > 0]
+    # Retain the selected front-expiry identity so roll transitions are auditable.
+    hist = select_front_expiry_history(rows)
     p = np.asarray([item[1] for item in hist], dtype=float)
     if len(p) < 60:
         return {"status": "insufficient_history", "symbol": symbol, "observations": len(p),
