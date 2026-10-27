@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 import os
 import sys
 import time
@@ -37,6 +38,7 @@ def normalize_source_date(value: str, field_name: str) -> str:
         return raw
     for fmt in (
         "%Y-%m-%d",
+        "%m/%d/%Y",
         "%d/%m/%Y",
         "%d-%m-%Y",
         "%d %b %Y",
@@ -158,6 +160,61 @@ def canonicalize_rows(rows: list[list[str]]) -> tuple[bytes, set[str]]:
     return output.getvalue().encode("utf-8"), found_symbols
 
 
+
+def canonicalize_json_records(records: list[dict]) -> tuple[bytes, set[str]]:
+    """Convert the public MCX Bhavcopy page's JSON record array to canonical CSV."""
+    output = io.StringIO(newline="")
+    writer = csv.writer(output)
+    writer.writerow(CANONICAL_HEADERS)
+    found_symbols: set[str] = set()
+    for item in records:
+        if not isinstance(item, dict):
+            continue
+        normalized = {normalize_header(str(k)): v for k, v in item.items()}
+        symbol = str(normalized.get("symbol") or normalized.get("productcode") or "").strip().upper()
+        if symbol not in TARGET_SYMBOLS:
+            continue
+        date_value = normalized.get("date") or normalized.get("datedisplay") or ""
+        expiry_value = normalized.get("expirydate") or normalized.get("expiry") or ""
+        close_value = normalized.get("close")
+        if close_value in (None, ""):
+            close_value = normalized.get("ltp")
+        if not date_value or not expiry_value or close_value in (None, ""):
+            continue
+        date_text = normalize_source_date(str(date_value), "date")
+        expiry_text = normalize_source_date(str(expiry_value), "expiry_date")
+        def val(*keys: str) -> str:
+            for key in keys:
+                value = normalized.get(key)
+                if value not in (None, ""):
+                    return str(value).strip()
+            return ""
+        writer.writerow([
+            date_text, symbol, expiry_text,
+            val("open"), val("high"), val("low"),
+            str(close_value).strip(), val("volume", "vollots", "volumelots"),
+            val("openinterest", "openinterestlots", "oi"),
+        ])
+        found_symbols.add(symbol)
+    if not found_symbols:
+        raise RuntimeError("The JSON response contains no usable GOLDM/GOLDTEN/GOLDGUINEA/GOLDPETAL rows.")
+    return output.getvalue().encode("utf-8"), found_symbols
+
+
+def find_json_records(text: str) -> list[dict] | None:
+    """Find a JSON array in a raw JSON response or an HTML page body."""
+    decoder = json.JSONDecoder()
+    candidates = [0]
+    candidates.extend(i for i, ch in enumerate(text) if ch == "[")
+    for start in candidates:
+        try:
+            value, _ = decoder.raw_decode(text[start:].lstrip())
+        except json.JSONDecodeError:
+            continue
+        if isinstance(value, list) and value and any(isinstance(row, dict) for row in value):
+            return value
+    return None
+
 def download_and_convert(url: str) -> tuple[bytes, set[str], str]:
     parsed = urlparse(url)
     if parsed.scheme != "https" or (parsed.hostname or "").lower() not in ALLOWED_HOSTS:
@@ -173,11 +230,22 @@ def download_and_convert(url: str) -> tuple[bytes, set[str], str]:
         raise RuntimeError(f"Downloaded file exceeds {MAX_BYTES} bytes.")
     if not body:
         raise RuntimeError("Downloaded file is empty.")
-    if body.lstrip().lower().startswith((b"<!doctype html", b"<html", b"<head")) or "html" in content_type:
+    try:
+        text = body.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        text = body.decode("latin-1")
+    # The official Bhavcopy page can return its rendered records as a JSON
+    # array wrapped in HTML rather than as a direct CSV download.
+    records = find_json_records(text)
+    if records is not None:
         try:
-            text = body.decode("utf-8-sig")
-        except UnicodeDecodeError:
-            text = body.decode("latin-1")
+            converted, symbols = canonicalize_json_records(records)
+            return converted, symbols, "json-records"
+        except RuntimeError:
+            # Continue to table parsing in case the page also contains a valid
+            # downloadable table alongside unrelated JSON.
+            pass
+    if body.lstrip().lower().startswith((b"<!doctype html", b"<html", b"<head")) or "html" in content_type:
         parser = TableParser()
         parser.feed(text)
         for table in sorted(parser.tables, key=len, reverse=True):
@@ -186,11 +254,7 @@ def download_and_convert(url: str) -> tuple[bytes, set[str], str]:
                 return converted, symbols, "html-table"
             except RuntimeError:
                 continue
-        raise RuntimeError("The response is HTML, but no supported MCX bhavcopy table was found (login/error pages are not data).")
-    try:
-        text = body.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        text = body.decode("latin-1")
+        raise RuntimeError("The response is HTML, but no supported MCX bhavcopy JSON records or table were found (login/error pages are not data).")
     converted, symbols = canonicalize_rows(list(csv.reader(io.StringIO(text))))
     return converted, symbols, "csv"
 
