@@ -51,8 +51,8 @@ def non_test_observations_query(db):
     from backend.app.models.market_observation import MarketObservation
 
     test_rows = or_(
-        sql_sql_test_source_condition(MarketObservation.data_source),
-        sql_sql_test_source_condition(ImportBatch.data_source),
+        sql_test_source_condition(MarketObservation.data_source),
+        sql_test_source_condition(ImportBatch.data_source),
     )
     return (
         db.query(MarketObservation)
