@@ -90,8 +90,8 @@ def canonicalize_rows(rows: list[list[str]]) -> tuple[bytes, set[str]]:
         "high": {"high", "highprice"},
         "low": {"low", "lowprice"},
         "close": {"close", "closeprice", "settleprice", "settlementprice", "ltp"},
-        "volume": {"volume", "vollots", "tradedqty", "totalvolume", "contractstraded"},
-        "open_interest": {"openinterest", "oilots", "oi"},
+        "volume": {"volume", "vollots", "volumelots", "tradedqty", "totalvolume", "contractstraded"},
+        "open_interest": {"openinterest", "openinterestlots", "oilots", "oi"},
     }
     header_index = None
     mapping: dict[str, int] = {}
