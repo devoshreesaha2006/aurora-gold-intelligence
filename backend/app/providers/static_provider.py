@@ -1,14 +1,15 @@
 from datetime import datetime, timezone
 from typing import List
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, case, func, not_, or_
 
+from sqlalchemy import and_, case, func, not_, or_
+from sqlalchemy.orm import Session
+
+from backend.app.config import settings
+from backend.app.models.contract import Contract
+from backend.app.models.data_import import ImportBatch
+from backend.app.models.market_observation import MarketObservation
 from backend.app.providers.base import MarketDataProvider
 from backend.app.schemas.market import MarketStatusRead
-from backend.app.models.contract import Contract
-from backend.app.models.market_observation import MarketObservation
-from backend.app.models.data_import import ImportBatch
-from backend.app.config import settings
 from backend.app.services.data_provenance import is_synthetic_source, is_test_source
 
 
@@ -39,7 +40,12 @@ class StaticDatabaseProvider(MarketDataProvider):
 
     def get_market_status(self, db: Session) -> MarketStatusRead:
         """Return database health using bounded aggregate queries, without loading rows."""
-        total_contracts = db.query(func.count(Contract.id)).filter(Contract.is_active.is_(True)).scalar() or 0
+        total_contracts = (
+            db.query(func.count(Contract.id))
+            .filter(Contract.is_active.is_(True))
+            .scalar()
+            or 0
+        )
         total_obs = db.query(func.count(MarketObservation.id)).scalar() or 0
         latest_date = db.query(func.max(MarketObservation.trade_date)).scalar()
         last_ingestion = db.query(func.max(ImportBatch.created_at)).scalar()
@@ -56,13 +62,20 @@ class StaticDatabaseProvider(MarketDataProvider):
             _source_condition(MarketObservation.data_source, is_synthetic_source),
             _source_condition(ImportBatch.data_source, is_synthetic_source),
         )
-        provenance_counts = db.query(
-            func.coalesce(func.sum(case((is_test, 1), else_=0)), 0).label("test_count"),
-            func.coalesce(func.sum(case((and_(not_(is_test), is_synthetic), 1), else_=0)), 0).label("synthetic_count"),
-            func.coalesce(func.sum(case((and_(not_(is_test), not_(is_synthetic)), 1), else_=0)), 0).label("csv_count"),
-        ).select_from(MarketObservation).outerjoin(
-            ImportBatch, MarketObservation.import_batch_id == ImportBatch.id
-        ).one()
+        provenance_counts = (
+            db.query(
+                func.coalesce(func.sum(case((is_test, 1), else_=0)), 0).label("test_count"),
+                func.coalesce(
+                    func.sum(case((and_(not_(is_test), is_synthetic), 1), else_=0)), 0
+                ).label("synthetic_count"),
+                func.coalesce(
+                    func.sum(case((and_(not_(is_test), not_(is_synthetic)), 1), else_=0)), 0
+                ).label("csv_count"),
+            )
+            .select_from(MarketObservation)
+            .outerjoin(ImportBatch, MarketObservation.import_batch_id == ImportBatch.id)
+            .one()
+        )
 
         test_count = int(provenance_counts.test_count or 0)
         synthetic_count = int(provenance_counts.synthetic_count or 0)
@@ -86,7 +99,11 @@ class StaticDatabaseProvider(MarketDataProvider):
         elif synthetic_count:
             mode = "demo_synthetic"
         else:
-            mode = "live_feed_disconnected" if settings.data_mode == "live_feed_authorized" else settings.data_mode
+            mode = (
+                "live_feed_disconnected"
+                if settings.data_mode == "live_feed_authorized"
+                else settings.data_mode
+            )
 
         return MarketStatusRead(
             market_open=None,
@@ -106,7 +123,9 @@ class StaticDatabaseProvider(MarketDataProvider):
             data_provenance="; ".join(labels),
         )
 
-    def fetch_latest_observations(self, db: Session, limit: int = 100) -> List[MarketObservation]:
+    def fetch_latest_observations(
+        self, db: Session, limit: int = 100
+    ) -> List[MarketObservation]:
         return (
             db.query(MarketObservation)
             .order_by(MarketObservation.trade_date.desc(), MarketObservation.symbol.asc())
