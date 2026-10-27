@@ -49,9 +49,6 @@ def ml_spread_forecast(symbol: str = Query("GOLDM", pattern=SYMBOL_PATTERN),
     rows = (eligible_analytics_observations_query(db)
             .filter(MarketObservation.symbol == symbol)
             .order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc()).all())
-    by_date = {}
-    for row in rows:
-        by_date.setdefault(row.trade_date, row)
     # Retain the selected front-expiry identity so roll transitions are auditable.
     hist = select_front_expiry_history(rows)
     p = np.asarray([item[1] for item in hist], dtype=float)
