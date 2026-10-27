@@ -734,3 +734,27 @@ def test_event_evidence_preserves_observed_zero_liquidity():
     assert evidence.volume_b == 12
     assert evidence.open_interest_a == 0
     assert evidence.open_interest_b == 5
+
+
+
+def test_synchronized_analytics_rejects_invalid_price_basis():
+    """Bad normalized/raw prices must not enter spreads or downstream radar statistics."""
+    from types import SimpleNamespace
+
+    valid = SimpleNamespace(normalized_price_10g_basis=145226.18, close_price=116648.0)
+    assert RelativeValueAnalyticsService._has_valid_price_basis(valid) is True
+
+    for normalized, close in [
+        (None, 100.0),
+        (0.0, 100.0),
+        (-1.0, 100.0),
+        (float("nan"), 100.0),
+        (float("inf"), 100.0),
+        (100.0, None),
+        (100.0, 0.0),
+        (100.0, -5.0),
+        (100.0, float("nan")),
+        (100.0, float("inf")),
+    ]:
+        row = SimpleNamespace(normalized_price_10g_basis=normalized, close_price=close)
+        assert RelativeValueAnalyticsService._has_valid_price_basis(row) is False
