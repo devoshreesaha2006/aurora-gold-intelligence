@@ -172,7 +172,7 @@ td{border-color:rgba(148,163,184,.12)}
 <article class="card panel-glass" id="research-backtest"><h2>Strategy backtesting</h2><p class="desc">Use the existing Walk-Forward Backtesting Lab for portfolio simulation, equity curve, P&amp;L, drawdown, costs and trade logs. Per-leg P&amp;L is arithmetic attribution; passive leg benchmarks are not exposure-matched alpha.</p><p class="muted" style="font-size:13px">Backtest metrics depend on the chosen pair, history, user-entered cost assumptions and settlement fill proxies. Historical results are not evidence of future performance.</p><a class="btn" href="backtesting-lab.html">Open Backtesting Lab</a><p class="muted" style="font-size:12px">Ensure the existing frontend server is running to open the Backtesting Lab.</p></article>
 </section><p class="footer">AURORA research suite · Historical data may be user-imported and is not necessarily exchange-verified. Always check the data provenance, synchronized expiry coverage, and contract specification before interpreting results.</p>
 <script>
-const API = (window.AURORA_API_BASE || 'http://127.0.0.1:8000/api').replace(/\/$/,'');
+const API = (window.AURORA_API_BASE || 'https://aurora-gold-intelligence.onrender.com/api').replace(/\/$/,'');
 const $ = id => document.getElementById(id);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = value => value == null || !Number.isFinite(Number(value)) ? '—' : Number(value).toLocaleString('en-IN',{maximumFractionDigits:2});
