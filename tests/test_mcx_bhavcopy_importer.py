@@ -48,3 +48,46 @@ def test_mcx_spaced_display_dates_are_normalized_to_iso():
     assert rows[0]["date"] == "2026-10-26"
     assert rows[0]["expiry_date"] == "2026-11-05"
     assert rows[0]["close"] == "141451"
+
+
+def test_official_page_json_records_are_canonicalized():
+    records = [
+        {
+            "Date": "10/26/2026",
+            "Symbol": "GOLDM ",
+            "ExpiryDate": "05NOV2026",
+            "Open": 141451.0,
+            "High": 142672.0,
+            "Low": 140555.0,
+            "Close": 142509.0,
+            "Volume": 12,
+            "OpenInterest": 34,
+        },
+        {
+            "Date": "10/26/2026",
+            "Symbol": "ALUMINI ",
+            "ExpiryDate": "30OCT2026",
+            "Open": 328.8,
+            "High": 331.7,
+            "Low": 327.0,
+            "Close": 330.7,
+            "Volume": 1238,
+            "OpenInterest": 1048,
+        },
+    ]
+    converted, symbols = MODULE.canonicalize_json_records(records)
+    rows = list(__import__("csv").DictReader(__import__("io").StringIO(converted.decode("utf-8"))))
+    assert symbols == {"GOLDM"}
+    assert len(rows) == 1
+    assert rows[0]["date"] == "2026-10-26"
+    assert rows[0]["expiry_date"] == "2026-11-05"
+    assert rows[0]["close"] == "142509.0"
+    assert rows[0]["volume"] == "12"
+    assert rows[0]["open_interest"] == "34"
+
+
+def test_json_array_can_be_extracted_from_html_wrapped_page():
+    raw = '<html><body><p>[{"Date":"10/26/2026","Symbol":"GOLDM"}]</p></body></html>'
+    records = MODULE.find_json_records(raw)
+    assert records is not None
+    assert records[0]["Symbol"] == "GOLDM"
