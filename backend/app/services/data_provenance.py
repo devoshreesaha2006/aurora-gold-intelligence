@@ -35,7 +35,7 @@ def sql_test_source_condition(column):
 
 def synthetic_source_condition(column):
     """SQL equivalent of is_synthetic_source for observation/import sources."""
-    source = func.lower(func.coalesce(column, ""))
+    source = func.lower(func.trim(func.coalesce(column, "")))
     return or_(
         source.in_(SYNTHETIC_SOURCES),
         source.startswith("synthetic_", autoescape=True),
