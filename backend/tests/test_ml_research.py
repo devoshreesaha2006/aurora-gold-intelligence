@@ -14,7 +14,7 @@ def test_ml_features_work_at_first_valid_lag():
 def test_ml_features_use_only_the_trailing_twenty_prices():
     prices = np.linspace(100.0, 150.0, 80)
     changed_history = prices.copy()
-    changed_history[:61] *= 3
+    changed_history[:51] *= 3
 
     # At index 70, the feature window starts at index 51. Earlier values must
     # not affect the feature vector.
