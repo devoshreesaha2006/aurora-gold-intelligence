@@ -8,7 +8,7 @@
  */
 
 (function () {
-  const API_BASE = 'http://127.0.0.1:8000';
+  const API_BASE = (window.AURORA_API_ORIGIN || 'https://aurora-gold-intelligence.onrender.com').replace(/\/$/, '');
   let backendOnline = false;
   let radarPairMap = {};
   let radarRequestId = 0;

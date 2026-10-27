@@ -3890,7 +3890,7 @@
       document.body.style.overflow = 'hidden';
       if (!snapshot || snapshot.spread == null || !body) return;
 
-      const apiBase = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? `${location.origin}/api` : 'http://127.0.0.1:8000/api')).replace(/\/$/, '');
+      const apiBase = (window.AURORA_API_BASE || 'https://aurora-gold-intelligence.onrender.com/api').replace(/\/$/, '');
       const ageText = snapshot.data_age_days == null ? 'Age unavailable' : snapshot.data_age_days === 0 ? 'Trade date is today' : `${snapshot.data_age_days} calendar day${snapshot.data_age_days === 1 ? '' : 's'} old`;
       const freshnessText = String(snapshot.snapshot_freshness || 'unavailable').replace(/-/g, ' ').toUpperCase();
       fetch(`${apiBase}/analytics/spreads?pair=${encodeURIComponent(snapshot.pair)}&window=30&end_date=${encodeURIComponent(snapshot.trade_date)}`)

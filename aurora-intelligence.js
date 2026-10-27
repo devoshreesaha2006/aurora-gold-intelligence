@@ -4,7 +4,7 @@
   if (window.__AURORA_INTELLIGENCE_PANEL__) return;
   window.__AURORA_INTELLIGENCE_PANEL__ = true;
 
-  const API_BASE = (window.AURORA_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, '');
+  const API_BASE = (window.AURORA_API_ORIGIN || 'https://aurora-gold-intelligence.onrender.com').replace(/\/$/, '');
   const css = `
   #auroraIntelLauncher{position:fixed;right:22px;bottom:22px;z-index:12000;border:1px solid rgba(240,185,11,.55);border-radius:999px;padding:12px 17px;background:linear-gradient(135deg,#f0b90b,#b87908);color:#101323;font:700 12px Inter,Arial,sans-serif;letter-spacing:.3px;box-shadow:0 8px 30px #0008;cursor:pointer}
   #auroraIntelOverlay{position:fixed;inset:0;z-index:12001;background:rgba(3,3,2,.76);backdrop-filter:blur(14px) saturate(115%);display:none;align-items:center;justify-content:center;padding:18px}
