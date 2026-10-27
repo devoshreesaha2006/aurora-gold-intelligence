@@ -81,6 +81,21 @@ class RelativeValueAnalyticsService:
     def __init__(self, db: Session):
         self.db = db
 
+    @staticmethod
+    def _has_valid_price_basis(row: MarketObservation) -> bool:
+        """Reject corrupt prices before they can contaminate spreads, radar or distributions."""
+        try:
+            normalized = float(row.normalized_price_10g_basis)
+            close = float(row.close_price)
+        except (TypeError, ValueError, OverflowError):
+            return False
+        return (
+            math.isfinite(normalized)
+            and normalized > 0
+            and math.isfinite(close)
+            and close > 0
+        )
+
     def get_synchronized_observations(
         self,
         leg_a: str,
@@ -99,7 +114,12 @@ class RelativeValueAnalyticsService:
             query_a = query_a.filter(MarketObservation.trade_date >= start_date)
         if end_date:
             query_a = query_a.filter(MarketObservation.trade_date <= end_date)
-        obs_a = query_a.order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc()).all()
+        obs_a = [
+            row for row in query_a.order_by(
+                MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc()
+            ).all()
+            if self._has_valid_price_basis(row)
+        ]
 
         # Fetch Leg B observations
         query_b = eligible_analytics_observations_query(self.db).filter(MarketObservation.symbol == leg_b)
@@ -107,7 +127,12 @@ class RelativeValueAnalyticsService:
             query_b = query_b.filter(MarketObservation.trade_date >= start_date)
         if end_date:
             query_b = query_b.filter(MarketObservation.trade_date <= end_date)
-        obs_b = query_b.order_by(MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc()).all()
+        obs_b = [
+            row for row in query_b.order_by(
+                MarketObservation.trade_date.asc(), MarketObservation.expiry_date.asc()
+            ).all()
+            if self._has_valid_price_basis(row)
+        ]
 
         # An instrument can have multiple listed expiries on one trade date. Pair only
         # the same dated contract; a date-only map silently crossed those contracts.
