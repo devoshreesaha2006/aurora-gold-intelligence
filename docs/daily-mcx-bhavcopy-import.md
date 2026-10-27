@@ -8,6 +8,7 @@ This adapter is deliberately **disabled by default**. It does not guess an MCX d
 2. It downloads a direct HTTPS file hosted on `mcxindia.com` or `www.mcxindia.com`.
 3. It accepts either a CSV or an HTML table exported with an `.xls` extension (some spreadsheet downloads are HTML documents rather than binary Excel workbooks).
 4. It maps the source columns to AURORA's canonical CSV schema, filters the four supported gold symbols, and submits that CSV to the existing `POST /api/data/upload` endpoint with `data_source=mcx_bhavcopy_official_csv`.
+   - Trade and expiry dates are normalized to ISO `YYYY-MM-DD`, including MCX display dates such as `26 Oct 2026` and compact expiry dates such as `05NOV2026`.
 5. AURORA's existing validation, normalization, and deduplication remain in charge of database ingestion. The workflow logs the API result.
 
 The source file must include Date, Symbol (or a usable contract field), Expiry Date, and Close/LTP. A single file may contain only one or some of the four symbols; the importer reports which symbols it found and does **not** fabricate missing contracts. Opportunity Radar will only have observations for contracts actually present in the imported data.
