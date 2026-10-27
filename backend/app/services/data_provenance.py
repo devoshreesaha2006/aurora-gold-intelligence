@@ -25,8 +25,11 @@ def test_source_condition(column):
     source = func.lower(func.coalesce(column, ""))
     return or_(
         source.in_(TEST_SOURCES),
-        source.like("test_%"), source.like("tests_%"), source.like("invalid_%"),
-        source.like("fixture_%"), source.like("pytest_%"),
+        source.startswith("test_", autoescape=True),
+        source.startswith("tests_", autoescape=True),
+        source.startswith("invalid_", autoescape=True),
+        source.startswith("fixture_", autoescape=True),
+        source.startswith("pytest_", autoescape=True),
     )
 
 
@@ -35,13 +38,15 @@ def synthetic_source_condition(column):
     source = func.lower(func.coalesce(column, ""))
     return or_(
         source.in_(SYNTHETIC_SOURCES),
-        source.like("synthetic_%"), source.like("demo_%"), source.like("sample_%"),
+        source.startswith("synthetic_", autoescape=True),
+        source.startswith("demo_", autoescape=True),
+        source.startswith("sample_", autoescape=True),
     )
 
 
 def non_test_observations_query(db):
     """Return observations excluding rows or batches explicitly marked as test data."""
-    from sqlalchemy import not_
+    from sqlalchemy import not_, or_
     from backend.app.models.data_import import ImportBatch
     from backend.app.models.market_observation import MarketObservation
 
