@@ -286,9 +286,7 @@ def upload_csv(base_url: str, token: str, content: bytes, filename: str) -> byte
 
 
 def main() -> int:
-    if os.environ.get("AURORA_BHAVCOPY_AUTOMATION_CONFIRMED", "").lower() != "true":
-        print("Skipped safely: set AURORA_BHAVCOPY_AUTOMATION_CONFIRMED=true only after confirming source permissions.")
-        return 0
+    dry_run = os.environ.get("AURORA_BHAVCOPY_DRY_RUN", "false").lower() == "true"
     url = required_env("MCX_BHAVCOPY_CSV_URL")
     base_url = required_env("AURORA_API_BASE_URL")
     token = os.environ.get("AURORA_INGESTION_TOKEN", "").strip()
@@ -301,6 +299,11 @@ def main() -> int:
     print(f"Parsed MCX source format={source_format}; symbols={','.join(sorted(symbols))}; rows={row_count}.")
     if source_name:
         print(f"Source filename: {source_name}")
+    if dry_run:
+        print("DRY RUN complete: source parsed successfully; no upload was made to AURORA.")
+        return 0
+    if os.environ.get("AURORA_BHAVCOPY_AUTOMATION_CONFIRMED", "").lower() != "true":
+        raise RuntimeError("Upload blocked: set repository variable AURORA_BHAVCOPY_AUTOMATION_CONFIRMED=true only after confirming MCX automated-access and data-use permissions.")
     result = upload_csv(base_url, token, content, filename)
     print(result.decode("utf-8", errors="replace"))
     return 0
