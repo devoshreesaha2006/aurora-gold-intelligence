@@ -213,7 +213,7 @@ def test_api_radar_endpoint(client):
     for p in data["pairs"]:
         assert p["deviation_intensity"] is None or 0.0 <= p["deviation_intensity"] <= 100.0
         assert p["classification"] in ("Investigate", "Watch", "Cost-Blocked", "Expiry-Risk", "No Signal")
-        if p["snapshot_freshness"] in ("historical", "future-dated") and p["spread"] is not None:
+        if (p["snapshot_freshness"] == "future-dated" or (p["data_age_days"] is not None and p["data_age_days"] > 3)) and p["spread"] is not None:
             # Old/future snapshots may retain historical metrics but cannot expose
             # current actionable scores from the default/latest radar.
             assert p["classification"] == "No Signal"
