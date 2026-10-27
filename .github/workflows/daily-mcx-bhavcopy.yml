@@ -2,6 +2,12 @@ name: Daily MCX Bhavcopy Import
 
 on:
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Fetch and parse MCX data only; do not upload to AURORA"
+        required: true
+        type: boolean
+        default: true
   schedule:
     # Weekdays at 18:00 IST (12:30 UTC), after the usual end-of-day window.
     - cron: "30 12 * * 1-5"
@@ -11,9 +17,9 @@ permissions:
 
 jobs:
   import-bhavcopy:
-    # Disabled by default. Enable only after confirming the exact official source,
-    # automated-access permission, storage rights, and public-display restrictions.
-    if: ${{ vars.ENABLE_MCX_BHAVCOPY_AUTOMATION == 'true' }}
+    # Manual runs are available for a safe dry-run. Scheduled uploads remain disabled
+    # until the repository variable ENABLE_MCX_BHAVCOPY_AUTOMATION is explicitly true.
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.ENABLE_MCX_BHAVCOPY_AUTOMATION == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -25,9 +31,10 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Import official MCX CSV through AURORA's existing ingestion API
+      - name: Import official MCX data through AURORA's existing ingestion API
         env:
           AURORA_BHAVCOPY_AUTOMATION_CONFIRMED: ${{ vars.AURORA_BHAVCOPY_AUTOMATION_CONFIRMED }}
+          AURORA_BHAVCOPY_DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || 'false' }}
           MCX_BHAVCOPY_CSV_URL: ${{ secrets.MCX_BHAVCOPY_CSV_URL }}
           AURORA_API_BASE_URL: ${{ secrets.AURORA_API_BASE_URL }}
           AURORA_INGESTION_TOKEN: ${{ secrets.AURORA_INGESTION_TOKEN }}
