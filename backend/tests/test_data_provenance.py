@@ -7,7 +7,7 @@ from backend.app.services.data_provenance import (
     is_synthetic_source,
     is_test_source,
     synthetic_source_condition,
-    test_source_condition,
+    sql_test_source_condition,
 )
 
 
@@ -39,7 +39,7 @@ def sqlite_connection():
 )
 def test_sql_test_source_condition_matches_python(sqlite_connection, source, expected):
     sql_result = sqlite_connection.execute(
-        select(test_source_condition(literal(source)))
+        select(sql_test_source_condition(literal(source)))
     ).scalar_one()
 
     assert is_test_source(source) is expected
