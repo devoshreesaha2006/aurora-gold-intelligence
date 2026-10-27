@@ -80,14 +80,16 @@ def upload_csv(base_url: str, token: str, content: bytes, filename: str) -> byte
         + content + b"\r\n"
     )
     chunks.append(f"--{boundary}--\r\n".encode())
+    headers = {
+        "Content-Type": f"multipart/form-data; boundary={boundary}",
+        "Accept": "application/json",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
     request = Request(
         base_url.rstrip("/") + "/api/data/upload",
         data=b"".join(chunks),
-        headers={
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
-            "Accept": "application/json",
-            "Authorization": f"Bearer {token}",
-        },
+        headers=headers,
         method="POST",
     )
     with urlopen(request, timeout=60) as response:
@@ -103,7 +105,7 @@ def main() -> int:
         return 0
     url = required_env("MCX_BHAVCOPY_CSV_URL")
     base_url = required_env("AURORA_API_BASE_URL")
-    token = required_env("AURORA_INGESTION_TOKEN")
+    token = os.environ.get("AURORA_INGESTION_TOKEN", "").strip()
     if urlparse(base_url).scheme != "https":
         raise RuntimeError("AURORA_API_BASE_URL must use HTTPS.")
     content = download_csv(url)
