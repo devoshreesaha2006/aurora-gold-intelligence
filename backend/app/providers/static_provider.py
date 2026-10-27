@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import List
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, not_, or_
+from sqlalchemy import and_, case, func, not_, or_
 
 from backend.app.providers.base import MarketDataProvider
 from backend.app.schemas.market import MarketStatusRead
@@ -38,21 +38,14 @@ class StaticDatabaseProvider(MarketDataProvider):
         return False
 
     def get_market_status(self, db: Session) -> MarketStatusRead:
-        total_contracts = db.query(Contract).filter(Contract.is_active == True).count()
-        total_obs = db.query(MarketObservation).count()
+        """Return database health using bounded aggregate queries, without loading rows."""
+        total_contracts = db.query(func.count(Contract.id)).filter(Contract.is_active.is_(True)).scalar() or 0
+        total_obs = db.query(func.count(MarketObservation.id)).scalar() or 0
+        latest_date = db.query(func.max(MarketObservation.trade_date)).scalar()
+        last_ingestion = db.query(func.max(ImportBatch.created_at)).scalar()
 
-        latest_obs = db.query(MarketObservation).order_by(MarketObservation.trade_date.desc()).first()
-        latest_date = latest_obs.trade_date if latest_obs else None
-
-        last_batch = db.query(ImportBatch).order_by(ImportBatch.created_at.desc()).first()
-        last_ingestion = last_batch.created_at if last_batch else None
-
-        # CSV uploads are user-provided and are not verified exchange/provider data.
-        # Batch-level provenance takes precedence so test/synthetic batches cannot
-        # become "historical Bhavcopy" merely because an individual row flag is false.
-        joined = db.query(MarketObservation, ImportBatch).outerjoin(
-            ImportBatch, MarketObservation.import_batch_id == ImportBatch.id
-        )
+        # Classify provenance in a single joined aggregate scan instead of three
+        # separate COUNT queries over the complete observations history.
         is_test = or_(
             _source_condition(MarketObservation.data_source, is_test_source),
             _source_condition(ImportBatch.data_source, is_test_source),
@@ -63,9 +56,17 @@ class StaticDatabaseProvider(MarketDataProvider):
             _source_condition(MarketObservation.data_source, is_synthetic_source),
             _source_condition(ImportBatch.data_source, is_synthetic_source),
         )
-        test_count = joined.filter(is_test).count()
-        synthetic_count = joined.filter(and_(not_(is_test), is_synthetic)).count()
-        csv_count = joined.filter(and_(not_(is_test), not_(is_synthetic))).count()
+        provenance_counts = db.query(
+            func.coalesce(func.sum(case((is_test, 1), else_=0)), 0).label("test_count"),
+            func.coalesce(func.sum(case((and_(not_(is_test), is_synthetic), 1), else_=0)), 0).label("synthetic_count"),
+            func.coalesce(func.sum(case((and_(not_(is_test), not_(is_synthetic)), 1), else_=0)), 0).label("csv_count"),
+        ).select_from(MarketObservation).outerjoin(
+            ImportBatch, MarketObservation.import_batch_id == ImportBatch.id
+        ).one()
+
+        test_count = int(provenance_counts.test_count or 0)
+        synthetic_count = int(provenance_counts.synthetic_count or 0)
+        csv_count = int(provenance_counts.csv_count or 0)
 
         labels = []
         if csv_count:
@@ -79,14 +80,13 @@ class StaticDatabaseProvider(MarketDataProvider):
         labels.append("No verified provider observations")
 
         if csv_count:
-            mode = "staged_csv"  # Retained for existing clients; label explicitly states unverified provenance.
+            mode = "staged_csv"
         elif test_count:
             mode = "test_data"
         elif synthetic_count:
             mode = "demo_synthetic"
         else:
             mode = "live_feed_disconnected" if settings.data_mode == "live_feed_authorized" else settings.data_mode
-        freshness = " · ".join(labels)
 
         return MarketStatusRead(
             market_open=None,
@@ -99,7 +99,7 @@ class StaticDatabaseProvider(MarketDataProvider):
             last_ingestion_at=last_ingestion,
             latest_trade_date=latest_date,
             server_time=datetime.now(timezone.utc),
-            data_freshness_label=freshness,
+            data_freshness_label=" · ".join(labels),
             feed_status="UNAVAILABLE",
             connection_state="disconnected",
             authentication_state="not_applicable",

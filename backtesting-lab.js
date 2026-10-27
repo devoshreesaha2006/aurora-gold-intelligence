@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const API_BASE = (window.AURORA_API_BASE || ((location.protocol === 'http:' || location.protocol === 'https:') && !['localhost', '127.0.0.1'].includes(location.hostname) ? location.origin : 'http://127.0.0.1:8000')).replace(/\/$/, '');
+  const API_BASE = (window.AURORA_API_BASE || (['localhost', '127.0.0.1'].includes(location.hostname) ? 'http://127.0.0.1:8000' : 'https://aurora-gold-intelligence.onrender.com')).replace(/\/$/, '');
   const form = document.getElementById('backtestForm');
   const runButton = document.getElementById('runButton');
   const formError = document.getElementById('formError');
@@ -146,10 +146,18 @@
       const response = await fetch(`${API_BASE}/api/backtests/run`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
       });
-      const body = await response.json();
+      const responseText = await response.text();
+      let body = {};
+      if (responseText.trim()) {
+        try {
+          body = JSON.parse(responseText);
+        } catch {
+          throw new Error(`Backtest API returned a non-JSON response (HTTP ${response.status}). Confirm the deployed backend URL and inspect Render API logs.`);
+        }
+      }
       if (!response.ok) {
         const details = body.details?.map((item) => item.message).filter(Boolean).join(' ');
-        throw new Error(body.error || details || 'The backtest request failed.');
+        throw new Error(body.error || body.detail || details || `The backtest request failed (HTTP ${response.status}).`);
       }
       renderResult(body.data);
     } catch (error) {
