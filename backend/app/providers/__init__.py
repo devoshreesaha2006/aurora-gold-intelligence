@@ -1,6 +1,7 @@
 from backend.app.providers.base import MarketDataProvider
 from backend.app.providers.static_provider import StaticDatabaseProvider
 from backend.app.providers.live_mock import AuthorizedMCXLiveProvider
+from backend.app.providers.mcx_market_watch import MCXMarketWatchProvider
 from backend.app.config import settings
 from threading import Lock
 
@@ -13,6 +14,17 @@ def get_market_provider() -> MarketDataProvider:
     """Return a cached provider selected by explicit local configuration."""
     global _provider, _provider_config
     mode = (settings.data_mode or "").strip().lower()
+    if mode == "mcx_market_watch":
+        key = (mode, settings.mcx_watch_url, settings.mcx_watch_timeout_seconds,
+               settings.mcx_watch_poll_interval_seconds, settings.mcx_watch_stale_after_seconds,
+               settings.mcx_watch_terms_confirmed)
+        with _provider_lock:
+            if _provider is None or _provider_config != key:
+                if _provider is not None and hasattr(_provider, "close"):
+                    _provider.close()
+                _provider = MCXMarketWatchProvider()
+                _provider_config = key
+            return _provider
     if mode == "live_feed_authorized":
         key = (
             mode, settings.mcx_feed_api_key, settings.mcx_feed_api_secret,
@@ -31,4 +43,4 @@ def get_market_provider() -> MarketDataProvider:
     return StaticDatabaseProvider()
 
 
-__all__ = ["MarketDataProvider", "StaticDatabaseProvider", "AuthorizedMCXLiveProvider", "get_market_provider"]
+__all__ = ["MarketDataProvider", "StaticDatabaseProvider", "AuthorizedMCXLiveProvider", "MCXMarketWatchProvider", "get_market_provider"]
