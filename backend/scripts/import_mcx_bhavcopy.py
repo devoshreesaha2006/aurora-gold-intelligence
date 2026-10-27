@@ -30,6 +30,29 @@ def required_env(name: str) -> str:
     return value
 
 
+def normalize_source_date(value: str, field_name: str) -> str:
+    """Convert common MCX display/compact dates to ISO dates for the API importer."""
+    raw = value.strip()
+    if not raw:
+        return raw
+    for fmt in (
+        "%Y-%m-%d",
+        "%d/%m/%Y",
+        "%d-%m-%Y",
+        "%d %b %Y",
+        "%d %B %Y",
+        "%d%b%Y",
+        "%d-%b-%Y",
+        "%d/%b/%Y",
+    ):
+        try:
+            from datetime import datetime
+            return datetime.strptime(raw, fmt).date().isoformat()
+        except ValueError:
+            continue
+    raise RuntimeError(f"Unsupported {field_name} date format in MCX row: {raw!r}")
+
+
 def normalize_header(value: str) -> str:
     return "".join(ch.lower() for ch in value.strip() if ch.isalnum())
 
@@ -125,6 +148,8 @@ def canonicalize_rows(rows: list[list[str]]) -> tuple[bytes, set[str]]:
         for key in CANONICAL_HEADERS:
             col_idx = mapping.get(key)
             value = row[col_idx].strip() if col_idx is not None and col_idx < len(row) else ""
+            if key in {"date", "expiry_date"} and value:
+                value = normalize_source_date(value, key)
             record.append(value)
         writer.writerow(record)
         found_symbols.add(symbol)
