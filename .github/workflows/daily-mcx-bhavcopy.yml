@@ -1,0 +1,34 @@
+name: Daily MCX Bhavcopy Import
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekdays at 18:00 IST (12:30 UTC), after the usual end-of-day window.
+    - cron: "30 12 * * 1-5"
+
+permissions:
+  contents: read
+
+jobs:
+  import-bhavcopy:
+    # Disabled by default. Enable only after confirming the exact official source,
+    # automated-access permission, storage rights, and public-display restrictions.
+    if: ${{ vars.ENABLE_MCX_BHAVCOPY_AUTOMATION == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Import official MCX CSV through AURORA's existing ingestion API
+        env:
+          AURORA_BHAVCOPY_AUTOMATION_CONFIRMED: ${{ vars.AURORA_BHAVCOPY_AUTOMATION_CONFIRMED }}
+          MCX_BHAVCOPY_CSV_URL: ${{ secrets.MCX_BHAVCOPY_CSV_URL }}
+          AURORA_API_BASE_URL: ${{ secrets.AURORA_API_BASE_URL }}
+          AURORA_INGESTION_TOKEN: ${{ secrets.AURORA_INGESTION_TOKEN }}
+        run: python backend/scripts/import_mcx_bhavcopy.py
