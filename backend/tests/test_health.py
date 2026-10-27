@@ -7,6 +7,11 @@ def test_health_check(client):
     assert "version" in data["data"]
     assert "server_time" in data["data"]
 
+    # Health and market status must describe the same effective data source.
+    market_response = client.get("/api/market/status")
+    assert market_response.status_code == 200
+    assert data["data"]["data_mode"] == market_response.json()["data"]["data_mode"]
+
 
 def test_market_status(client):
     response = client.get("/api/market/status")
