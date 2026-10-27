@@ -538,14 +538,17 @@ class RelativeValueAnalyticsService:
                 trap_score = None
                 is_exp = False
                 is_cost = False
-                is_liq = False
+                # Keep observed liquidity evidence intact: suppressing a stale
+                # signal must not erase a measured zero-volume trap or turn
+                # missing liquidity into an assessed value.
                 gross_edge = None
                 net_edge = None
-                reason = (
+                freshness_reason = (
                     f"Actionable scoring suppressed: snapshot dated {last_pt.trade_date} "
                     f"is {'future-dated' if future_dated_snapshot else f'{age_days} calendar days old'}. "
                     "Historical spread statistics remain available, but refresh the dataset before treating this as a current-market signal."
                 )
+                reason = f"{freshness_reason} Market-quality context: {reason}"
 
             if classification == "Investigate":
                 investigate_count += 1
