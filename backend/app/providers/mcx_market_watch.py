@@ -143,6 +143,14 @@ class MCXMarketWatchProvider(MarketDataProvider):
                 oi = _float(row.get("OpenInterest"), required=True)
                 # Gold futures are orders of magnitude above ₹5; reject malformed
                 # records and impossible OHLC rather than contaminating analytics.
+                if stamp is not None:
+                    # Preserve stale status metadata, but never ingest old snapshots
+                    # as fresh market observations for the radar.
+                    if (datetime.now(timezone.utc) - stamp).total_seconds() > settings.mcx_watch_stale_after_seconds:
+                        if self._last_timestamp is None or stamp > self._last_timestamp:
+                            self._last_timestamp = stamp
+                        rejected += 1
+                        continue
                 if (not contract or not expiry or not stamp or price is None or
                     price < 1000 or price > 10000000 or volume is None or oi is None or
                     volume < 0 or oi < 0 or not volume.is_integer() or not oi.is_integer() or
