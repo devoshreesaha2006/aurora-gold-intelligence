@@ -105,6 +105,9 @@ class MCXMarketWatchProvider(MarketDataProvider):
     def _poll(self, db: Session, force: bool = False):
         now = datetime.now(timezone.utc)
         with self._lock:
+            if not settings.mcx_watch_terms_confirmed:
+                self._last_error = "Set MCX_MARKET_WATCH_TERMS_CONFIRMED=true only after checking MCX terms and permissions"
+                return
             if not force and self._last_poll and (now - self._last_poll).total_seconds() < settings.mcx_watch_poll_interval_seconds:
                 return
             self._last_poll = now
