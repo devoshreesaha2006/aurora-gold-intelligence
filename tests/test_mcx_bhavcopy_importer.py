@@ -1,0 +1,40 @@
+import importlib.util
+from pathlib import Path
+
+SCRIPT = Path(__file__).resolve().parents[1] / "backend" / "scripts" / "import_mcx_bhavcopy.py"
+SPEC = importlib.util.spec_from_file_location("import_mcx_bhavcopy", SCRIPT)
+assert SPEC and SPEC.loader
+MODULE = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(MODULE)
+
+
+def test_html_table_xls_is_converted_to_canonical_csv():
+    html = """
+    <html><body><table>
+      <tr><th>Date</th><th>Instrument Name</th><th>Symbol</th><th>Expiry Date</th>
+      <th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume(Lots)</th><th>Open Interest(Lots)</th></tr>
+      <tr><td>28/10/2026</td><td>FUTCOM</td><td>GOLDM</td><td>05NOV2026</td>
+      <td>141451</td><td>142672</td><td>140555</td><td>142509</td><td>12</td><td>34</td></tr>
+      <tr><td>28/10/2026</td><td>FUTCOM</td><td>CRUDEOIL</td><td>19NOV2026</td>
+      <td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td></tr>
+    </table></body></html>
+    """
+    parser = MODULE.TableParser()
+    parser.feed(html)
+    converted, symbols = MODULE.canonicalize_rows(parser.tables[0])
+    rows = list(__import__("csv").DictReader(__import__("io").StringIO(converted.decode("utf-8"))))
+    assert symbols == {"GOLDM"}
+    assert len(rows) == 1
+    assert rows[0]["date"] == "28/10/2026"
+    assert rows[0]["expiry_date"] == "05NOV2026"
+    assert rows[0]["close"] == "142509"
+    assert rows[0]["volume"] == "12"
+    assert rows[0]["open_interest"] == "34"
+
+
+def test_csv_with_mcx_headers_is_canonicalized():
+    raw = "Date,Symbol,Expiry Date,Open,High,Low,Close,Volume(Lots),Open Interest(Lots)\n28/10/2026,GOLDPETAL,31OCT2026,14000,14100,13900,14050,7,9\n"
+    converted, symbols = MODULE.canonicalize_rows(list(__import__("csv").reader(__import__("io").StringIO(raw))))
+    assert symbols == {"GOLDPETAL"}
+    assert b"14050" in converted
+    assert b",7,9" in converted
