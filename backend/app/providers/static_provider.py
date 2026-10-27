@@ -49,9 +49,6 @@ class StaticDatabaseProvider(MarketDataProvider):
         # Compute provenance counts in one grouped scan rather than running three
         # separate joined COUNT queries. This matters on hosted databases and
         # prevents the status endpoint from repeatedly scanning imported history.
-        joined = db.query(MarketObservation.id.label("observation_id")).select_from(
-            MarketObservation
-        ).outerjoin(ImportBatch, MarketObservation.import_batch_id == ImportBatch.id)
         is_test = or_(
             _source_condition(MarketObservation.data_source, is_test_source),
             _source_condition(ImportBatch.data_source, is_test_source),
