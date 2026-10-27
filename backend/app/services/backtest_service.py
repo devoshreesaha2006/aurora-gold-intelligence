@@ -21,6 +21,7 @@ ASSUMPTIONS = [
     "Only synchronized, non-synthetic observations from non-test imports are eligible; settlement fills are proxies, not executable quotes.",
     "P&L is only booked between consecutive sessions of the same expiry pair. If the nearest shared expiry changes while a position is open, the position is closed at the last settlement of the expiring pair (exit costs charged once); the level difference between the two contract pairs is never booked as P&L.",
     "Passive benchmark returns use first-to-last normalized settlement price changes for each leg, scaled to starting capital; they are transparent reference comparisons, not exposure-matched alpha or executable investment returns.",
+    "Per-leg P&L decomposes the same normalized spread units arithmetically; it is not capital-, beta-, or margin-matched attribution. Bid/ask data is unavailable, so fills and costs are settlement proxies and user-entered estimates.",
 ]
 
 
@@ -42,6 +43,16 @@ class BacktestService:
         for row in rows:
             source = row.data_source
             if is_test_source(source) or is_synthetic_source(source):
+                continue
+            # Backtests operate on the normalized ₹/10g basis. Missing,
+            # non-finite, or non-positive values must never enter spread math.
+            normalized_price = row.normalized_price_10g_basis
+            if (
+                isinstance(normalized_price, bool)
+                or not isinstance(normalized_price, (int, float))
+                or not isfinite(normalized_price)
+                or normalized_price <= 0
+            ):
                 continue
             if row.import_batch_id:
                 batch = self.db.get(ImportBatch, row.import_batch_id)
@@ -172,20 +183,30 @@ class BacktestService:
                 trades.append(self._trade(
                     open_trade, prev_oa, prev_ob, prev_spread, req.units, gross_trade, half_cost * 2,
                     gross_trade - half_cost * 2, "Expiry roll (pair changed)",
+                    open_trade["leg_a_gross_pnl"], open_trade["leg_b_gross_pnl"],
                 ))
                 open_trade = None
             if open_trade:
                 daily_pnl = (spread - previous_spread) * open_trade["sign"] * req.units
+                previous_a, previous_b, _ = pairs[idx - 1]
+                leg_a_daily = (oa.normalized_price_10g_basis - previous_a.normalized_price_10g_basis) * open_trade["sign"] * req.units
+                leg_b_daily = -(ob.normalized_price_10g_basis - previous_b.normalized_price_10g_basis) * open_trade["sign"] * req.units
                 equity += daily_pnl
                 gross_total += daily_pnl
+            else:
+                leg_a_daily = leg_b_daily = 0.0
 
-            z = z_scores[idx - 1]
+            expiry_changed = oa.expiry_date != pairs[idx - 1][0].expiry_date
+            # A trailing signal computed for the previous expiry cannot be
+            # carried over to the newly selected contract pair.
+            z = None if expiry_changed else z_scores[idx - 1]
             if open_trade and (z is not None and abs(z) <= req.exit_z):
                 equity -= half_cost
                 total_costs += half_cost
                 gross_trade = open_trade["gross_pnl"] + daily_pnl
                 net_trade = gross_trade - half_cost * 2
-                trades.append(self._trade(open_trade, oa, ob, spread, req.units, gross_trade, half_cost * 2, net_trade, "Z-score reverted"))
+                trades.append(self._trade(open_trade, oa, ob, spread, req.units, gross_trade, half_cost * 2, net_trade, "Z-score reverted",
+                                          open_trade["leg_a_gross_pnl"] + leg_a_daily, open_trade["leg_b_gross_pnl"] + leg_b_daily))
                 open_trade = None
             elif not open_trade and z is not None and abs(z) >= req.entry_z:
                 entry_setups += 1
@@ -203,10 +224,13 @@ class BacktestService:
                     total_costs += half_cost
                     open_trade = {
                         "entry_date": oa.trade_date, "entry_spread": spread, "sign": sign,
-                        "gross_pnl": 0.0, "direction": "Short spread" if sign < 0 else "Long spread",
+                        "gross_pnl": 0.0, "leg_a_gross_pnl": 0.0, "leg_b_gross_pnl": 0.0,
+                        "direction": "Short spread" if sign < 0 else "Long spread",
                     }
             if open_trade:
                 open_trade["gross_pnl"] += daily_pnl
+                open_trade["leg_a_gross_pnl"] += leg_a_daily
+                open_trade["leg_b_gross_pnl"] += leg_b_daily
 
             peak = max(peak, equity)
             drawdown = ((equity - peak) / peak * 100) if peak else 0.0
@@ -221,7 +245,8 @@ class BacktestService:
             equity -= half_cost
             total_costs += half_cost
             gross_trade = open_trade["gross_pnl"]
-            trades.append(self._trade(open_trade, oa, ob, spread, req.units, gross_trade, half_cost * 2, gross_trade - half_cost * 2, "End of history"))
+            trades.append(self._trade(open_trade, oa, ob, spread, req.units, gross_trade, half_cost * 2, gross_trade - half_cost * 2, "End of history",
+                                      open_trade["leg_a_gross_pnl"], open_trade["leg_b_gross_pnl"]))
             peak = max(peak, equity)
             drawdown = ((equity - peak) / peak * 100) if peak else 0.0
             max_drawdown = min(max_drawdown, drawdown)
@@ -248,6 +273,8 @@ class BacktestService:
         benchmark_a_pnl = capital * benchmark_a_return / 100 if benchmark_a_return is not None else None
         benchmark_b_pnl = capital * benchmark_b_return / 100 if benchmark_b_return is not None else None
         strategy_return = ((equity - capital) / capital) * 100 if capital else None
+        leg_a_pnl = sum(t.leg_a_gross_pnl or 0.0 for t in trades)
+        leg_b_pnl = sum(t.leg_b_gross_pnl or 0.0 for t in trades)
         metrics = BacktestMetricSet(
             total_return_pct=round((equity - capital) / capital * 100, 4),
             total_pnl=round(equity - capital, 2), max_drawdown_pct=round(max_drawdown, 4),
@@ -261,6 +288,7 @@ class BacktestService:
             benchmark_leg_b_pnl=round(benchmark_b_pnl, 2) if benchmark_b_pnl is not None else None,
             excess_return_vs_leg_a_pct=round(strategy_return - benchmark_a_return, 4) if strategy_return is not None and benchmark_a_return is not None else None,
             excess_return_vs_leg_b_pct=round(strategy_return - benchmark_b_return, 4) if strategy_return is not None and benchmark_b_return is not None else None,
+            leg_a_gross_pnl=round(leg_a_pnl, 2), leg_b_gross_pnl=round(leg_b_pnl, 2),
         )
         markers = {}
         for trade in trades:
@@ -302,10 +330,12 @@ class BacktestService:
         )
 
     @staticmethod
-    def _trade(open_trade, oa, ob, exit_spread, units, gross, costs, net, reason):
+    def _trade(open_trade, oa, ob, exit_spread, units, gross, costs, net, reason, leg_a_gross=None, leg_b_gross=None):
         return BacktestTrade(
             entry_date=open_trade["entry_date"], exit_date=oa.trade_date, pair=f"{oa.symbol}-{ob.symbol}",
             direction=open_trade["direction"], entry_spread=round(open_trade["entry_spread"], 4),
             exit_spread=round(exit_spread, 4), units=units, gross_pnl=round(gross, 2), costs=round(costs, 2),
             net_pnl=round(net, 2), exit_reason=reason,
+            leg_a_gross_pnl=round(leg_a_gross, 2) if leg_a_gross is not None else None,
+            leg_b_gross_pnl=round(leg_b_gross, 2) if leg_b_gross is not None else None,
         )

@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AURORA | Research Intelligence</title>
+<style>
+:root{color-scheme:dark;--bg:#0a0b0e;--panel:#12151b;--line:#272c35;--muted:#929baa;--gold:#e5bd69;--text:#f5f2e9;--green:#9ed8b0;--red:#e5a09a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% -15%,#3a2b12 0,transparent 38%),var(--bg);color:var(--text);font:15px/1.5 Inter,Segoe UI,Arial,sans-serif}a{color:var(--gold)}.wrap{max-width:1240px;margin:auto;padding:28px 22px 60px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:22px}.brand{letter-spacing:.22em;font-size:12px;color:var(--gold);font-weight:800}.top h1{font-size:clamp(28px,4vw,44px);line-height:1.05;margin:8px 0}.sub,.muted{color:var(--muted)}.pill{border:1px solid #65532f;color:var(--gold);border-radius:99px;padding:7px 12px;font-size:12px}.grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:16px;margin-top:20px}.card{grid-column:span 6;background:linear-gradient(145deg,#151920,#101217);border:1px solid var(--line);border-radius:16px;padding:20px;min-width:0;box-shadow:0 12px 35px #0002}.wide{grid-column:span 12}.third{grid-column:span 4}h2{font-size:17px;margin:0 0 5px}h3{font-size:13px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase;margin:18px 0 8px}.desc{font-size:13px;color:var(--muted);margin:0 0 16px}label{display:block;color:#bbc1cc;font-size:12px;margin:0 0 6px}input,select{width:100%;background:#0a0c10;border:1px solid #303642;border-radius:9px;padding:11px;color:var(--text);outline:none}input:focus,select:focus{border-color:var(--gold)}.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}button,.btn{border:1px solid #a9843f;background:linear-gradient(135deg,#f1d38a,#bd8d36);color:#16130c;padding:10px 14px;border-radius:9px;font-weight:750;cursor:pointer;text-decoration:none;display:inline-block;margin-top:12px}button.secondary{background:#171b22;color:var(--text);border-color:#343b47}.output{margin-top:15px;border:1px solid var(--line);border-radius:10px;padding:13px;background:#0c0f13;overflow:auto}.metric-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}.metric{padding:12px;background:#171b22;border:1px solid #252b35;border-radius:10px}.metric small{display:block;color:var(--muted);font-size:11px}.metric strong{font-size:18px;overflow-wrap:anywhere}.rowitem{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.rowitem:last-child{border:0}.status{font-size:11px;color:var(--muted);border:1px solid #3a414c;border-radius:99px;padding:3px 8px;white-space:nowrap}.warn{color:#f0ca7a}.fine{color:var(--green)}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600}.footer{margin-top:22px;color:var(--muted);font-size:12px}@media(max-width:760px){.card,.third{grid-column:span 12}.fields,.fields.two,.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:18px 14px}}
+
+.app-nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 4px;padding:10px 0;border-bottom:1px solid var(--line)}.app-nav a{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;color:var(--muted);text-decoration:none;font-size:12px}.app-nav a:hover,.app-nav a[aria-current="page"]{color:var(--gold);border-color:#65532f;background:#1a1711}.app-nav a[aria-current="page"]{font-weight:750}@media(max-width:760px){.app-nav a{flex:1 1 42%;justify-content:center}}
+
+/* AURORA shared dashboard skin — aligned with dashboard.html */
+:root{
+ color-scheme:dark;
+ --bg:#060919;--panel:rgba(16,22,60,.72);--line:rgba(240,185,11,.18);
+ --muted:#94a3b8;--gold:#f0b90b;--text:#f1f5f9;--green:#10b981;--red:#ef4444;
+ --bg-deep:#060919;--bg-primary:#0a0e27;--bg-secondary:#101538;
+}
+html{font-size:14px;scroll-behavior:smooth}
+body{
+ margin:0;min-height:100vh;overflow-x:hidden;color:var(--text);
+ font:14px/1.55 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ background:radial-gradient(circle at 15% 15%,rgba(20,28,85,.4),transparent 45%),
+ radial-gradient(circle at 85% 25%,rgba(240,185,11,.08),transparent 50%),
+ radial-gradient(circle at 50% 85%,rgba(16,22,60,.6),transparent 60%),#060919;
+}
+a{color:#fbbf24}
+.wrap{width:auto;max-width:none;margin-left:270px;padding:34px clamp(20px,3vw,48px) 56px}
+.top{border-bottom:1px solid rgba(240,185,11,.16);padding:0 0 24px}
+.brand{font-family:Orbitron,Inter,sans-serif;letter-spacing:.22em;font-size:11px;color:#fbbf24}
+.top h1{font-family:Orbitron,Inter,sans-serif;font-weight:600;font-size:clamp(25px,2.7vw,38px);letter-spacing:-.035em;margin:10px 0}
+.sub,.muted{color:#94a3b8}
+.pill{border:1px solid rgba(240,185,11,.3);background:rgba(240,185,11,.07);color:#fbbf24;border-radius:999px;padding:7px 12px;font-size:11px;letter-spacing:.04em}
+.app-nav{
+ position:fixed;z-index:50;left:0;top:0;bottom:0;width:246px;overflow-y:auto;
+ display:flex;flex-direction:column;align-items:stretch;gap:7px;margin:0;padding:28px 16px;
+ border:0;border-right:1px solid rgba(240,185,11,.16);
+ background:linear-gradient(180deg,rgba(10,14,39,.98),rgba(6,9,25,.99));
+ box-shadow:12px 0 40px rgba(0,0,0,.2)
+}
+.app-nav:before{content:"AURORA";display:block;padding:4px 10px 22px;color:#fbbf24;font:700 17px Orbitron,Inter,sans-serif;letter-spacing:.2em}
+.app-nav:after{content:"GOLD INTELLIGENCE";display:block;order:2;padding:18px 10px 0;color:#64748b;font-size:10px;letter-spacing:.16em}
+.app-nav a{display:flex;align-items:center;min-height:42px;padding:11px 13px;border:1px solid transparent;border-radius:10px;color:#94a3b8;font-size:12px;transition:all .18s ease}
+.app-nav a:hover,.app-nav a[aria-current="page"]{color:#fbbf24;border-color:rgba(240,185,11,.2);background:linear-gradient(100deg,rgba(240,185,11,.12),rgba(240,185,11,.035))}
+.app-nav a[aria-current="page"]{font-weight:700;box-shadow:inset 2px 0 #f0b90b}
+.grid{gap:18px;margin-top:24px}
+.card{background:linear-gradient(135deg,rgba(20,27,72,.78),rgba(13,18,52,.88));border:1px solid rgba(240,185,11,.14);border-radius:18px;padding:22px;box-shadow:10px 10px 24px rgba(3,5,15,.32),inset 1px 1px 2px rgba(255,255,255,.035);transition:border-color .2s ease,transform .2s ease}
+.card:hover{border-color:rgba(240,185,11,.27)}
+h2{font-size:15px;font-weight:650;letter-spacing:-.01em}
+h3{color:#fbbf24}
+.desc{color:#94a3b8;line-height:1.65}
+label{color:#cbd5e1}
+input,select{background:rgba(6,9,25,.8);border:1px solid #283252;border-radius:9px;color:#f1f5f9}
+input:focus,select:focus{border-color:#f0b90b;box-shadow:0 0 0 3px rgba(240,185,11,.08)}
+button,.btn{background:linear-gradient(135deg,#ffd700,#d4a017);border:1px solid rgba(255,215,0,.45);color:#111827;border-radius:10px;box-shadow:0 5px 16px rgba(240,185,11,.08);transition:transform .18s ease,filter .18s ease}
+button:hover,.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+button.secondary{background:rgba(22,28,72,.8);color:#e2e8f0;border-color:rgba(240,185,11,.18);box-shadow:none}
+.output{background:rgba(6,9,25,.56);border-color:rgba(148,163,184,.15);border-radius:12px}
+.metric{background:rgba(6,9,25,.38);border-color:rgba(240,185,11,.12);border-radius:12px}
+.metric small{color:#94a3b8}
+.metric strong{color:#f8fafc}
+.status{border-color:rgba(148,163,184,.22)}
+th{color:#94a3b8}
+td{border-color:rgba(148,163,184,.12)}
+.footer{border-top:1px solid rgba(240,185,11,.12);padding-top:16px;line-height:1.7}
+@media(max-width:1080px){
+ .wrap{margin-left:0;padding:24px 22px 48px}
+ .app-nav{position:relative;inset:auto;width:auto;display:flex;flex-direction:row;flex-wrap:wrap;gap:7px;padding:12px 22px;border-right:0;border-bottom:1px solid rgba(240,185,11,.16);box-shadow:none}
+ .app-nav:before{width:100%;padding:2px 0 7px}
+ .app-nav:after{display:none}
+ .app-nav a{flex:1 1 150px;justify-content:center}
+}
+@media(max-width:760px){
+ .wrap{padding:22px 14px 40px}
+ .app-nav{padding:12px 14px}
+ .app-nav a{flex:1 1 42%;justify-content:flex-start}
+ .card{padding:17px;border-radius:15px}
+ .top{align-items:flex-start}
+}
+
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="analytics-premium.css">
+<link rel="stylesheet" href="aurora-theme.css?v=midnight-cobalt-2">
+<link rel="stylesheet" href="backtesting-premium.css">
+<script src="aurora-nav.js"></script>
+<style>
+.research-main{max-width:1600px;margin-inline:auto}
+.research-heading{margin-bottom:26px}
+.research-main .grid{gap:14px;margin-top:0}
+.research-main .card{grid-column:span 6;min-width:0;padding:20px;border-radius:15px;position:relative;overflow:hidden}
+.research-main .card.wide{grid-column:span 12}
+.research-main .card.third{grid-column:span 4}
+.research-main .card h2{font-size:16px;line-height:1.4}
+.research-main .desc{font-size:12px;line-height:1.65}
+.research-main .fields{gap:12px}
+.research-main .metric-grid{gap:10px}
+.research-main .metric{min-height:70px}
+.research-main .output{line-height:1.6}
+.research-main .footer{max-width:1600px;margin:18px auto 0}
+.research-api-state{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--bt-line);border-radius:999px;background:rgba(24,22,17,.72);color:#c9c2b1;font-size:11px}
+.research-api-state::before{content:"";width:7px;height:7px;border-radius:50%;background:#d6b56a;box-shadow:0 0 9px rgba(214,181,106,.36)}
+.research-jump{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 18px;padding:12px 14px;border:1px solid var(--bt-line);border-radius:13px;background:rgba(12,12,10,.72)}
+.research-jump strong{font-size:11px;color:#c9c2b1;margin-right:4px}
+.research-jump a{padding:7px 10px;border:1px solid var(--bt-line-soft);border-radius:8px;color:#d0c8b5;text-decoration:none;font-size:11px;transition:color .18s ease,border-color .18s ease,background .18s ease}
+.research-jump a:hover,.research-jump a:focus-visible{color:#f2d487;border-color:rgba(214,179,99,.48);background:rgba(214,179,99,.08);outline:none}
+.research-main [id^="research-"]{scroll-margin-top:calc(var(--header-height) + 18px)}
+.research-page .main-wrapper{isolation:isolate}
+.research-page .research-heading{padding:8px 0 20px;border-bottom:1px solid rgba(214,179,99,.14)}
+.research-page .research-jump{position:sticky;top:calc(var(--header-height) + 8px);z-index:20;backdrop-filter:blur(18px) saturate(130%);-webkit-backdrop-filter:blur(18px) saturate(130%);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.research-page .research-jump a{min-height:36px;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.025)}
+.research-page .research-jump a:active{transform:translateY(1px)}
+.research-page .research-main .card{background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018) 34%,rgba(10,11,13,.52)),rgba(12,13,15,.58);border-color:rgba(222,190,119,.19);backdrop-filter:blur(18px) saturate(130%);-webkit-backdrop-filter:blur(18px) saturate(130%);box-shadow:0 18px 44px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.055)}
+.research-page .research-main .card:hover{border-color:rgba(222,190,119,.32);box-shadow:0 20px 48px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.075)}
+.research-page .research-main .card h2{font-size:18px;letter-spacing:-.025em}
+.research-page .research-main .desc{font-size:13px}
+.research-page .research-main .output{background:rgba(5,7,12,.48);border-color:rgba(214,179,99,.12)}
+.research-page .research-main button,.research-page .research-main .btn{min-height:40px;padding:10px 16px;border-radius:10px;font-size:13px}
+.research-page .research-main button.secondary{background:linear-gradient(135deg,rgba(35,44,77,.78),rgba(20,27,52,.82));border-color:rgba(214,179,99,.25);color:#ead9ab}
+.research-page .research-main button:focus-visible,.research-page .research-main .btn:focus-visible,.research-page .research-jump a:focus-visible{outline:2px solid #f0c96c;outline-offset:3px}
+.research-page .research-main .metric{background:linear-gradient(145deg,rgba(17,23,47,.7),rgba(9,12,23,.65));border-color:rgba(214,179,99,.14)}
+.research-page .research-main .metric strong{font-variant-numeric:tabular-nums}
+.research-page .research-api-state{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+@media(max-width:850px){.research-page .research-jump{position:relative;top:auto}}
+@media(prefers-reduced-transparency:reduce){.research-page .research-jump,.research-page .research-main .card,.research-page .research-api-state{backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media(max-width:850px){.research-main .card,.research-main .card.wide,.research-main .card.third{grid-column:span 12}.research-heading{align-items:flex-start}}
+@media(max-width:560px){.research-main .grid{gap:10px}.research-main .card{padding:16px 14px}.research-main .fields,.research-main .fields.two,.research-main .metric-grid{grid-template-columns:1fr}.research-api-state{font-size:10px}}
+</style></head>
+<body class="backtest-page research-page">
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+  <a class="sidebar-header bt-brand" href="dashboard.html" aria-label="AURORA dashboard"><span class="brand-logo" aria-hidden="true"><img src="aurora-mark.png" alt=""></span><span class="brand-info"><strong>AURORA</strong><small>Market intelligence</small></span></a>
+  <nav class="sidebar-nav">
+    <span class="nav-category">Executive Desk</span>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-grid-2"></i><span>Dashboard</span></a>
+    <a class="nav-item" href="contract-explorer.html"><i class="fa-solid fa-scale-balanced"></i><span>Contract Explorer</span></a>
+    <a class="nav-item" href="opportunity-radar.html"><i class="fa-solid fa-bullseye"></i><span>Opportunity Radar</span></a>
+    <a class="nav-item" href="market-detective.html"><i class="fa-solid fa-magnifying-glass-chart"></i><span>Market Detective</span></a>
+    <span class="nav-category">Quantitative Labs</span>
+    <a class="nav-item" href="javascript:void(0)" onclick="AuroraNav.openNetwork()"><i class="fa-solid fa-diagram-project"></i><span>Relationship Network</span></a>
+    <a class="nav-item" href="javascript:void(0)" onclick="AuroraNav.openMemory()"><i class="fa-solid fa-brain"></i><span>Historical Memory</span></a>
+    <a class="nav-item" href="backtesting-lab.html"><i class="fa-solid fa-chart-line"></i><span>Backtesting Lab</span></a>
+    <a class="nav-item active" href="research-intelligence-lab.html" aria-current="page"><i class="fa-solid fa-microscope"></i><span>Research Intelligence</span></a>
+    <a class="nav-item" href="backtesting-lab.html#backtestForm" onclick="AuroraNav.openSimulator()"><i class="fa-solid fa-sliders"></i><span>Market Simulator</span></a>
+    <span class="nav-category">Operations</span>
+    <a class="nav-item" href="dashboard.html#expiry-calendar-section" onclick="AuroraNav.openCalendar()"><i class="fa-regular fa-calendar-days"></i><span>Contract Calendar</span></a>
+    <a class="nav-item" href="javascript:void(0)" onclick="AuroraNav.openSettings()"><i class="fa-solid fa-gear"></i><span>Settings &amp; Keys</span></a>
+  </nav>
+  <div class="sidebar-footer"><div class="bt-side-note"><span class="bt-note-mark">R</span><span><b>Research mode</b><small>Historical analysis</small></span></div></div>
+</aside>
+<header class="top-header" id="topHeader"><div class="header-left"><button class="sidebar-toggle-btn" id="sidebarToggle" type="button" aria-label="Toggle navigation" aria-expanded="false"><i class="fa-solid fa-bars"></i></button><span class="bt-crumb">AURORA <i class="fa-solid fa-chevron-right"></i> RESEARCH INTELLIGENCE</span></div><div class="header-right"><span class="research-api-state">Historical analysis · live quotes excluded</span></div></header>
+<main class="main-wrapper bt-main research-main">
+<section class="bt-page-heading research-heading"><div><div class="bt-eyebrow"><span class="bt-eyebrow-dot"></span> QUANTITATIVE RESEARCH</div><h1>Research <em>Intelligence</em></h1><p>Historical-only intelligence, transparent assumptions and risk-aware analysis. Forecasts compare eligible observations; no fabricated live quotes or signals.</p></div><div class="bt-heading-meta"><span class="bt-mode-chip"><i class="fa-solid fa-clock-rotate-left"></i><span>Research workspace</span></span><span class="bt-updated">Baseline models · walk-forward validation</span></div></section>
+<nav class="research-jump" aria-label="Research tools quick navigation"><strong>Jump to</strong><a href="#research-forecast">Forecast</a><a href="#research-validation">Validation</a><a href="#research-ml">ML experiment</a><a href="#research-risk">Risk tools</a><a href="#research-context">Market context</a><a href="#research-export">Data export</a><a href="#research-expanding-backtest">Strategy folds</a><a href="#research-quality">Data coverage</a><a href="#research-term-structure">Expiry curve</a><a href="#research-backtest">Backtesting</a></nav>
+<section class="grid">
+<article class="card panel-glass wide"><h2>Research workspace</h2><p class="desc">This panel connects to your local AURORA API. Forecasts compare transparent historical baselines; multi-window diagnostics assess repeatability but do not establish future accuracy or profitability. Existing Walk-Forward Backtesting Lab remains the strategy simulation engine.</p><div class="metric-grid" id="healthMetrics"><div class="metric"><small>API status</small><strong id="apiStatusValue" class="warn">Checking (max 5s)…</strong></div><div class="metric"><small>Macro context</small><strong id="macroHealthValue" class="warn">Loading…</strong></div><div class="metric"><small>Economic calendar</small><strong id="calendarHealthValue" class="warn">Loading…</strong></div></div><div id="healthMessage" class="muted" style="margin-top:12px;font-size:13px" role="status" aria-live="polite">Checking the local FastAPI connection…</div><button class="secondary" id="retryApiBtn" type="button">Retry API connection</button></article>
+<article class="card panel-glass wide" id="research-forecast"><h2>Historical trend baseline</h2><p class="desc">Compares naive, rolling-mean and linear-trend baselines. Uses chronological validation at the selected horizon to select a candidate; if validation is insufficient, no winner is declared. Bands are descriptive, not calibrated confidence intervals.</p><div class="fields"><div><label>Contract</label><select id="symbol"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Lookback rows</label><input id="lookback" type="number" min="10" max="1000" value="60"></div><div><label>Horizon steps</label><input id="horizon" type="number" min="1" max="20" value="5"></div></div><button id="forecastBtn">Calculate baseline</button><div id="forecastOutput" class="output muted">Forecast has not been run.</div></article>
+<article class="card panel-glass wide" id="research-validation"><h2>Walk-forward forecast validation</h2><p class="desc">Tests one-step forecasts on later dates. Every fold trains only on earlier eligible observations. Compare the naive last-value baseline against the linear-trend model before adding more complex ML.</p><div class="fields"><div><label>Contract</label><select id="validationSymbol"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Training lookback</label><input id="validationLookback" type="number" min="20" max="500" value="60"></div><div><label>Test folds</label><input id="validationFolds" type="number" min="10" max="250" value="60"></div></div><button id="validateForecastBtn">Run walk-forward validation</button><div id="validationOutput" class="output muted">Validation has not been run.</div></article>
+<article class="card panel-glass wide"><h2>Multi-step forecast validation</h2><p class="desc">Evaluates forecasts several eligible observations ahead, rather than repeatedly scoring only the next observation. This is a stricter test of the baseline models.</p><div class="fields"><div><label>Contract</label><select id="horizonSymbol"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Forecast horizon (observations)</label><input id="horizonSteps" type="number" min="2" max="20" value="5"></div><div><label>Test folds</label><input id="horizonFolds" type="number" min="10" max="120" value="30"></div></div><button id="validateHorizonBtn">Run multi-step validation</button><div id="horizonValidationOutput" class="output muted">Multi-step validation has not been run.</div></article>
+<article class="card panel-glass wide"><h2>Multi-window forecast stability</h2><p class="desc">Checks whether a baseline's lowest-MAE result repeats across separate chronological windows at the same forecast horizon. Windows use distinct, non-overlapping test origins; no model is assumed to be stable in advance.</p><div class="fields"><div><label>Contract</label><select id="stabilitySymbol"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Forecast horizon (observations)</label><input id="stabilityHorizon" type="number" min="1" max="20" value="5"></div><div><label>Chronological windows</label><select id="stabilityWindows"><option value="2">2 windows</option><option value="3" selected>3 windows</option><option value="4">4 windows</option><option value="5">5 windows</option></select></div><div><label>Folds per window</label><select id="stabilityFolds"><option value="5">5</option><option value="10" selected>10</option><option value="15">15</option><option value="20">20</option><option value="30">30</option></select></div><div><label>Training lookback</label><input id="stabilityLookback" type="number" min="20" max="500" value="60"></div></div><button id="validateStabilityBtn">Evaluate model stability</button><div id="stabilityOutput" class="output muted">No stability analysis has been run.</div></article>
+<article class="card panel-glass wide" id="research-ml"><h2>Experimental ML forecast</h2><p class="desc">Trains a Random Forest on lagged returns and rolling statistics. Evaluates later observations chronologically against a naive zero-change baseline. The next-step estimate is experimental, not a live quote.</p><div class="fields"><div><label>Contract</label><select id="mlSymbol"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Out-of-sample folds</label><select id="mlFolds"><option value="5">5 folds</option><option value="10" selected>10 folds</option><option value="20">20 folds</option><option value="30">30 folds</option></select></div></div><button id="runMlForecast" type="button">Train &amp; evaluate ML model</button><div id="mlForecastOutput" class="output muted" role="status" aria-live="polite">ML has not been trained or evaluated in this session.</div></article><article class="card panel-glass" id="research-risk"><h2>Position risk calculator</h2><p class="desc">Calculate a theoretical unit cap from your capital, stop distance and estimated costs. This is not a broker margin calculator.</p><div class="fields two"><div><label>Capital ₹</label><input id="capital" type="number" value="100000" min="1"></div><div><label>Risk budget %</label><input id="riskPct" type="number" value="1" min=".01" max="10" step=".1"></div><div><label>Entry price</label><input id="entry" type="number" value="145000" min=".01"></div><div><label>Stop price</label><input id="stop" type="number" value="143500" min=".01"></div><div><label>Unit multiplier</label><input id="unitSize" type="number" value="1" min=".001" step=".1"></div><div><label>Cost per unit ₹</label><input id="cost" type="number" value="25" min="0" step=".5"></div></div><button id="riskBtn">Calculate risk cap</button><div id="riskOutput" class="output muted">Enter assumptions and calculate.</div></article>
+<article class="card panel-glass" id="research-context"><h2>Macro & cross-asset context</h2><p class="desc">Free public FRED observations for the US 10-year Treasury yield, 10-year inflation-indexed yield, and broad trade-weighted US dollar index. These are macro proxies—not MCX quotes or trading signals. Data may be delayed; source timestamps and stale status are shown.</p><div id="macroOutput" class="output muted">Loading public macro observations…</div></article>
+<article class="card panel-glass"><h2>Economic event calendar</h2><p class="desc">Upcoming releases from the free public calendar feed. Publisher coverage and verification vary; missing values are not inferred.</p><div id="calendarOutput" class="output muted">Loading calendar status…</div></article>
+<article class="card panel-glass" id="research-export"><h2>Historical data export</h2><p class="desc">Download eligible stored historical observations. CSV is generated by the local backend.</p><div class="fields two"><div><label>Contract filter</label><select id="exportSymbol"><option value="">All contracts</option><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Maximum rows (1–50,000)</label><input id="exportLimit" type="number" value="10000" min="1" max="50000"></div><div><label>Start date (optional)</label><input id="startDate" type="date"></div><div><label>End date (optional)</label><input id="endDate" type="date"></div></div><button id="exportBtn">Download CSV</button><div id="exportOutput" class="muted" style="margin-top:10px;font-size:13px"></div></article>
+<article class="card panel-glass"><h2>Forecast error diagnostics</h2><p class="desc">Compare actual prices with chronological out-of-sample predictions, then inspect whether absolute forecast error is rising or falling across the evaluation window.</p><div class="fields"><div><label>Contract</label><select id="diagSymbol"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Forecast horizon</label><select id="diagHorizon"><option value="1">1 observation</option><option value="2">2 observations</option><option value="3">3 observations</option><option value="5" selected>5 observations</option><option value="10">10 observations</option><option value="20">20 observations</option></select></div><div><label>Model to inspect</label><select id="diagModel"><option value="naive_last_value">Naive · last value</option><option value="rolling_mean_5" selected>Rolling mean · 5 observations</option><option value="linear_trend">Linear trend</option></select></div><div><label>Training lookback</label><input id="diagLookback" type="number" min="20" max="500" value="60"></div><div><label>Test folds</label><select id="diagFolds"><option value="10">10</option><option value="20">20</option><option value="30" selected>30</option><option value="60">60</option></select></div></div><button id="runDiagnosticsBtn">Run forecast diagnostics</button><div id="diagnosticsOutput" class="output muted">No forecast error diagnostics have been run.</div></article>
+<article class="card panel-glass"><h2>Forecast reliability monitor</h2><p class="desc">Inspect recent historical error, compare all three baseline models over the same folds, and flag large error changes for review. This is a diagnostic warning, not an automatic market-regime classifier.</p><div class="fields"><div><label>Contract</label><select id="relSymbol"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select></div><div><label>Forecast horizon</label><select id="relHorizon"><option value="1">1 observation</option><option value="2">2 observations</option><option value="3">3 observations</option><option value="5" selected>5 observations</option><option value="10">10 observations</option><option value="20">20 observations</option></select></div><div><label>Training lookback</label><input id="relLookback" type="number" min="20" max="500" value="60"></div><div><label>Test folds</label><select id="relFolds"><option value="10">10</option><option value="20">20</option><option value="30" selected>30</option><option value="60">60</option></select></div></div><button id="runReliabilityBtn">Run reliability check</button><div id="reliabilityOutput" class="output muted">No reliability check has been run.</div></article>
+<article class="card panel-glass wide" id="research-expanding-backtest"><h2>Expanding-window strategy validation</h2><p class="desc">Chronological train/test folds for a relative-value rule. Each test fold is evaluated only after thresholds are chosen from the expanding training history. Matched-expiry settlement changes are proxies, not executable fills.</p><div class="fields"><div><label>Canonical pair</label><select id="expPair"><option>GOLDM-GOLDTEN</option><option>GOLDM-GOLDGUINEA</option><option selected>GOLDM-GOLDPETAL</option><option>GOLDTEN-GOLDGUINEA</option><option>GOLDTEN-GOLDPETAL</option><option>GOLDGUINEA-GOLDPETAL</option></select></div><div><label>Rolling lookback</label><input id="expWindow" type="number" min="5" max="365" value="30"></div><div><label>Initial training share</label><input id="expTrainFraction" type="number" min="0.5" max="0.9" step="0.05" value="0.6"></div><div><label>Out-of-sample folds</label><input id="expFolds" type="number" min="2" max="12" value="4"></div><div><label>Minimum entry Z</label><input id="expEntryZ" type="number" min="0.5" max="5" step="0.1" value="2"></div><div><label>Estimated transaction cost ₹/10g</label><input id="expCost" type="number" min="0" value="10.31" step="0.01"></div><div><label>Estimated slippage ₹/10g</label><input id="expSlippage" type="number" min="0" value="15" step="0.01"></div><div><label>Spread units</label><input id="expUnits" type="number" min="1" max="10000" value="1"></div></div><button id="runExpandingBacktest" type="button">Run expanding-window validation</button><div id="expandingBacktestOutput" class="output muted" role="status" aria-live="polite">No expanding-window strategy validation has been run.</div><p class="muted" style="font-size:12px">Costs and slippage above are user assumptions. Historical CSV is not provider-verified; the endpoint does not model order-book depth, bid/ask fills, margin, taxes, or portfolio exposure.</p></article>
+<article class="card panel-glass wide" id="research-quality"><h2>Historical data coverage audit</h2><p class="desc">Read-only inventory of eligible stored history: date coverage, symbol coverage, matched trade-date/expiry combinations, and observed versus missing volume/open interest.</p><button id="runQualityAudit" type="button">Audit stored coverage</button><div id="qualityAuditOutput" class="output muted" role="status" aria-live="polite">Coverage audit has not been run. This report never changes or imports observations.</div></article>
+<article class="card panel-glass wide" id="research-term-structure"><h2>Expiry curve & lifecycle context</h2><p class="desc">Descriptive, exact-expiry historical spread curve only. This is not a validated carry or roll-down model; no carry inference is made without effective-dated contract specifications and financing, storage, tax, tender, and settlement inputs.</p><div class="fields"><div><label>Canonical pair</label><select id="termPair"><option>GOLDM-GOLDTEN</option><option>GOLDM-GOLDGUINEA</option><option selected>GOLDM-GOLDPETAL</option><option>GOLDTEN-GOLDGUINEA</option><option>GOLDTEN-GOLDPETAL</option><option>GOLDGUINEA-GOLDPETAL</option></select></div></div><button id="runTermStructure" type="button">Inspect expiry history</button><div id="termStructureOutput" class="output muted" role="status" aria-live="polite">Expiry history has not been inspected.</div></article>
+<article class="card panel-glass" id="research-backtest"><h2>Strategy backtesting</h2><p class="desc">Use the existing Walk-Forward Backtesting Lab for portfolio simulation, equity curve, P&amp;L, drawdown, costs and trade logs. Per-leg P&amp;L is arithmetic attribution; passive leg benchmarks are not exposure-matched alpha.</p><p class="muted" style="font-size:13px">Backtest metrics depend on the chosen pair, history, user-entered cost assumptions and settlement fill proxies. Historical results are not evidence of future performance.</p><a class="btn" href="backtesting-lab.html">Open Backtesting Lab</a><p class="muted" style="font-size:12px">Ensure the existing frontend server is running to open the Backtesting Lab.</p></article>
+</section><p class="footer">AURORA research suite · Historical data may be user-imported and is not necessarily exchange-verified. Always check the data provenance, synchronized expiry coverage, and contract specification before interpreting results.</p>
+<script>
+const API = (window.AURORA_API_BASE || 'http://127.0.0.1:8000/api').replace(/\/$/,'');
+const $ = id => document.getElementById(id);
+const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = value => value == null || !Number.isFinite(Number(value)) ? '—' : Number(value).toLocaleString('en-IN',{maximumFractionDigits:2});
+async function getJson(path, options={}){const controller=new AbortController();const timeoutMs=options.timeoutMs||5000;const fetchOptions={...options};delete fetchOptions.timeoutMs;const timeout=setTimeout(()=>controller.abort(),timeoutMs);try{const res=await fetch(API+path,{...fetchOptions,signal:controller.signal});const contentType=res.headers.get('content-type')||'';const body=contentType.includes('application/json')?await res.json():{};if(!res.ok)throw new Error(body.detail||body.message||('HTTP '+res.status));return body;}catch(e){if(e.name==='AbortError')throw new Error('Request timed out after '+Math.round(timeoutMs/1000)+' seconds. Check FastAPI and retry with fewer folds.');if(e instanceof TypeError)throw new Error('Connection blocked or refused. Check FastAPI on port 8000 and CORS settings.');throw e;}finally{clearTimeout(timeout);}}
+
+async function loadPublicMacro(){
+ const out=$('macroOutput');const health=$('macroHealthValue');
+ health.textContent='Loading…';health.className='warn';out.textContent='Fetching latest public macro observations through the local FastAPI backend…';
+ try{
+  const payload=await getJson('/research/macro');
+  const results=Array.isArray(payload.data)?payload.data:[];
+  if(!results.length)throw new Error('The backend returned no macro observations.');
+  const rows=results.map(item=>{
+   const age=Number(item.age_days);
+   return '<div class="rowitem"><div><strong>'+esc(item.name)+'</strong><div class="muted">'+esc(item.meaning)+' · observation date '+esc(item.date)+'</div><div class="muted">Source: <a href="'+esc(item.source_url||('https://fred.stlouisfed.org/series/'+item.id))+'" target="_blank" rel="noopener noreferrer">FRED · '+esc(item.id)+'</a> · '+esc(age)+' day(s) old</div></div><div style="text-align:right"><strong>'+esc(fmt(item.value))+'</strong><div class="muted">'+esc(item.unit)+'</div><span class="status '+(age>7?'warn':'fine')+'">'+(age>7?'Stale':'Latest available')+'</span></div></div>';
+  }).join('');
+  const stale=results.some(x=>Number(x.age_days)>7);
+  const partial=!!payload.partial;
+  health.textContent=partial?'Partially connected':(stale?'Connected · stale data':'Connected');
+  health.className=(partial||stale)?'warn':'fine';
+  out.innerHTML='<div class="rowitem"><span>Provider</span><span class="status '+(partial?'warn':'fine')+'">'+esc(payload.provider||'FRED public CSV · backend proxy')+'</span></div>'+rows+(partial?'<p class="warn">Some FRED series could not be retrieved: '+esc((payload.errors||[]).map(x=>x.id+': '+x.message).join('; '))+'</p>':'')+'<p class="muted">Values are the latest non-missing observations returned by FRED; observation dates are not real-time timestamps. Stale threshold: more than 7 days. This panel does not provide a verified gold spot series, USD/INR, market news, or sentiment. No market price or directional signal is inferred.</p>';
+ }catch(e){
+  health.textContent='Unavailable';health.className='warn';
+  out.innerHTML='<div class="rowitem"><span>Public macro feed</span><span class="status warn">Unavailable</span></div><p>Could not load FRED observations through the backend: '+esc(e.message)+'. Check backend connectivity to FRED. No cached or invented values are shown.</p><p><a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener noreferrer">Open FRED</a></p>';
+ }
+}
+async function loadContext(){
+ const status=$('apiStatusValue');
+ status.textContent='Checking (max 5s)…';status.className='warn';
+ $('healthMessage').textContent='Checking '+API+'/health …';
+ $('retryApiBtn').disabled=true;$('retryApiBtn').textContent='Checking…';
+ try {
+  const h=await getJson('/health');
+  status.textContent='Connected';status.className='fine';
+  $('healthMessage').textContent=(h.message||'FastAPI health endpoint responded.')+' · '+API;
+ } catch(e) {
+  status.textContent='Offline';status.className='warn';
+  $('healthMessage').textContent='Cannot reach '+API+'. '+e.message+' Start/restart FastAPI in the repository root, then retry.';
+ }
+ $('retryApiBtn').disabled=false;$('retryApiBtn').textContent='Retry API connection';
+ // Start macro and calendar requests concurrently; neither panel should hold up the other.
+ void loadPublicMacro();
+ try{
+  const today=new Date();const to=new Date(today);to.setDate(to.getDate()+14);
+  const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const url='https://www.financecalendar.com/wp-json/fc/v1/calendar?'+new URLSearchParams({from:iso(today),to:iso(to),country:'US,GB,IN',tz:'Asia/Kolkata',limit:'100'});
+  const res=await fetch(url,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(4500)});
+  if(!res.ok)throw new Error('Finance Calendar returned HTTP '+res.status);
+  const d=await res.json();const events=Array.isArray(d.events)?d.events:[];
+  const label=e=>e.title||e.name||e.series_name||'Economic release';
+  const dateLabel=e=>e.time_local||e.date||e.release_at_utc||'Time not published';
+  const rows=events.slice(0,20).map(e=>'<div class="rowitem"><div><strong>'+esc(label(e))+'</strong><div class="muted">'+esc(e.country||'Global')+' · '+esc(dateLabel(e))+' · '+esc(e.status||'schedule status unavailable')+'</div>'+(e.url?'<div><a href="'+esc(e.url)+'" target="_blank" rel="noopener noreferrer">Publisher/source details</a></div>':'')+'</div><span class="status">'+esc(e.impact||'Impact n/a')+'</span></div>').join('');
+  $('calendarHealthValue').textContent='Connected';$('calendarHealthValue').className='fine';$('calendarOutput').innerHTML='<div class="rowitem"><span>Calendar status</span><span class="status fine">Connected · public feed</span></div><div class="rowitem"><span>Window</span><span>'+esc(iso(today))+' → '+esc(iso(to))+'</span></div><div class="rowitem"><span>Events returned</span><span>'+events.length+'</span></div>'+(rows||'<p>No events were returned for this date range.</p>')+'<p class="muted">Source: <a href="https://www.financecalendar.com/api/" target="_blank" rel="noopener noreferrer">Finance Calendar</a>. Free public feed; attribution retained. Event coverage and verification vary by publisher. A missing time or impact is not inferred.</p>';
+ }catch(e){$('calendarHealthValue').textContent='Unavailable';$('calendarHealthValue').className='warn';$('calendarOutput').innerHTML='<div class="rowitem"><span>Calendar status</span><span class="status warn">Unavailable</span></div><p>Could not load the public economic calendar: '+esc(e.message)+'. Retry the page or check network access. No dates are fabricated.</p><p><a href="https://www.financecalendar.com/calendar/" target="_blank" rel="noopener noreferrer">Open Finance Calendar</a></p>';}
+}
+$('retryApiBtn').addEventListener('click',loadContext);
+$('forecastBtn').onclick=async()=>{
+ const out=$('forecastOutput');out.textContent='Calculating forecasts and checking historical validation…';
+ try{
+  const symbol=$('symbol').value;
+  const horizon=Math.max(1,Math.min(20,Number($('horizon').value)||5));
+  const lookback=Math.max(10,Math.min(1000,Number($('lookback').value)||60));
+  const q=new URLSearchParams({symbol,lookback:String(lookback),horizon:String(horizon)});
+  const d=await getJson('/research/forecast?'+q);
+  if(d.status!=='baseline_only'){out.innerHTML='<strong>'+esc(d.status)+'</strong><p>'+esc(d.message)+'</p>';return;}
+  const validationQ=new URLSearchParams({symbol,lookback:String(Math.max(20,Math.min(500,lookback))),min_train:String(Math.max(20,Math.min(30,lookback))),max_folds:'60'});
+  let validation=null,validationKind='';
+  try{
+   if(horizon===1){validation=await getJson('/research/forecast-validation?'+validationQ);validationKind='one-step';}
+   else{validationQ.set('horizon',String(horizon));validationQ.set('max_folds','30');validation=await getJson('/research/forecast-horizon-validation?'+validationQ);validationKind=horizon+'-observation horizon';}
+  }catch(validationError){validation=null;}
+  const modelNames={naive_last_value:'Naive · last value',rolling_mean_5:'Rolling mean · 5 observations',linear_trend:'Linear trend'};
+  const pooledWinner=validation&&validation.status==='evaluated'&&validation.selection?validation.selection.lowest_mae_model:null;
+  const folds=validation&&validation.status==='evaluated'&&Array.isArray(validation.folds)?validation.folds:[];
+  const predictionFields={naive_last_value:'naive_prediction_10g',rolling_mean_5:'rolling_mean_prediction_10g',linear_trend:'trend_prediction_10g'};
+  const recentCount=Math.min(5,folds.length);
+  const recentMetrics=Object.keys(modelNames).map(key=>{const errs=folds.map(f=>Math.abs(Number(f.actual_price_10g)-Number(f[predictionFields[key]]))).filter(Number.isFinite);const recent=errs.slice(-recentCount);return {key,mae:recent.length?recent.reduce((a,b)=>a+b,0)/recent.length:Infinity};});
+  const recentWinner=recentMetrics.length&&recentMetrics.some(m=>Number.isFinite(m.mae))?[...recentMetrics].sort((a,b)=>a.mae-b.mae)[0].key:null;
+  const selectedErrors=pooledWinner&&folds.length?folds.map(f=>Math.abs(Number(f.actual_price_10g)-Number(f[predictionFields[pooledWinner]]))).filter(Number.isFinite):[];
+  const recentBlock=selectedErrors.slice(-5);
+  const previousBlock=selectedErrors.slice(-10,-5);
+  const meanError=arr=>arr.length?arr.reduce((sum,value)=>sum+value,0)/arr.length:null;
+  const recentSelectedMae=meanError(recentBlock),previousSelectedMae=meanError(previousBlock);
+  const selectedErrorChange=previousSelectedMae>0?(recentSelectedMae-previousSelectedMae)/previousSelectedMae*100:null;
+  const modelDisagreement=!!(pooledWinner&&recentWinner&&pooledWinner!==recentWinner);
+  const reliabilityStatus=recentBlock.length<5||previousBlock.length<5?'WATCH':selectedErrorChange>=50?'UNSTABLE':selectedErrorChange>=20||modelDisagreement?'WATCH':'STABLE';
+  const reliabilityDescription=recentBlock.length<5||previousBlock.length<5?'Not enough recent and preceding folds for a full comparison.':selectedErrorChange>=50?'Recent error is at least 50% higher than the preceding five-fold block.':modelDisagreement&&selectedErrorChange<20?'Recent and pooled validation winners disagree; monitor the next folds.':selectedErrorChange>=20?'Recent error is at least 20% higher than the preceding five-fold block.':'Recent error is not more than 20% above the preceding five-fold block.';
+  // Browser-local history is keyed by contract and horizon; it records each explicit calculation.
+  const historyKey='aurora.forecastReliability.v1.'+symbol+'.h'+horizon;
+  let reliabilityHistory=[];
+  try{const saved=JSON.parse(localStorage.getItem(historyKey)||'[]');if(Array.isArray(saved))reliabilityHistory=saved;}catch(historyReadError){reliabilityHistory=[];}
+  const snapshot={date:d.last_observation_date||null,status:reliabilityStatus,pooled_winner:pooledWinner,recent_winner:recentWinner,recent_mae:recentSelectedMae,previous_mae:previousSelectedMae,error_change_pct:selectedErrorChange,recorded_at:new Date().toISOString()};
+  const existingIndex=reliabilityHistory.findIndex(item=>item.date===snapshot.date);
+  if(existingIndex>=0)reliabilityHistory[existingIndex]=snapshot;else reliabilityHistory.push(snapshot);
+  reliabilityHistory=reliabilityHistory.slice(-20);
+  try{localStorage.setItem(historyKey,JSON.stringify(reliabilityHistory));}catch(historyWriteError){}
+  const previousSnapshot=reliabilityHistory.length>1?reliabilityHistory[reliabilityHistory.length-2]:null;
+  const recoveryText=previousSnapshot&&previousSnapshot.status!==reliabilityStatus?'Status transition: '+previousSnapshot.status+' → '+reliabilityStatus+'.':previousSnapshot?'Status unchanged from previous saved calculation.':'First saved reliability snapshot for this contract and horizon.';
+  const statusCounts=reliabilityHistory.reduce((counts,item)=>{const status=item.status||'UNKNOWN';counts[status]=(counts[status]||0)+1;return counts;},{});
+  const statusTransitions=reliabilityHistory.slice(1).map((item,index)=>({from:reliabilityHistory[index].status,to:item.status,date:item.date||'unknown date'})).filter(item=>item.from!==item.to);
+  const historyDatesValid=reliabilityHistory.every(item=>typeof item.date==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(item.date));
+  const reliabilityEvidenceReady=recentBlock.length===5&&previousBlock.length===5&&Number.isFinite(selectedErrorChange)&&!!pooledWinner&&!!recentWinner;
+  let stability=null;
+  try{const sq=new URLSearchParams({symbol,lookback:String(Math.max(20,Math.min(500,lookback))),min_train:String(Math.max(20,Math.min(30,lookback))),horizon:String(horizon),windows:'3',folds_per_window:'10'});stability=await getJson('/research/forecast-stability?'+sq);}catch(stabilityError){stability=null;}
+  const pooledWinnerWindowWins=pooledWinner&&stability&&stability.window_wins?Number(stability.window_wins[pooledWinner]||0):0;
+  const stabilityPassed=!!(stability&&stability.status==='evaluated'&&stability.stability_verdict==='consistent'&&pooledWinnerWindowWins>=2);
+  const winner=pooledWinner&&stabilityPassed&&reliabilityStatus!=='UNSTABLE'?pooledWinner:null;
+  const stabilityLabel=stabilityPassed?'Pooled winner repeats across windows':(stability&&stability.status==='evaluated'?(stability.stability_verdict==='consistent'?'A different model repeats across windows':'Window-dependent'):'Insufficient evidence');
+  const forecasts=d.forecast;
+  const chosen=winner?modelNames[winner]:'No stable winner declared';
+  let output='<div class="metric-grid"><div class="metric"><small>Latest eligible date</small><strong>'+esc(d.last_observation_date)+'</strong></div><div class="metric"><small>Latest normalized price</small><strong>₹'+fmt(d.last_price_10g)+'</strong></div><div class="metric"><small>Pooled validation winner</small><strong>'+esc(pooledWinner?modelNames[pooledWinner]:'Unavailable')+'</strong><p class="muted">Lowest MAE over '+fmt(validation&&validation.test_folds)+' chronological folds.</p></div><div class="metric"><small>Recent winner · latest '+fmt(recentCount)+' folds</small><strong>'+esc(recentWinner?modelNames[recentWinner]:'Unavailable')+'</strong><p class="muted">Recent sample is a diagnostic, not an automatic switch rule.</p></div><div class="metric"><small>Stability gate</small><strong class="'+(stabilityPassed?'fine':'warn')+'">'+esc(stabilityLabel)+'</strong><p class="muted">'+esc(stability&&stability.status==='evaluated'?(stability.stability_note||'Three separate chronological windows were evaluated.'):'Could not verify the requested multi-window stability check.')+'</p></div></div>';
+  output+='<div class="metric-grid"><div class="metric"><small>Reliability status · pooled candidate</small><strong class="'+(reliabilityStatus==='STABLE'?'fine':'warn')+'">'+reliabilityStatus+'</strong><p class="muted">'+esc(reliabilityDescription)+'</p></div><div class="metric"><small>Candidate recent MAE · latest 5 folds</small><strong>'+(recentSelectedMae===null?'—':'₹'+fmt(recentSelectedMae))+'</strong><p class="muted">Previous 5 folds: '+(previousSelectedMae===null?'—':'₹'+fmt(previousSelectedMae))+(selectedErrorChange===null?'':' · '+(selectedErrorChange>0?'+':'')+fmt(selectedErrorChange)+'%')+'</p></div></div>';
+  output+='<h3>Reliability evidence check</h3><div class="metric-grid"><div class="metric"><small>Comparison evidence</small><strong class="'+(reliabilityEvidenceReady?'fine':'warn')+'">'+(reliabilityEvidenceReady?'Sufficient':'Insufficient')+'</strong><p class="muted">Requires 5 recent folds, 5 preceding folds, finite MAE change, and both pooled/recent winners.</p></div><div class="metric"><small>History integrity</small><strong class="'+(historyDatesValid?'fine':'warn')+'">'+(historyDatesValid?'Valid dates':'Check dates')+'</strong><p class="muted">Every saved snapshot must include a YYYY-MM-DD latest-data date.</p></div><div class="metric"><small>Saved status transitions</small><strong>'+fmt(statusTransitions.length)+'</strong><p class="muted">Status changes across '+fmt(reliabilityHistory.length)+' snapshots in this browser.</p></div></div>';
+  output+='<h3>Reliability recovery history · '+esc(symbol)+' · horizon '+horizon+'</h3><p class="muted">'+esc(recoveryText)+' History is saved in this browser only; it is not synced to the backend or other devices. A new calculation updates the snapshot for the latest eligible data date. Recalculating without a newer eligible date replaces that date\'s snapshot rather than manufacturing a new history point.</p>';
+  output+='<div class="metric-grid"><div class="metric"><small>STABLE snapshots</small><strong class="fine">'+fmt(statusCounts.STABLE||0)+'</strong></div><div class="metric"><small>WATCH snapshots</small><strong class="warn">'+fmt(statusCounts.WATCH||0)+'</strong></div><div class="metric"><small>UNSTABLE snapshots</small><strong class="warn">'+fmt(statusCounts.UNSTABLE||0)+'</strong></div></div>';
+  if(statusTransitions.length)output+='<h3>Status transition timeline</h3><ol>'+statusTransitions.slice().reverse().map(item=>'<li><strong>'+esc(item.from)+' → '+esc(item.to)+'</strong> <span class="muted">· data date '+esc(item.date)+'</span></li>').join('')+'</ol>';
+  output+='<div class="tablewrap"><table><thead><tr><th>Recorded</th><th>Latest data date</th><th>Status</th><th>Pooled winner</th><th>Recent winner</th><th>Recent MAE change</th></tr></thead><tbody>'+reliabilityHistory.slice().reverse().map(item=>'<tr><td>'+esc((item.recorded_at||'').replace('T',' ').slice(0,16)||'—')+'</td><td>'+esc(item.date||'—')+'</td><td><strong class="'+(item.status==='STABLE'?'fine':'warn')+'">'+esc(item.status||'—')+'</strong></td><td>'+esc(modelNames[item.pooled_winner]||'—')+'</td><td>'+esc(modelNames[item.recent_winner]||'—')+'</td><td>'+(Number.isFinite(item.error_change_pct)?(item.error_change_pct>0?'+':'')+fmt(item.error_change_pct)+'%':'—')+'</td></tr>').join('')+'</tbody></table></div>';
+  if(pooledWinner&&recentWinner&&pooledWinner!==recentWinner)output+='<p class="warn">Recent model disagreement: '+esc(modelNames[recentWinner])+' has the lowest MAE over the latest '+fmt(recentCount)+' folds, while '+esc(modelNames[pooledWinner])+' wins across the full pooled validation. Current reliability status is '+esc(reliabilityStatus)+'. '+(reliabilityStatus==='UNSTABLE'?'No model is promoted as selected because the pooled candidate’s recent errors have deteriorated sharply.':'The pooled model remains eligible only if it passes the multi-window stability gate. The recent winner is diagnostic, not an automatic switch.')+'</p>';
+  if(winner){
+   output+='<p class="muted">Candidate passed both pooled lowest-MAE comparison and the separate 3-window stability check ('+fmt(stability.test_folds)+' folds). The recent winner is shown separately; selection remains historical and is not a guarantee.</p>';
+   const metrics=validation.models;
+   output+='<div class="tablewrap"><table><thead><tr><th>Validated model</th><th>MAE ₹</th><th>RMSE ₹</th><th>MAPE %</th><th>Recent rank</th></tr></thead><tbody>'+Object.keys(modelNames).map(key=>'<tr><td>'+esc(modelNames[key])+(key===winner?' · stability-gated candidate':'')+'</td><td>'+fmt(metrics[key].mae)+'</td><td>'+fmt(metrics[key].rmse)+'</td><td>'+fmt(metrics[key].mape_pct)+'</td><td>'+(key===recentWinner?'Recent lowest MAE':'—')+'</td></tr>').join('')+'</tbody></table></div>';
+   const comparisonModels=Object.keys(modelNames).filter(key=>key!==winner);
+   output+='<h3>Stability-gated baseline forecast · ₹/10g</h3><div class="tablewrap"><table><thead><tr><th>Step</th><th>Selected candidate · '+esc(modelNames[winner])+'</th>'+comparisonModels.map(key=>'<th>'+esc(modelNames[key])+'</th>').join('')+'</tr></thead><tbody>'+forecasts.map(p=>'<tr><td>'+p.step+'</td><td><strong>₹'+fmt(p.model_forecasts[winner])+'</strong></td>'+comparisonModels.map(key=>'<td>₹'+fmt(p.model_forecasts[key])+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
+  }else{
+   output+='<p class="warn">'+(reliabilityStatus==='UNSTABLE'?'No preferred baseline declared: the pooled candidate is UNSTABLE because recent forecast errors deteriorated by at least 50% versus the preceding five-fold block. All model forecasts remain comparison-only; this does not automatically promote the recent winner.':'No stable winner declared. A pooled lowest-MAE result alone is not enough: the stability endpoint must evaluate three separate windows and agree on the pooled winner. Forecast values remain visible for comparison only; no model is promoted as selected.')+'</p>';
+   output+='<div class="tablewrap"><table><thead><tr><th>Step</th><th>Naive</th><th>Rolling mean</th><th>Linear trend</th></tr></thead><tbody>'+forecasts.map(p=>'<tr><td>'+p.step+'</td><td>₹'+fmt(p.model_forecasts.naive_last_value)+'</td><td>₹'+fmt(p.model_forecasts.rolling_mean_5)+'</td><td>₹'+fmt(p.model_forecasts.linear_trend)+'</td></tr>').join('')+'</tbody></table></div>';
+  }
+  output+='<p class="muted">Trend in-sample RMSE: ₹'+fmt(d.metrics.in_sample_rmse)+'. The residual band applies only to the trend fit and is descriptive, not a calibrated prediction interval.</p><p class="muted">'+esc(d.caveat)+' Validation does not establish profitability or future accuracy. Data may be user-imported and not exchange-verified.</p>';
+  out.innerHTML=output;
+ }catch(e){out.textContent='Forecast unavailable: '+e.message;}
+};
+$('validateForecastBtn').onclick=async()=>{const out=$('validationOutput');out.textContent='Running chronological validation…';try{const q=new URLSearchParams({symbol:$('validationSymbol').value,lookback:$('validationLookback').value,min_train:Math.min(30,Number($('validationLookback').value)),max_folds:$('validationFolds').value});const d=await getJson('/research/forecast-validation?'+q);if(d.status!=='evaluated'){out.innerHTML='<strong>'+esc(d.status)+'</strong><p>'+esc(d.message)+'</p><p>Eligible observations: '+fmt(d.observations)+' · Minimum required: '+fmt(d.minimum_required)+'</p>';return;}const models=[['Naive · last value',d.models.naive_last_value],['Rolling mean · 5 rows',d.models.rolling_mean_5],['Linear trend',d.models.linear_trend]];out.innerHTML='<div class="metric-grid"><div class="metric"><small>Out-of-sample folds</small><strong>'+fmt(d.test_folds)+'</strong></div><div class="metric"><small>Test window</small><strong>'+esc(d.first_test_date)+' → '+esc(d.last_test_date)+'</strong></div><div class="metric"><small>Lowest MAE</small><strong class="fine">'+esc(d.selection.lowest_mae_model.replaceAll('_',' '))+'</strong></div></div><div class="tablewrap"><table><thead><tr><th>Model</th><th>MAE ₹</th><th>RMSE ₹</th><th>MAPE %</th><th>Direction %</th></tr></thead><tbody>'+models.map(r=>'<tr><td>'+r[0]+'</td><td>'+fmt(r[1].mae)+'</td><td>'+fmt(r[1].rmse)+'</td><td>'+fmt(r[1].mape_pct)+'</td><td>'+fmt(r[1].directional_accuracy_pct)+'</td></tr>').join('')+'</tbody></table></div><p class="muted">Trend wins vs naive: '+fmt(d.comparison.trend_wins)+' / '+fmt(d.test_folds)+' · '+fmt(d.comparison.trend_win_rate_pct)+'% of folds. '+esc(d.method)+'</p><p class="muted">'+esc(d.caveat)+'</p><details><summary>Show per-date predictions</summary><div class="tablewrap"><table><thead><tr><th>Date</th><th>Actual ₹</th><th>Naive ₹</th><th>Rolling mean ₹</th><th>Trend ₹</th><th>Train rows</th></tr></thead><tbody>'+d.folds.map(f=>'<tr><td>'+esc(f.date)+'</td><td>'+fmt(f.actual_price_10g)+'</td><td>'+fmt(f.naive_prediction_10g)+'</td><td>'+fmt(f.rolling_mean_prediction_10g)+'</td><td>'+fmt(f.trend_prediction_10g)+'</td><td>'+fmt(f.training_observations)+'</td></tr>').join('')+'</tbody></table></div></details>';}catch(e){out.textContent='Validation failed: '+e.message;}};
+$('validateHorizonBtn').onclick=async()=>{const out=$('horizonValidationOutput');out.textContent='Running rolling-origin multi-step validation…';try{const q=new URLSearchParams({symbol:$('horizonSymbol').value,horizon:$('horizonSteps').value,lookback:$('validationLookback').value,min_train:Math.min(30,Number($('validationLookback').value)),max_folds:$('horizonFolds').value});const d=await getJson('/research/forecast-horizon-validation?'+q);if(d.status!=='evaluated'){out.innerHTML='<strong>'+esc(d.status)+'</strong><p>'+esc(d.message)+'</p><p>Eligible observations: '+fmt(d.observations)+' · Minimum required: '+fmt(d.minimum_required)+'</p>';return;}const models=[['Naive · last value',d.models.naive_last_value],['Rolling mean · 5 rows',d.models.rolling_mean_5],['Linear trend',d.models.linear_trend]];out.innerHTML='<div class="metric-grid"><div class="metric"><small>Horizon</small><strong>'+fmt(d.horizon_observations)+' observations</strong></div><div class="metric"><small>Test folds</small><strong>'+fmt(d.test_folds)+'</strong></div><div class="metric"><small>Lowest MAE</small><strong class="fine">'+esc(d.selection.lowest_mae_model.replaceAll('_',' '))+'</strong></div></div><div class="tablewrap"><table><thead><tr><th>Model</th><th>MAE ₹</th><th>RMSE ₹</th><th>MAPE %</th></tr></thead><tbody>'+models.map(r=>'<tr><td>'+r[0]+'</td><td>'+fmt(r[1].mae)+'</td><td>'+fmt(r[1].rmse)+'</td><td>'+fmt(r[1].mape_pct)+'</td></tr>').join('')+'</tbody></table></div><p class="muted">'+esc(d.first_target_date)+' → '+esc(d.last_target_date)+'. '+esc(d.method)+'</p><p class="muted">'+esc(d.caveat)+'</p><details><summary>Show multi-step predictions</summary><div class="tablewrap"><table><thead><tr><th>Origin</th><th>Target</th><th>Actual ₹</th><th>Naive ₹</th><th>Rolling mean ₹</th><th>Trend ₹</th></tr></thead><tbody>'+d.folds.map(f=>'<tr><td>'+esc(f.origin_date)+'</td><td>'+esc(f.target_date)+'</td><td>'+fmt(f.actual_price_10g)+'</td><td>'+fmt(f.naive_prediction_10g)+'</td><td>'+fmt(f.rolling_mean_prediction_10g)+'</td><td>'+fmt(f.trend_prediction_10g)+'</td></tr>').join('')+'</tbody></table></div></details>';}catch(e){out.textContent='Multi-step validation failed: '+e.message;}};
+
+$('validateStabilityBtn').onclick=async()=>{
+ const out=$('stabilityOutput');out.textContent='Evaluating separate chronological windows…';
+ try{
+  const lookback=Math.max(20,Math.min(500,Number($('stabilityLookback').value)||60));
+  const q=new URLSearchParams({
+   symbol:$('stabilitySymbol').value,
+   horizon:String(Math.max(1,Math.min(20,Number($('stabilityHorizon').value)||5))),
+   windows:$('stabilityWindows').value,
+   folds_per_window:$('stabilityFolds').value,
+   lookback:String(lookback),
+   min_train:String(Math.max(20,Math.min(30,lookback)))
+  });
+  const d=await getJson('/research/forecast-stability?'+q);
+  if(d.status!=='evaluated'){
+   out.innerHTML='<strong class="warn">'+esc(d.status)+'</strong><p>'+esc(d.message||'Stability analysis unavailable.')+'</p><p>Eligible observations: '+fmt(d.observations)+' · Minimum required: '+fmt(d.minimum_required)+'</p>';return;
+  }
+  const names={naive_last_value:'Naive · last value',rolling_mean_5:'Rolling mean · 5 observations',linear_trend:'Linear trend'};
+  const verdict=d.stability_verdict==='consistent'?'Consistent across tested windows':'Window-dependent';
+  let output='<div class="metric-grid"><div class="metric"><small>Stability verdict</small><strong class="'+(d.stability_verdict==='consistent'?'fine':'warn')+'">'+esc(verdict)+'</strong></div><div class="metric"><small>Overall lowest MAE</small><strong>'+esc(names[d.overall_lowest_mae_model]||'—')+'</strong></div><div class="metric"><small>Evaluated folds</small><strong>'+fmt(d.test_folds)+'</strong></div></div>';
+  output+='<p class="muted">'+esc(d.stability_note)+' Test targets: '+esc(d.first_target_date)+' → '+esc(d.last_target_date)+'. Horizon: '+fmt(d.horizon_observations)+' observation(s).</p>';
+  output+='<h3>Aggregate metrics across all windows · ₹/10g</h3><div class="tablewrap"><table><thead><tr><th>Model</th><th>MAE ₹</th><th>RMSE ₹</th><th>MAPE %</th><th>Window wins</th></tr></thead><tbody>'+Object.keys(names).map(k=>'<tr><td>'+esc(names[k])+(k===d.overall_lowest_mae_model?' · lowest overall MAE':'')+'</td><td>'+fmt(d.overall_models[k].mae)+'</td><td>'+fmt(d.overall_models[k].rmse)+'</td><td>'+fmt(d.overall_models[k].mape_pct)+'</td><td>'+fmt(d.window_wins[k])+' / '+fmt(d.windows.length)+'</td></tr>').join('')+'</tbody></table></div>';
+  const naiveMae=d.overall_models.naive_last_value.mae;
+  const rollingMae=d.overall_models.rolling_mean_5.mae;
+  const improvement=naiveMae>0?((naiveMae-rollingMae)/naiveMae*100):null;
+  const modelKeys=['naive_last_value','rolling_mean_5','linear_trend'];
+  const spreads=Object.fromEntries(modelKeys.map(k=>{const vals=d.windows.map(w=>w.models[k].mae);return [k,Math.max(...vals)-Math.min(...vals)];}));
+  output+='<h3>Comparison insights</h3><div class="metric-grid"><div class="metric"><small>Rolling mean MAE vs naive</small><strong class="'+(improvement!==null&&improvement>0?'fine':'warn')+'">'+(improvement===null?'—':(improvement>0?'+':'')+fmt(improvement)+'%')+'</strong><p class="muted">'+(improvement!==null&&improvement>0?'lower MAE than naive across the pooled folds':'no pooled MAE improvement over naive')+'</p></div><div class="metric"><small>Naive MAE spread across windows</small><strong>₹'+fmt(spreads.naive_last_value)+'</strong><p class="muted">Highest minus lowest window MAE</p></div><div class="metric"><small>Rolling mean MAE spread</small><strong>₹'+fmt(spreads.rolling_mean_5)+'</strong><p class="muted">Highest minus lowest window MAE</p></div></div>';
+  output+='<h3>Individual chronological windows</h3><div class="tablewrap"><table><thead><tr><th>Window</th><th>Target dates</th><th>Folds</th><th>Lowest MAE model</th><th>Naive MAE ₹</th><th>Rolling MAE ₹</th><th>Trend MAE ₹</th><th>Rolling vs naive</th></tr></thead><tbody>'+d.windows.map(w=>{const n=w.models.naive_last_value.mae;const r=w.models.rolling_mean_5.mae;const delta=n>0?((n-r)/n*100):null;return '<tr><td>'+fmt(w.window)+'</td><td>'+esc(w.first_target_date)+' → '+esc(w.last_target_date)+'</td><td>'+fmt(w.folds)+'</td><td>'+esc(names[w.winner])+'</td><td>'+fmt(n)+'</td><td>'+fmt(r)+'</td><td>'+fmt(w.models.linear_trend.mae)+'</td><td class="'+(delta!==null&&delta>0?'fine':'warn')+'">'+(delta===null?'—':(delta>0?'+':'')+fmt(delta)+'%')+'</td></tr>';}).join('')+'</tbody></table></div>';
+  output+='<h3>Window-by-window MAE profile · ₹/10g</h3><div class="tablewrap"><table><thead><tr><th>Window</th><th>Naive</th><th>Rolling mean</th><th>Linear trend</th></tr></thead><tbody>'+d.windows.map(w=>{const vals=modelKeys.map(k=>w.models[k].mae);const max=Math.max(...vals,1);const bar=(v)=>'<div style="min-width:110px"><div style="height:8px;width:'+Math.max(2,Math.min(100,v/max*100))+'%;background:currentColor;opacity:.65;border-radius:4px"></div><small>₹'+fmt(v)+'</small></div>';return '<tr><td>Window '+fmt(w.window)+'</td><td>'+bar(w.models.naive_last_value.mae)+'</td><td>'+bar(w.models.rolling_mean_5.mae)+'</td><td>'+bar(w.models.linear_trend.mae)+'</td></tr>';}).join('')+'</tbody></table></div>';
+  output+='<p class="muted">Positive rolling-vs-naive percentages mean rolling mean had lower MAE; negative values mean it was worse. MAE spread is a simple sensitivity indicator, not a statistical confidence measure.</p>';
+  output+='<p class="muted">'+esc(d.method)+'</p><p class="muted">'+esc(d.caveat)+'</p>';
+  out.innerHTML=output;
+ }catch(e){out.textContent='Stability analysis failed: '+e.message;}
+};
+
+function diagnosticLineChart(title,series,dates,yLabel){
+ const width=760,height=290,padL=64,padR=18,padT=30,padB=48;
+ const values=series.flatMap(s=>s.values).filter(v=>Number.isFinite(v));
+ if(!values.length)return '<p class="muted">Not enough points to draw this chart.</p>';
+ let min=Math.min(...values),max=Math.max(...values);if(min===max){min-=1;max+=1;}
+ const x=i=>padL+(series[0].values.length<2?0:i*(width-padL-padR)/(series[0].values.length-1));
+ const y=v=>padT+(max-v)*(height-padT-padB)/(max-min);
+ const colors=['#d6a84f','#62a7ff','#d879b5','#73c99b'];
+ let svg='<div class="tablewrap"><svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="'+esc(title)+'" style="display:block;width:100%;min-width:520px;height:auto"><text x="'+padL+'" y="18" fill="currentColor" font-size="13" font-weight="600">'+esc(title)+'</text>';
+ for(let i=0;i<5;i++){const val=max-(max-min)*i/4,yy=y(val);svg+='<line x1="'+padL+'" y1="'+yy+'" x2="'+(width-padR)+'" y2="'+yy+'" stroke="currentColor" opacity=".12"/><text x="'+(padL-8)+'" y="'+(yy+4)+'" text-anchor="end" fill="currentColor" opacity=".75" font-size="10">'+esc(fmt(val))+'</text>';}
+ series.forEach((s,si)=>{const pts=s.values.map((v,i)=>x(i)+','+y(v)).join(' ');svg+='<polyline points="'+pts+'" fill="none" stroke="'+colors[si%colors.length]+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';s.values.forEach((v,i)=>{if(s.values.length<=30||i===0||i===s.values.length-1)svg+='<circle cx="'+x(i)+'" cy="'+y(v)+'" r="2.4" fill="'+colors[si%colors.length]+'"/>';});});
+ const ticks=[0,Math.floor((dates.length-1)/2),dates.length-1].filter((v,i,a)=>dates[v]&&a.indexOf(v)===i);
+ ticks.forEach(i=>{svg+='<text x="'+x(i)+'" y="'+(height-22)+'" text-anchor="'+(i===0?'start':i===dates.length-1?'end':'middle')+'" fill="currentColor" opacity=".75" font-size="10">'+esc(dates[i])+'</text>';});
+ svg+='</svg></div><div class="rowitem" style="flex-wrap:wrap">'+series.map((s,i)=>'<span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+colors[i%colors.length]+';margin-right:5px"></span>'+esc(s.name)+'</span>').join('')+'</div>';
+ return svg;
+}
+$('runDiagnosticsBtn').onclick=async()=>{
+ const out=$('diagnosticsOutput');out.textContent='Running chronological out-of-sample diagnostics…';
+ try{
+  const horizon=Number($('diagHorizon').value);
+  const lookback=Math.max(20,Math.min(500,Number($('diagLookback').value)||60));
+  const q=new URLSearchParams({symbol:$('diagSymbol').value,horizon:String(horizon),lookback:String(lookback),min_train:String(Math.max(20,Math.min(30,lookback))),max_folds:$('diagFolds').value});
+  const d=horizon===1?await getJson('/research/forecast-validation?'+q):await getJson('/research/forecast-horizon-validation?'+q);
+  if(d.status!=='evaluated'){out.innerHTML='<strong class="warn">'+esc(d.status)+'</strong><p>'+esc(d.message||'Diagnostics unavailable.')+'</p><p>Eligible observations: '+fmt(d.observations)+' · Minimum required: '+fmt(d.minimum_required)+'</p>';return;}
+  const folds=d.folds||[];
+  if(!folds.length){out.textContent='No out-of-sample folds were returned.';return;}
+  const model=$('diagModel').value;
+  const names={naive_last_value:'Naive · last value',rolling_mean_5:'Rolling mean · 5 observations',linear_trend:'Linear trend'};
+  const actual=folds.map(f=>Number(f.actual_price_10g));
+  const prediction=folds.map(f=>Number(f[model==='naive_last_value'?'naive_prediction_10g':model==='rolling_mean_5'?'rolling_mean_prediction_10g':'trend_prediction_10g']));
+  const error=folds.map((f,i)=>Math.abs(actual[i]-prediction[i]));
+  const rollingError=error.map((_,i)=>{const start=Math.max(0,i-4);return error.slice(start,i+1).reduce((a,b)=>a+b,0)/(i-start+1);});
+  const first=folds[0].target_date||folds[0].date||'';
+  const last=folds[folds.length-1].target_date||folds[folds.length-1].date||'';
+  const meanError=error.reduce((a,b)=>a+b,0)/error.length;
+  const recentN=Math.min(5,error.length),recentError=error.slice(-recentN).reduce((a,b)=>a+b,0)/recentN;
+  const change=meanError>0?(recentError-meanError)/meanError*100:null;
+  let html='<div class="metric-grid"><div class="metric"><small>Out-of-sample folds</small><strong>'+fmt(folds.length)+'</strong></div><div class="metric"><small>Average absolute error</small><strong>₹'+fmt(meanError)+'</strong></div><div class="metric"><small>Last '+recentN+' fold avg. error</small><strong>₹'+fmt(recentError)+'</strong></div></div>';
+  html+='<p class="muted">Targets: '+esc(first)+' → '+esc(last)+'. Horizon: '+fmt(horizon)+' eligible observation(s). '+(change===null?'':('Recent error vs full-window average: <strong class="'+(change>0?'warn':'fine')+'">'+(change>0?'+':'')+fmt(change)+'%</strong>.'))+'</p>';
+  html+=diagnosticLineChart('Actual vs predicted price · ₹/10g',[{name:'Actual',values:actual},{name:names[model],values:prediction}],folds.map(f=>f.target_date||f.date||''),'Price');
+  html+=diagnosticLineChart('Absolute error trend · 5-fold rolling average · ₹/10g',[{name:'Absolute error',values:error},{name:'Rolling mean absolute error',values:rollingError}],folds.map(f=>f.target_date||f.date||''),'Error');
+  html+='<details><summary>Show fold-level diagnostics</summary><div class="tablewrap"><table><thead><tr><th>Target date</th><th>Actual ₹</th><th>Predicted ₹</th><th>Absolute error ₹</th><th>5-fold rolling error ₹</th></tr></thead><tbody>'+folds.map((f,i)=>'<tr><td>'+esc(f.target_date||f.date||'')+'</td><td>'+fmt(actual[i])+'</td><td>'+fmt(prediction[i])+'</td><td>'+fmt(error[i])+'</td><td>'+fmt(rollingError[i])+'</td></tr>').join('')+'</tbody></table></div></details>';
+  html+='<p class="muted">'+esc(d.method||'Chronological out-of-sample validation.')+' These diagnostics describe historical error only; rising error can indicate a change in conditions but does not prove a market regime shift. Imported data may not be exchange-verified. No profitability claim is implied.</p>';
+  out.innerHTML=html;
+ }catch(e){out.textContent='Forecast diagnostics failed: '+e.message;}
+};
+$('runReliabilityBtn').onclick=async()=>{
+ const out=$('reliabilityOutput');out.textContent='Checking historical forecast reliability…';
+ try{
+  const horizon=Number($('relHorizon').value);
+  const lookback=Math.max(20,Math.min(500,Number($('relLookback').value)||60));
+  const q=new URLSearchParams({symbol:$('relSymbol').value,horizon:String(horizon),lookback:String(lookback),min_train:String(Math.max(20,Math.min(30,lookback))),max_folds:$('relFolds').value});
+  const d=horizon===1?await getJson('/research/forecast-validation?'+q):await getJson('/research/forecast-horizon-validation?'+q);
+  if(d.status!=='evaluated'){out.innerHTML='<strong class="warn">'+esc(d.status)+'</strong><p>'+esc(d.message||'Reliability check unavailable.')+'</p><p>Eligible observations: '+fmt(d.observations)+' · Minimum required: '+fmt(d.minimum_required)+'</p>';return;}
+  const folds=d.folds||[];if(!folds.length){out.textContent='No out-of-sample folds were returned.';return;}
+  const models=[{key:'naive_last_value',label:'Naive · last value',field:'naive_prediction_10g'},{key:'rolling_mean_5',label:'Rolling mean · 5 observations',field:'rolling_mean_prediction_10g'},{key:'linear_trend',label:'Linear trend',field:'trend_prediction_10g'}];
+  const series=models.map(m=>{const errors=folds.map(f=>Math.abs(Number(f.actual_price_10g)-Number(f[m.field])));const mean=errors.reduce((a,b)=>a+b,0)/errors.length;return {...m,errors,mae:mean,rmse:Math.sqrt(errors.reduce((a,b)=>a+b*b,0)/errors.length)};});
+  const recentCount=Math.min(5,folds.length),priorCount=Math.min(5,Math.max(0,folds.length-recentCount));
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  const recent=series.map(s=>({...s,recentMae:avg(s.errors.slice(-recentCount)),previousMae:priorCount?avg(s.errors.slice(-(recentCount+priorCount),-recentCount)):null,shortMae:avg(s.errors.slice(-Math.min(10,folds.length))),longMae:s.mae}));
+  const best=[...recent].sort((a,b)=>a.mae-b.mae)[0];
+  const recentBest=[...recent].sort((a,b)=>a.recentMae-b.recentMae)[0];
+  const selected=recent.find(s=>s.key==='rolling_mean_5');
+  const change=selected.previousMae>0?(selected.recentMae-selected.previousMae)/selected.previousMae*100:null;
+  const recentVsFull=selected.mae>0?(selected.recentMae-selected.mae)/selected.mae*100:null;
+  let status='Insufficient evidence',statusClass='warn',explanation='More out-of-sample folds are needed before interpreting reliability.';
+  if(folds.length>=10){
+   if(change!==null&&change>=50){status='Error spike warning';statusClass='warn';explanation='Recent rolling-mean error is at least 50% above the preceding comparison block.';}
+   else if(change!==null&&change<=-20){status='Recent error lower';statusClass='fine';explanation='Recent rolling-mean error is at least 20% below the preceding comparison block.';}
+   else {status='No large recent shift detected';statusClass='fine';explanation='Recent error did not cross the simple ±20% improvement / +50% spike thresholds.';}
+  }
+  let html='<div class="metric-grid"><div class="metric"><small>Diagnostic status · rolling mean</small><strong class="'+statusClass+'">'+esc(status)+'</strong><p class="muted">'+esc(explanation)+'</p></div><div class="metric"><small>Best pooled baseline · lowest MAE</small><strong>'+esc(best.label)+'</strong><p class="muted">Across '+fmt(folds.length)+' common test folds · MAE ₹'+fmt(best.mae)+'</p></div><div class="metric"><small>Best recent baseline · latest '+fmt(recentCount)+' folds</small><strong>'+esc(recentBest.label)+'</strong><p class="muted">Recent MAE ₹'+fmt(recentBest.recentMae)+' · this may differ from the pooled winner</p></div><div class="metric"><small>Recent 5-fold MAE · rolling mean</small><strong>₹'+fmt(selected.recentMae)+'</strong><p class="muted">Previous block: '+(selected.previousMae===null?'not available':'₹'+fmt(selected.previousMae))+'</p></div></div>';
+  html+='<p class="muted">Targets: '+esc(folds[0].target_date||folds[0].date||'')+' → '+esc(folds[folds.length-1].target_date||folds[folds.length-1].date||'')+'. Horizon: '+fmt(horizon)+' observation(s). Recent rolling-mean error vs its full-window MAE: <strong class="'+(recentVsFull!==null&&recentVsFull>0?'warn':'fine')+'">'+(recentVsFull===null?'—':(recentVsFull>0?'+':'')+fmt(recentVsFull)+'%')+'</strong>.</p>';
+  html+='<h3>Same-fold model comparison</h3><div class="tablewrap"><table><thead><tr><th>Baseline</th><th>Overall MAE ₹</th><th>Overall RMSE ₹</th><th>Recent 5-fold MAE ₹</th><th>Previous 5-fold MAE ₹</th><th>Recent change</th></tr></thead><tbody>'+recent.map(s=>{const delta=s.previousMae>0?(s.recentMae-s.previousMae)/s.previousMae*100:null;return '<tr><td>'+esc(s.label)+'</td><td>'+fmt(s.mae)+'</td><td>'+fmt(s.rmse)+'</td><td>'+fmt(s.recentMae)+'</td><td>'+(s.previousMae===null?'—':fmt(s.previousMae))+'</td><td class="'+(delta!==null&&delta>0?'warn':'fine')+'">'+(delta===null?'—':(delta>0?'+':'')+fmt(delta)+'%')+'</td></tr>';}).join('')+'</tbody></table></div>';
+  html+='<h3>Recent error windows · rolling mean</h3><div class="tablewrap"><table><thead><tr><th>Window</th><th>MAE ₹/10g</th><th>Compared with previous full window</th></tr></thead><tbody>'+[5,10,20].filter(n=>n<=folds.length).map(n=>{const v=avg(selected.errors.slice(-n));const hasFullPrevious=folds.length>=n*2;const previous=hasFullPrevious?avg(selected.errors.slice(-(n*2),-n)):null;const delta=previous>0?(v-previous)/previous*100:null;return '<tr><td>Last '+n+' folds</td><td>'+fmt(v)+'</td><td class="'+(delta!==null&&delta>0?'warn':'fine')+'">'+(delta===null?'Not enough folds for a full preceding '+n+'-fold comparison':(delta>0?'+':'')+fmt(delta)+'%')+'</td></tr>';}).join('')+'</tbody></table></div>';
+  html+='<h3>Fold-level error timeline</h3><p class="muted">One row per out-of-sample forecast. Values are rendered directly in the page so the diagnostics remain inspectable without expanding a hidden section.</p><div class="tablewrap"><table><thead><tr><th>Target date</th><th>Actual ₹/10g</th><th>Naive prediction ₹</th><th>Naive abs. error ₹</th><th>Rolling prediction ₹</th><th>Rolling abs. error ₹</th><th>Trend prediction ₹</th><th>Trend abs. error ₹</th></tr></thead><tbody>'+folds.map((f,i)=>{const actual=Number(f.actual_price_10g);const safeDate=f.target_date||f.date||f.origin_date||'Date unavailable';const cell=n=>Number.isFinite(n)?fmt(n):'Unavailable';const prediction=field=>{const n=Number(f[field]);return Number.isFinite(n)?n:null;};return '<tr><td>'+esc(safeDate)+'</td><td>'+cell(actual)+'</td><td>'+cell(prediction('naive_prediction_10g'))+'</td><td>'+cell(series[0].errors[i])+'</td><td>'+cell(prediction('rolling_mean_prediction_10g'))+'</td><td>'+cell(series[1].errors[i])+'</td><td>'+cell(prediction('trend_prediction_10g'))+'</td><td>'+cell(series[2].errors[i])+'</td></tr>';}).join('')+'</tbody></table></div>';
+  html+='<p class="muted">Thresholds are transparent heuristics, not statistical tests. A recent error spike can reflect noise, a small sample, or changing conditions; it does not prove a regime shift. Forecast error does not imply trading profitability. Imported data may not be exchange-verified.</p>';
+  out.innerHTML=html;
+ }catch(e){out.textContent='Reliability check failed: '+e.message;}
+};
+$('riskBtn').onclick=async()=>{const out=$('riskOutput');out.textContent='Calculating…';try{const payload={capital:Number($('capital').value),risk_pct:Number($('riskPct').value),entry_price:Number($('entry').value),stop_price:Number($('stop').value),unit_size:Number($('unitSize').value),estimated_cost_per_unit:Number($('cost').value)};const d=await getJson('/research/risk-sizing',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});out.innerHTML='<div class="metric-grid"><div class="metric"><small>Risk budget</small><strong>₹'+fmt(d.risk_budget)+'</strong></div><div class="metric"><small>Estimated risk / unit</small><strong>₹'+fmt(d.estimated_risk_per_unit)+'</strong></div><div class="metric"><small>Max units by inputs</small><strong>'+fmt(d.max_units_by_input_assumptions)+'</strong></div></div><p class="muted">'+esc(d.warning)+'</p>';}catch(e){out.textContent='Check inputs: '+e.message;}};
+$('exportBtn').onclick=()=>{const q=new URLSearchParams({limit:$('exportLimit').value});if($('exportSymbol').value)q.set('symbol',$('exportSymbol').value);if($('startDate').value)q.set('start_date',$('startDate').value);if($('endDate').value)q.set('end_date',$('endDate').value);if($('startDate').value&&$('endDate').value&&$('startDate').value>$('endDate').value){$('exportOutput').textContent='Start date must be on or before end date.';return;}const url=API+'/research/export-observations?'+q;$('exportOutput').textContent='Opening CSV export…';const a=document.createElement('a');a.href=url;a.download='aurora_observations.csv';document.body.appendChild(a);a.click();a.remove();$('exportOutput').textContent='If the download did not start, check the backend URL and available historical rows.';};
+const researchData=body=>body&&body.data!==undefined?body.data:body;
+$('runExpandingBacktest').onclick=async()=>{
+ const out=$('expandingBacktestOutput');out.textContent='Running chronological expanding-window validation…';
+ const values={pair:$('expPair').value,window:Number($('expWindow').value),train_fraction:Number($('expTrainFraction').value),folds:Number($('expFolds').value),entry_z:Number($('expEntryZ').value),transaction_cost_per_10g:Number($('expCost').value),slippage_per_10g:Number($('expSlippage').value),units:Number($('expUnits').value)};
+ if(!Number.isFinite(values.train_fraction)||values.train_fraction<=.5||values.train_fraction>=.9||!Number.isInteger(values.folds)||values.folds<2||values.folds>12){out.textContent='Use a training share above 0.50 and below 0.90, with 2–12 test folds.';return;}
+ try{const d=researchData(await getJson('/intelligence/walk-forward-expanding',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(values)}));
+  if(!d||d.status!=='completed'){out.innerHTML='<strong class="warn">'+esc(d?.status||'Unavailable')+'</strong><p>'+esc(d?.message||'The backend did not complete this validation.')+'</p>';return;}
+  const folds=Array.isArray(d.folds)?d.folds:[];
+  let html='<div class="metric-grid"><div class="metric"><small>Eligible observations</small><strong>'+fmt(d.observations)+'</strong><p class="muted">Historical CSV · not provider-verified</p></div><div class="metric"><small>Initial training</small><strong>'+fmt(d.training_observations)+'</strong><p class="muted">'+esc(d.training_start)+' → '+esc(d.training_end)+'</p></div><div class="metric"><small>Out-of-sample test</small><strong>'+fmt(d.holdout_observations)+'</strong><p class="muted">'+esc(d.holdout_start)+' → '+esc(d.holdout_end)+'</p></div><div class="metric"><small>Expiry-transition outcomes excluded</small><strong>'+fmt(d.expiry_transition_exclusions)+'</strong><p class="muted">No return is booked across different explicit expiries.</p></div></div>';
+  html+='<div class="tablewrap"><table><thead><tr><th>Fold</th><th>Training period / rows</th><th>Test period / rows</th><th>Training-selected threshold</th><th>Signals</th><th>Gross ₹</th><th>Estimated costs ₹</th><th>Net ₹</th><th>Expiry transitions excluded</th></tr></thead><tbody>'+folds.map(f=>'<tr><td>'+fmt(f.fold)+'</td><td>'+esc(f.training_start)+' → '+esc(f.training_end)+' · '+fmt(f.training_observations)+'</td><td>'+esc(f.testing_start)+' → '+esc(f.testing_end)+' · '+fmt(f.testing_observations)+'</td><td>'+fmt(f.entry_threshold_selected_from_training)+'σ</td><td>'+fmt(f.signal_count)+'</td><td>'+fmt(f.gross_pnl)+'</td><td>'+fmt(f.estimated_costs)+'</td><td>'+fmt(f.net_pnl)+'</td><td>'+fmt(f.expiry_transition_exclusions)+'</td></tr>').join('')+'</tbody></table></div>';
+  html+='<p><strong>Test-period aggregate:</strong> '+fmt(d.holdout_signal_count)+' one-step observations · gross ₹'+fmt(d.gross_pnl)+' · estimated costs ₹'+fmt(d.estimated_costs)+' · net ₹'+fmt(d.net_pnl)+' · win rate '+(d.win_rate_pct==null?'Unavailable':fmt(d.win_rate_pct)+'%')+'.</p><details><summary>Method and limitations</summary><ul>'+(d.assumptions||[]).map(a=>'<li>'+esc(a)+'</li>').join('')+'</ul></details>';
+  out.innerHTML=html;
+ }catch(e){out.textContent='Expanding-window validation unavailable: '+e.message;}
+};
+$('runQualityAudit').onclick=async()=>{
+ const out=$('qualityAuditOutput');out.textContent='Reading stored observation coverage…';
+ try{const d=researchData(await getJson('/research/data-quality'));if(!d)throw new Error('The backend returned no audit.');
+  const symbols=d.symbols||{};let html='<div class="metric-grid"><div class="metric"><small>Stored rows</small><strong>'+fmt(d.stored_observation_count)+'</strong></div><div class="metric"><small>Eligible rows</small><strong>'+fmt(d.eligible_observation_count)+'</strong></div><div class="metric"><small>Excluded by analysis policy</small><strong>'+fmt(d.excluded_by_eligibility_count)+'</strong></div><div class="metric"><small>Provider-verified rows</small><strong>'+fmt(d.provider_verified_observation_count)+'</strong></div></div>';
+  html+='<div class="tablewrap"><table><thead><tr><th>Contract</th><th>Stored / eligible</th><th>Stored date coverage</th><th>Eligible date coverage</th><th>Volume missing / observed zero</th><th>Open interest missing / observed zero</th><th>Provider-verified</th></tr></thead><tbody>'+Object.entries(symbols).map(([symbol,s])=>'<tr><td>'+esc(symbol)+'</td><td>'+fmt(s.stored_observations)+' / '+fmt(s.eligible_observations)+'</td><td>'+esc(s.first_trade_date||'—')+' → '+esc(s.last_trade_date||'—')+'</td><td>'+esc(s.eligible_first_trade_date||'—')+' → '+esc(s.eligible_last_trade_date||'—')+'</td><td>'+fmt(s.missing_volume_observation_count)+' / '+fmt(s.observed_zero_volume_count)+'</td><td>'+fmt(s.missing_open_interest_observation_count)+' / '+fmt(s.observed_zero_open_interest_count)+'</td><td>'+fmt(s.provider_verified_observation_count)+'</td></tr>').join('')+'</tbody></table></div>';
+  const pairs=d.exact_trade_date_and_expiry_pair_counts||{};html+='<h3>Exact synchronized sessions by pair</h3><div class="rowitem" style="flex-wrap:wrap">'+Object.entries(pairs).map(([pair,count])=>'<span><strong>'+esc(pair)+'</strong> · '+fmt(count)+'</span>').join('')+'</div>';
+  html+='<h3>Source labels (not authenticity verification)</h3><div class="rowitem" style="flex-wrap:wrap">'+Object.entries(d.data_source_counts||{}).map(([source,count])=>'<span>'+esc(source)+' · '+fmt(count)+'</span>').join('')+'</div><p class="muted">'+esc(d.provenance_limit||'')+'</p><ul>'+(d.limitations||[]).map(item=>'<li>'+esc(item)+'</li>').join('')+'</ul><p class="muted">'+esc(d.method||'')+'</p>';
+  out.innerHTML=html;
+ }catch(e){out.textContent='Coverage audit unavailable: '+e.message;}
+};
+$('runTermStructure').onclick=async()=>{
+ const out=$('termStructureOutput'),pair=$('termPair').value;out.textContent='Loading exact-expiry historical snapshots…';
+ try{const d=researchData(await getJson('/research/term-structure?pair='+encodeURIComponent(pair)));if(!d)throw new Error('The backend returned no report.');
+  const front=Array.isArray(d.front_series)?d.front_series:[],carry=d.carry_model||{},life=d.lifecycle_validation||{},decomp=d.decomposition||{};
+  let html='<div class="metric-grid"><div class="metric"><small>Pair / report status</small><strong>'+esc(d.pair)+' · '+esc(d.status)+'</strong></div><div class="metric"><small>Matched front observations</small><strong>'+fmt(d.observations)+'</strong><p class="muted">exact trade date + explicit expiry</p></div><div class="metric"><small>Same-expiry front changes</small><strong>'+fmt(decomp.same_expiry_front_change_count)+'</strong></div><div class="metric"><small>Measurable same-session switch gaps</small><strong>'+fmt(decomp.measurable_front_switch_gap_count)+'</strong></div></div>';
+  html+='<p><strong>Carry/roll-down model:</strong> <span class="status warn">'+esc(carry.status||'unavailable')+'</span> '+esc(carry.reason||'Unavailable; required assumptions are not in the stored data.')+'</p><p class="muted">Tender validation: '+esc(life.tender_period_validation||'unavailable')+' · Effective-dated specifications: '+(life.effective_dated_contract_specifications?'available':'not available')+'.</p>';
+  html+='<div class="tablewrap"><table><thead><tr><th>Trade date</th><th>Selected explicit expiry</th><th>Days to expiry</th><th>Spread ₹/10g</th><th>Same-expiry move ₹</th><th>Same-session switch gap ₹</th><th>Expiry changed</th></tr></thead><tbody>'+front.slice(-20).map(p=>'<tr><td>'+esc(p.trade_date)+'</td><td>'+esc(p.expiry_date)+'</td><td>'+fmt(p.days_to_expiry)+'</td><td>'+fmt(p.spread)+'</td><td>'+fmt(p.front_same_expiry_change)+'</td><td>'+fmt(p.front_switch_gap)+'</td><td>'+((p.front_expiry_changed)?'Yes':'No')+'</td></tr>').join('')+'</tbody></table></div>';
+  html+='<p class="muted">'+esc(d.data_quality?.execution_note||'Settlement values are analytical references, not executable quotes.')+' '+esc(d.data_quality?.curve_slope_semantics||'Curve differences are descriptive, not validated carry.')+'</p>';
+  out.innerHTML=html;
+ }catch(e){out.textContent='Expiry history unavailable: '+e.message;}
+};
+
+$('runMlForecast').onclick=async()=>{
+ const out=$('mlForecastOutput');out.textContent='Training Random Forest and evaluating chronological holdout folds…';
+ try{
+  const q=new URLSearchParams({symbol:$('mlSymbol').value,max_folds:$('mlFolds').value});
+  const d=await getJson('/research/ml-spread-forecast?'+q,{timeoutMs:60000});
+  if(d.status!=='evaluated'){out.innerHTML='<strong class="warn">'+esc(d.status||'Unavailable')+'</strong><p>'+esc(d.message||'Not enough eligible history to evaluate this model.')+'</p>';return;}
+  const m=d.metrics.random_forest,b=d.metrics.naive_zero_change;
+  let h='<div class="metric-grid"><div class="metric"><small>Experimental next-step estimate</small><strong>₹'+fmt(d.next_observation_experimental_price_10g)+'</strong><p class="muted">'+fmt(d.next_observation_experimental_change_pct)+'% from last observation</p></div><div class="metric"><small>Random Forest MAE</small><strong>'+fmt(m.mae_change_pct_points)+' pp</strong></div><div class="metric"><small>Naive baseline MAE</small><strong>'+fmt(b.mae_change_pct_points)+' pp</strong></div><div class="metric"><small>ML directional accuracy</small><strong>'+(m.directional_accuracy_pct==null?'—':fmt(m.directional_accuracy_pct)+'%')+'</strong></div><div class="metric"><small>Out-of-sample folds</small><strong>'+fmt(d.test_folds)+'</strong><p class="muted">'+esc(d.first_test_date)+' → '+esc(d.last_test_date)+'</p></div><div class="metric"><small>Model comparison</small><strong class="'+(d.comparison.ml_lower_mae_than_naive?'fine':'warn')+'">'+(d.comparison.ml_lower_mae_than_naive?'Lower MAE':'Did not beat baseline')+'</strong></div></div>';
+  h+='<p class="muted">Latest eligible observation: '+esc(d.latest_observation_date)+' · Last price ₹'+fmt(d.latest_price_10g)+' per 10g. Estimate is not an observed or live price.</p>';
+  const nr=d.metrics_excluding_expiry_rolls||{};const nrf=nr.random_forest||null;const nrb=nr.naive_zero_change||null;
+  h+='<div class="metric-grid"><div class="metric"><small>Expiry-roll transitions in test folds</small><strong>'+fmt(d.roll_transition_folds||0)+'</strong></div><div class="metric"><small>Non-roll folds</small><strong>'+fmt(nr.evaluated_folds||0)+'</strong></div><div class="metric"><small>Non-roll RF MAE</small><strong>'+(nrf?fmt(nrf.mae_change_pct_points)+' pp':'—')+'</strong></div><div class="metric"><small>Non-roll naive MAE</small><strong>'+(nrb?fmt(nrb.mae_change_pct_points)+' pp':'—')+'</strong></div><div class="metric"><small>Non-roll comparison</small><strong class="'+(nr.ml_lower_mae_than_naive===true?'fine':'warn')+'">'+(nr.ml_lower_mae_than_naive===true?'Lower MAE':nr.ml_lower_mae_than_naive===false?'Did not beat baseline':'Not enough non-roll folds')+'</strong></div></div>';
+  h+='<p class="muted">'+esc(d.metric_scope_note||'Expiry transitions can distort returns in a rolling futures series.')+'</p>';
+  h+='<h3>Fold-by-fold out-of-sample audit</h3><p class="muted">Visible table for the latest 20 evaluated folds. Price errors are shown in ₹/10g; return errors are percentage points. “Roll” means the selected expiry changed between origin and target.</p><div class="tablewrap"><table><thead><tr><th>Origin</th><th>Target</th><th>Origin expiry</th><th>Target expiry</th><th>Roll?</th><th>Actual price ₹</th><th>ML price ₹</th><th>ML abs. error ₹</th><th>Actual change %</th><th>ML change %</th><th>Naive error pp</th><th>Train targets</th></tr></thead><tbody>'+d.folds.slice(-20).map(f=>'<tr><td>'+esc(f.origin_date)+'</td><td>'+esc(f.target_date)+'</td><td>'+esc(f.origin_expiry_date||'—')+'</td><td>'+esc(f.target_expiry_date||'—')+'</td><td>'+(f.contract_roll?'Yes':'No')+'</td><td>'+fmt(f.actual_price_10g)+'</td><td>'+fmt(f.ml_predicted_price_10g)+'</td><td>'+fmt(Math.abs(Number(f.actual_price_10g)-Number(f.ml_predicted_price_10g)))+'</td><td>'+fmt(f.actual_change_pct)+'</td><td>'+fmt(f.ml_predicted_change_pct)+'</td><td>'+fmt(f.naive_absolute_error_pct_points)+'</td><td>'+fmt(f.training_targets)+'</td></tr>').join('')+'</tbody></table></div>';
+  h+='<p class="muted">'+esc(d.method)+'</p><p class="warn">'+esc(d.caveat)+'</p>';out.innerHTML=h;
+ }catch(e){out.textContent='ML evaluation unavailable: '+e.message+'. Install requirements.txt and restart FastAPI.';}
+};
+
+loadContext();
+</script>
+</main>
+<script>document.getElementById("sidebarToggle")?.addEventListener("click",function(){const sidebar=document.getElementById("sidebar");const open=sidebar.classList.toggle("open");this.setAttribute("aria-expanded",String(open));});</script>
+<script src="aurora-starfield.js" defer></script>
+</body></html>

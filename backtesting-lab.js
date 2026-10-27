@@ -100,6 +100,8 @@
   function resetDisplay() {
     clearCharts();
     allTrades = [];
+    $('attributionCard').hidden = true;
+    $('attributionSummary').textContent = 'Available after a completed run.';
     $('exportTradesButton').disabled = true;
     renderTrades([]);
     ['metricReturn', 'metricPnl', 'metricDrawdown', 'metricSharpe', 'metricWinRate', 'metricWinSub', 'metricTrades', 'metricProfitFactor'].forEach((id) => {
@@ -210,6 +212,10 @@
     setMetric('metricTrades', String(metrics.total_trades));
     setMetric('metricProfitFactor', Number.isFinite(metrics.profit_factor) ? metrics.profit_factor.toFixed(2) : '—');
     if (metrics.total_return_pct === null) $('metricPnl').textContent = 'Insufficient observations';
+    const attribution = $('attributionCard');
+    attribution.hidden = false;
+    const money = (value) => value == null || !Number.isFinite(Number(value)) ? 'Unavailable' : inr(Number(value));
+    $('attributionSummary').textContent = `Strategy net ${money(metrics.total_pnl)} · Leg A gross ${money(metrics.leg_a_gross_pnl)} · Leg B gross ${money(metrics.leg_b_gross_pnl)} · Passive Leg A ${metrics.benchmark_leg_a_return_pct == null ? 'Unavailable' : `${Number(metrics.benchmark_leg_a_return_pct).toFixed(2)}%`} · Passive Leg B ${metrics.benchmark_leg_b_return_pct == null ? 'Unavailable' : `${Number(metrics.benchmark_leg_b_return_pct).toFixed(2)}%`}.`;
   }
 
   function chartOptions(formatter, beginAtZero = false) {
@@ -280,13 +286,13 @@
     const body = $('tradeRows'); body.replaceChildren();
     if (!filtered.length) {
       const row = body.insertRow(); row.className = 'bt-table-empty';
-      const cell = row.insertCell(); cell.colSpan = 10; cell.textContent = trades.length ? 'No trades match this search.' : 'No completed trades were recorded for this run.';
+      const cell = row.insertCell(); cell.colSpan = 12; cell.textContent = trades.length ? 'No trades match this search.' : 'No completed trades were recorded for this run.';
       return;
     }
     filtered.forEach((trade) => {
       const row = body.insertRow();
-      const cells = [trade.entry_date, trade.exit_date, trade.pair.replace('-', ' / '), `${trade.direction} · ${trade.units}`, inr(trade.entry_spread), inr(trade.exit_spread), inr(trade.gross_pnl), inr(trade.costs), inr(trade.net_pnl), trade.exit_reason];
-      cells.forEach((text, index) => { const cell = row.insertCell(); cell.textContent = text; if ([6, 8].includes(index)) cell.className = Number(index === 6 ? trade.gross_pnl : trade.net_pnl) > 0 ? 'positive' : 'negative'; });
+      const cells = [trade.entry_date, trade.exit_date, trade.pair.replace('-', ' / '), `${trade.direction} · ${trade.units}`, inr(trade.entry_spread), inr(trade.exit_spread), trade.leg_a_gross_pnl == null ? '—' : inr(trade.leg_a_gross_pnl), trade.leg_b_gross_pnl == null ? '—' : inr(trade.leg_b_gross_pnl), inr(trade.gross_pnl), inr(trade.costs), inr(trade.net_pnl), trade.exit_reason];
+      cells.forEach((text, index) => { const cell = row.insertCell(); cell.textContent = text; if ([8, 10].includes(index)) cell.className = Number(index === 8 ? trade.gross_pnl : trade.net_pnl) > 0 ? 'positive' : 'negative'; });
     });
   }
 
@@ -314,7 +320,7 @@
     const columns = [
       ['entry_date', 'Entry date'], ['exit_date', 'Exit date'], ['pair', 'Pair'],
       ['direction', 'Position'], ['units', 'Units'], ['entry_spread', 'Entry spread INR/10g'],
-      ['exit_spread', 'Exit spread INR/10g'], ['gross_pnl', 'Gross P&L INR'],
+      ['exit_spread', 'Exit spread INR/10g'], ['leg_a_gross_pnl', 'Leg A gross contribution INR/10g'], ['leg_b_gross_pnl', 'Leg B gross contribution INR/10g'], ['gross_pnl', 'Gross P&L INR'],
       ['costs', 'Costs INR'], ['net_pnl', 'Net P&L INR'], ['exit_reason', 'Exit reason'],
     ];
     const escapeCell = (value) => {

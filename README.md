@@ -405,3 +405,29 @@ Do not put provider credentials in this frontend setting. Keep them only in the 
 - `backup-phase0-baseline`: Preserved snapshot of original repository state before Phase 1 implementation.
 - `feature/phase1-backend-pipeline`: Working branch with the complete Phase 1 implementation.
 - `backup_frontend_baseline/`: Local directory backup of original frontend assets.
+
+
+---
+
+## Research Intelligence Lab (historical-only additions)
+
+The branch `feat/research-intelligence-suite` adds a responsive local research page at
+`research-intelligence-lab.html` and these API routes:
+
+- `GET /api/research/forecast?symbol=GOLDM&lookback=60&horizon=5`: transparent linear-trend baseline from eligible stored history. This is not a trained production ML model or a trading signal.
+- `POST /api/research/risk-sizing`: position-risk arithmetic from explicit capital, stop, and cost assumptions.
+- `GET /api/research/macro-context`: explicit unavailable state until a verified macro/cross-asset/news provider is configured.
+- `GET /api/research/event-calendar`: explicit unavailable state until a verified event-calendar source is configured.
+- `GET /api/research/export-observations`: CSV export of eligible stored historical observations.
+
+### Open the Research Suite inside the main AURORA app (Windows PowerShell)
+
+The Research Suite is a page in the same frontend as the dashboard, Opportunity Radar, and Backtesting Lab. **Do not start a second frontend server on port 3001.** From the repository root, run one frontend server on port 3000 (if it is not already running):
+
+```powershell
+python -m http.server 3000 --bind 127.0.0.1
+```
+
+Open `http://127.0.0.1:3000/research-intelligence-lab.html`, or use the **Research Intelligence** link in the main app navigation. Open Backtesting Lab using its relative in-app link; no hardcoded port is required.
+
+Keep the FastAPI backend running separately on port 8000, since the frontend and API are different processes. The Research Suite calls the same local API at `http://127.0.0.1:8000/api` by default. Macro/news and calendar panels remain explicitly unavailable until verified providers are configured; no live prices or ML confidence are fabricated.

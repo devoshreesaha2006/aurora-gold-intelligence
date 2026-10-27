@@ -2164,9 +2164,29 @@
       opacity: 1;
     }
 
+
+    /* Historical pair-coverage diagnostics */
+    .pair-coverage-panel { margin-top: 22px; }
+    .pair-coverage-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+    .pair-coverage-header h3 { margin:0 0 6px; color:var(--gold-bright); font-size:1.05rem; }
+    .pair-coverage-header p { margin:0; color:var(--text-secondary, #aab4c8); font-size:.82rem; line-height:1.5; }
+    .pair-coverage-meta { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 16px; }
+    .pair-coverage-chip { border:1px solid rgba(212,175,55,.25); background:rgba(212,175,55,.07); border-radius:999px; padding:6px 10px; color:#e8d79b; font-size:.72rem; }
+    .pair-coverage-table-wrap { overflow-x:auto; border:1px solid rgba(212,175,55,.12); border-radius:12px; }
+    .pair-coverage-table { width:100%; min-width:760px; border-collapse:collapse; font-size:.78rem; }
+    .pair-coverage-table th { text-align:left; color:#c6cedd; background:rgba(7,13,28,.65); padding:12px 13px; font-weight:600; white-space:nowrap; }
+    .pair-coverage-table td { padding:12px 13px; border-top:1px solid rgba(148,163,184,.10); color:#e7ebf3; vertical-align:top; }
+    .pair-coverage-table tr:hover td { background:rgba(212,175,55,.035); }
+    .coverage-status { display:inline-block; border-radius:999px; padding:5px 8px; font-size:.67rem; font-weight:700; letter-spacing:.02em; white-space:nowrap; }
+    .coverage-status.match { color:#9de5bd; background:rgba(52,211,153,.10); border:1px solid rgba(52,211,153,.25); }
+    .coverage-status.historical { color:#f3d38a; background:rgba(245,197,66,.10); border:1px solid rgba(245,197,66,.22); }
+    .coverage-status.unavailable { color:#fda4af; background:rgba(251,113,133,.09); border:1px solid rgba(251,113,133,.22); }
+    .coverage-note { color:#9ca9bd; font-size:.72rem; line-height:1.45; margin-top:12px; }
+    .coverage-empty { padding:22px; color:#aab4c8; text-align:center; }
+
   </style>
   <script src="auth.js"></script>
-  <script src="aurora-pipeline.js?v=radar-data-safety-20261022"></script>
+  <script src="aurora-pipeline.js?v=pair-coverage-20261026"></script>
   <script src="aurora-nav.js"></script>
   <link rel="stylesheet" href="analytics-premium.css">
 </head>
@@ -2222,6 +2242,15 @@
             <i class="fa-solid fa-magnifying-glass-chart"></i>
             <span>Market Detective</span>
           </div>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="research-intelligence-lab.html" title="Research Intelligence">
+          <div class="nav-left">
+            <i class="fa-solid fa-microscope"></i>
+            <span>Research Intelligence</span>
+          </div>
+          <span class="nav-badge-count">LAB</span>
         </a>
       </li>
     </ul>
@@ -3181,6 +3210,58 @@
         </div>
       </section>
 
+
+<!-- Historical forecast diagnostics: intentionally separate from opportunity scoring -->
+      <section class="glass-panel pair-coverage-panel" id="radarForecastValidationPanel" style="margin-bottom:24px;">
+        <div class="pair-coverage-header">
+          <div>
+            <h3><i class="fa-solid fa-chart-line" style="color:var(--gold-light);margin-right:8px;"></i>Forecast Diagnostics</h3>
+            <p>Historical multi-step baseline comparison. This research output does not change Opportunity vs Trap scores or create a trade signal.</p>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:16px 0;">
+          <label style="display:grid;gap:6px;color:var(--text-secondary,#aaa);font-size:12px;">Contract
+            <select id="radarForecastSymbol" style="min-width:150px;padding:10px;border-radius:8px;"><option>GOLDM</option><option>GOLDTEN</option><option>GOLDGUINEA</option><option>GOLDPETAL</option></select>
+          </label>
+          <label style="display:grid;gap:6px;color:var(--text-secondary,#aaa);font-size:12px;">Horizon (observations)
+            <input id="radarForecastHorizon" type="number" min="2" max="20" value="5" style="width:150px;padding:10px;border-radius:8px;">
+          </label>
+          <label style="display:grid;gap:6px;color:var(--text-secondary,#aaa);font-size:12px;">Recent test folds
+            <input id="radarForecastFolds" type="number" min="10" max="120" value="30" style="width:130px;padding:10px;border-radius:8px;">
+          </label>
+          <button class="clay-btn" id="runRadarForecastValidation" type="button"><i class="fa-solid fa-play"></i> Run validation</button>
+        </div>
+        <div id="radarForecastValidationStatus" role="status" style="padding:12px;border-radius:8px;background:rgba(255,255,255,.04);">Validation has not been run. Results use eligible stored history only.</div>
+        <div class="pair-coverage-table-wrap" id="radarForecastValidationResults" style="display:none;margin-top:14px;">
+          <table class="pair-coverage-table">
+            <thead><tr><th>Baseline</th><th>MAE (₹/10g)</th><th>RMSE (₹/10g)</th><th>MAPE</th></tr></thead>
+            <tbody id="radarForecastValidationRows"></tbody>
+          </table>
+        </div>
+        <p class="coverage-note">Lowest MAE is descriptive for this evaluation window only. Multi-step accuracy is not evidence of trading profitability; imported observations may not be exchange-verified.</p>
+      </section>
+
+            <!-- Historical Pair Coverage: exact trade-date + expiry diagnostics -->
+      <section class="glass-panel pair-coverage-panel" id="pairCoveragePanel">
+        <div class="pair-coverage-header">
+          <div>
+            <h3><i class="fa-solid fa-calendar-check" style="color:var(--gold-light); margin-right:8px;"></i>Historical Pair Coverage</h3>
+            <p>Why each contract pair does—or does not—have a synchronized observation. Historical coverage is not live-feed availability.</p>
+          </div>
+          <button class="clay-btn-outline" type="button" id="refreshPairCoverageBtn" style="white-space:nowrap;">
+            <i class="fa-solid fa-rotate"></i> Refresh Coverage
+          </button>
+        </div>
+        <div class="pair-coverage-meta" id="pairCoverageMeta"><span class="pair-coverage-chip">Loading diagnostics…</span></div>
+        <div class="pair-coverage-table-wrap">
+          <table class="pair-coverage-table">
+            <thead><tr><th>Contract Pair</th><th>Latest Leg A</th><th>Latest Leg B</th><th>Latest Shared Date</th><th>Shared Expiry</th><th>Matched Rows</th><th>Coverage</th></tr></thead>
+            <tbody id="pairCoverageRows"><tr><td colspan="7" class="coverage-empty">Loading pair coverage from backend…</td></tr></tbody>
+          </table>
+        </div>
+        <p class="coverage-note" id="pairCoverageFootnote">Exact trade-date and expiry matches only. No pair is inferred from different expiries; observations are stored history, not provider-verified live quotes.</p>
+      </section>
+
     </main>
   </div>
 
@@ -3893,7 +3974,7 @@
         button{display:none}@media print{body{margin:0;max-width:none}}</style></head><body>
         <h1>${safe(title)}</h1><p>${safe(subtitle)}</p>
         <p>Generated by AURORA. Historical/observational evidence only; not a live quote or trading recommendation.</p>
-        ${body.innerHTML}<script>window.onload=()=>window.print()<\/script>  <script src="aurora-starfield.js" defer><\/script>
+        ${body.innerHTML}<script>window.onload=()=>window.print()<\/script>
   <script src="aurora-intelligence.js" defer><\/script>
 </body></html>`);
       printWindow.document.close();
@@ -3923,6 +4004,6 @@
 
     console.log("AURORA Opportunity Radar initialized with full telemetry.");
   </script>
-  <script src="aurora-nuggets.js" defer></script>
+  <script src="aurora-starfield.js" defer></script>
 </body>
 </html>

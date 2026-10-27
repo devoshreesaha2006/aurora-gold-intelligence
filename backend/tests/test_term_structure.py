@@ -45,6 +45,10 @@ def test_term_structure_separates_same_expiry_change_from_front_switch_gap(db_se
     assert report["decomposition"]["front_expiry_switch_count"] == 1
     assert report["decomposition"]["measurable_front_switch_gap_count"] == 0
     assert report["decomposition"]["cumulative_front_switch_gaps"] == 0
+    assert report["carry_model"]["status"] == "unavailable"
+    assert report["lifecycle_validation"]["tender_period_validation"].startswith("unavailable")
+    assert report["lifecycle_validation"]["effective_dated_contract_specifications"] is False
+    assert report["data_quality"]["verified_bid_ask_data"] is False
 
 
 def test_term_structure_accepts_reversed_pair_direction(db_session):

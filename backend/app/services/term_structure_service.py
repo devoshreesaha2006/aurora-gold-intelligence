@@ -54,10 +54,26 @@ class TermStructureService:
 
         curve = []
         front = []
+        curve_slopes = []
         previous_spread_by_expiry = {}
         previous_front = None
         for day in sorted(by_day):
             points = sorted(by_day[day], key=lambda p: p["expiry_date"])
+            # Descriptive same-session normalized spread curve only. A slope
+            # is not annualized carry or roll-down: financing, storage,
+            # convenience yield, taxes and historical contract specs are absent.
+            for near, far in zip(points, points[1:]):
+                near_date = date.fromisoformat(near["expiry_date"])
+                far_date = date.fromisoformat(far["expiry_date"])
+                day_gap = (far_date - near_date).days
+                curve_slopes.append({
+                    "trade_date": day.isoformat(),
+                    "near_expiry": near["expiry_date"], "far_expiry": far["expiry_date"],
+                    "days_between_expiries": day_gap,
+                    "near_spread_per_10g": near["spread"], "far_spread_per_10g": far["spread"],
+                    "spread_difference_per_10g": round(far["spread"] - near["spread"], 6),
+                    "slope_per_10g_per_calendar_day": round((far["spread"] - near["spread"]) / day_gap, 8) if day_gap > 0 else None,
+                })
             current_expiry_spreads = {}
             for point in points:
                 prior = previous_spread_by_expiry.get(point["expiry_date"])
@@ -101,6 +117,19 @@ class TermStructureService:
             "status": "available" if curve else "no_eligible_data",
             "observations": len(front),
             "curve_snapshots": curve,
+            "same_session_curve_slopes": curve_slopes,
+            "carry_model": {
+                "status": "unavailable",
+                "reason": "Stored settlements support descriptive expiry-curve spreads only; no validated carry or roll-down inputs/model are available.",
+                "required_inputs": ["effective-dated contract specifications", "financing and funding assumptions", "storage/insurance and tax costs", "validated delivery/tender lifecycle", "instrument-specific settlement conventions"],
+            },
+            "lifecycle_validation": {
+                "matched_explicit_expiry_observations": sum(len(day_points) for day_points in by_day.values()),
+                "observations_on_or_after_expiry": sum(1 for day_points in by_day.values() for point in day_points if point["days_to_expiry"] <= 0),
+                "observations_within_30_calendar_days_of_expiry": sum(1 for day_points in by_day.values() for point in day_points if 0 < point["days_to_expiry"] <= 30),
+                "tender_period_validation": "unavailable: tender dates are not stored",
+                "effective_dated_contract_specifications": False,
+            },
             "front_series": front,
             "decomposition": {
                 "same_expiry_front_change_count": len(same_expiry_moves),
@@ -114,5 +143,7 @@ class TermStructureService:
                 "source_note": "Eligible stored observations only; imported CSV is not provider-verified unless the market status explicitly confirms an authorized provider.",
                 "execution_note": "Normalized settlement/close values are analytical references, not executable bid/ask quotes.",
                 "synchronized_by": "exact trade date and explicit expiry",
+                "verified_bid_ask_data": False,
+                "curve_slope_semantics": "Same-session descriptive spread difference between adjacent explicit expiries; not carry, yield, or roll-down.",
             },
         }

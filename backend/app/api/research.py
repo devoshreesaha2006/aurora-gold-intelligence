@@ -6,9 +6,17 @@ from backend.app.database import get_db
 from backend.app.schemas.common import StandardResponse
 from backend.app.services.analytics_service import parse_pair
 from backend.app.services.term_structure_service import TermStructureService
+from backend.app.services.data_quality_service import DataQualityService
 
 
 router = APIRouter(prefix="/research", tags=["Research & Attribution"])
+
+
+@router.get("/data-quality", response_model=StandardResponse[dict])
+def get_data_quality(db: Session = Depends(get_db)):
+    """Read-only coverage, provenance and exact synchronized-expiry counts."""
+    data = DataQualityService(db).report()
+    return StandardResponse(success=True, data=data, message="Read-only stored-data coverage audit generated.")
 
 
 @router.get("/term-structure", response_model=StandardResponse[dict])

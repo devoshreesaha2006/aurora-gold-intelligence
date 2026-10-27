@@ -20,34 +20,39 @@ def is_synthetic_source(value):
     return source in SYNTHETIC_SOURCES or source.startswith(("synthetic_", "demo_", "sample_"))
 
 
-def test_source_condition(column):
+def sql_test_source_condition(column):
     """SQL equivalent of is_test_source for row and import-batch filters."""
-    source = func.lower(func.coalesce(column, ""))
+    source = func.lower(func.trim(func.coalesce(column, "")))
     return or_(
         source.in_(TEST_SOURCES),
-        source.like("test_%"), source.like("tests_%"), source.like("invalid_%"),
-        source.like("fixture_%"), source.like("pytest_%"),
+        source.startswith("test_", autoescape=True),
+        source.startswith("tests_", autoescape=True),
+        source.startswith("invalid_", autoescape=True),
+        source.startswith("fixture_", autoescape=True),
+        source.startswith("pytest_", autoescape=True),
     )
 
 
 def synthetic_source_condition(column):
     """SQL equivalent of is_synthetic_source for observation/import sources."""
-    source = func.lower(func.coalesce(column, ""))
+    source = func.lower(func.trim(func.coalesce(column, "")))
     return or_(
         source.in_(SYNTHETIC_SOURCES),
-        source.like("synthetic_%"), source.like("demo_%"), source.like("sample_%"),
+        source.startswith("synthetic_", autoescape=True),
+        source.startswith("demo_", autoescape=True),
+        source.startswith("sample_", autoescape=True),
     )
 
 
 def non_test_observations_query(db):
     """Return observations excluding rows or batches explicitly marked as test data."""
-    from sqlalchemy import not_
+    from sqlalchemy import not_, or_
     from backend.app.models.data_import import ImportBatch
     from backend.app.models.market_observation import MarketObservation
 
     test_rows = or_(
-        test_source_condition(MarketObservation.data_source),
-        test_source_condition(ImportBatch.data_source),
+        sql_test_source_condition(MarketObservation.data_source),
+        sql_test_source_condition(ImportBatch.data_source),
     )
     return (
         db.query(MarketObservation)
@@ -63,8 +68,8 @@ def eligible_analytics_observations_query(db):
     from backend.app.models.market_observation import MarketObservation
 
     ineligible = or_(
-        test_source_condition(MarketObservation.data_source),
-        test_source_condition(ImportBatch.data_source),
+        sql_test_source_condition(MarketObservation.data_source),
+        sql_test_source_condition(ImportBatch.data_source),
         MarketObservation.is_synthetic.is_(True),
         ImportBatch.is_synthetic.is_(True),
         synthetic_source_condition(MarketObservation.data_source),

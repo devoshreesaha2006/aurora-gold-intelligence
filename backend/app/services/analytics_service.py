@@ -525,6 +525,31 @@ class RelativeValueAnalyticsService:
                 cost_hurdle=cost_hurdle
             )
 
+            # Historical storage is useful for research, but an old snapshot must
+            # never be presented as an actionable current-market signal. Only the
+            # default/latest-snapshot radar is freshness-gated; explicitly requested
+            # evaluation dates remain available for historical analysis/backtesting.
+            age_days = (date.today() - last_pt.trade_date).days
+            stale_latest_snapshot = evaluation_date is None and age_days > 3
+            future_dated_snapshot = last_pt.trade_date > date.today()
+            if stale_latest_snapshot or future_dated_snapshot:
+                classification = "No Signal"
+                opp_score = None
+                trap_score = None
+                is_exp = False
+                is_cost = False
+                # Keep observed liquidity evidence intact: suppressing a stale
+                # signal must not erase a measured zero-volume trap or turn
+                # missing liquidity into an assessed value.
+                gross_edge = None
+                net_edge = None
+                freshness_reason = (
+                    f"Actionable scoring suppressed: snapshot dated {last_pt.trade_date} "
+                    f"is {'future-dated' if future_dated_snapshot else f'{age_days} calendar days old'}. "
+                    "Historical spread statistics remain available, but refresh the dataset before treating this as a current-market signal."
+                )
+                reason = f"{freshness_reason} Market-quality context: {reason}"
+
             if classification == "Investigate":
                 investigate_count += 1
             if is_cost:
@@ -556,8 +581,16 @@ class RelativeValueAnalyticsService:
                 trade_date=last_pt.trade_date,
                 expiry_date=last_pt.expiry_date,
                 data_age_days=max(0, (date.today() - last_pt.trade_date).days),
-                snapshot_freshness=("current-session" if (date.today() - last_pt.trade_date).days == 0 else "recent-history" if (date.today() - last_pt.trade_date).days == 1 else "historical"),
-                is_actionable=((date.today() - last_pt.trade_date).days <= 1 and classification != "No Signal"),
+                snapshot_freshness=(
+                    "future-dated" if last_pt.trade_date > date.today()
+                    else "current-session" if age_days == 0
+                    else "recent-history" if age_days == 1
+                    else "historical"
+                ),
+              is_actionable=(
+                0 <= (date.today() - last_pt.trade_date).days <= 1
+                and classification != "No Signal"
+              ),
                 spread=last_pt.spread,
                 rolling_mean=last_pt.rolling_mean,
                 rolling_std=last_pt.rolling_std,

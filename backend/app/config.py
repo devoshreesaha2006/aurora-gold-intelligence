@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     # AURORA's intended processing and storage. Credentials alone are insufficient.
     mcx_feed_license_confirmed: bool = False
 
+
     @field_validator("database_url")
     @classmethod
     def resolve_relative_sqlite_database(cls, value: str) -> str:

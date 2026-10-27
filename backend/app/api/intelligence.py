@@ -33,6 +33,12 @@ class ScenarioResult(BaseModel):
     evaluation_date: Optional[date] = None
     expiry_date: Optional[date] = None
     current_spread: Optional[float] = None
+    window: int
+    window_observations: int
+    rolling_mean: Optional[float] = None
+    rolling_std: Optional[float] = None
+    z_score: Optional[float] = None
+    percentile_rank: Optional[float] = None
     assumed_spread_change: Optional[float] = None
     units: int
     gross_pnl: Optional[float] = None
@@ -54,6 +60,10 @@ class WalkForwardRequest(BaseModel):
     units: int = Field(default=1, ge=1, le=10000)
 
 
+class ExpandingWalkForwardRequest(WalkForwardRequest):
+    folds: int = Field(default=5, ge=2, le=12, description="Number of contiguous expanding-window out-of-sample folds")
+
+
 def _pair(value: str):
     try:
         a, b, inverted = parse_pair(value)
@@ -62,11 +72,47 @@ def _pair(value: str):
     return a, b, inverted, f"{b}-{a}" if inverted else f"{a}-{b}"
 
 
+def _select_training_threshold(training_z_scores: List[Optional[float]], entry_z_floor: float) -> float:
+    """Choose a training-only threshold while honoring the user's configured minimum."""
+    abs_z = sorted(
+        abs(value)
+        for value in training_z_scores
+        if value is not None and isfinite(value)
+    )
+    if not abs_z:
+        return entry_z_floor
+    training_quantile = abs_z[int(0.9 * (len(abs_z) - 1))]
+    return max(entry_z_floor, min(3.0, training_quantile))
+
+
+def _scenario_horizon_warnings(
+    evaluation_date: date,
+    expiry_date: Optional[date],
+    holding_days: int,
+) -> List[str]:
+    """Describe expiry conflicts; the what-if does not simulate expiry settlement."""
+    if expiry_date is None:
+        return ["Contract expiry is unavailable; the selected holding horizon cannot be checked against expiry."]
+    horizon_end = evaluation_date + timedelta(days=holding_days)
+    warnings = []
+    if expiry_date <= evaluation_date:
+        warnings.append(
+            f"Historical contract expiry ({expiry_date}) is on or before the evaluation date "
+            f"({evaluation_date}); this scenario is based on an expired contract."
+        )
+    if expiry_date <= horizon_end:
+        warnings.append(
+            f"The selected holding horizon ends {horizon_end}, on or after contract expiry "
+            f"{expiry_date}; this scenario does not model expiry settlement or a forced exit."
+        )
+    return warnings
+
+
 @router.get("/explain")
 def explain_opportunity(
     pair: str = Query("GOLDM-GOLDPETAL"),
     window: int = Query(30, ge=2, le=365),
-    evaluation_date: Optional[date] = None,
+    evaluation_date: Optional[date] = Query(None, description="Optional historical evaluation date (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
 ):
     """Explain a Radar classification with its actual calculated fields and rule evidence."""
@@ -100,6 +146,7 @@ def explain_opportunity(
     caveats.append("Opportunity and trap scores are heuristic rule-based indicators, not probabilities of profit.")
     return StandardResponse(success=True, message="Explainability assembled from the existing Radar calculation.", data={
         "pair": item.pair, "classification": item.classification, "reason": item.reason,
+        "evaluation_date": radar.evaluation_date,
         "trade_date": item.trade_date, "expiry_date": item.expiry_date,
         "opportunity_score": item.opportunity_score, "trap_risk_score": item.trap_risk_score,
         "spread": item.spread, "rolling_mean": item.rolling_mean, "z_score": item.z_score,
@@ -128,15 +175,23 @@ def what_if_scenario(request: ScenarioRequest, db: Session = Depends(get_db)):
     break_even = (costs / (abs(latest.spread) * request.units) * 100.0) if latest.spread else None
     result = ScenarioResult(
         pair=canonical_pair, evaluation_date=latest.trade_date, expiry_date=latest.expiry_date,
-        current_spread=latest.spread, assumed_spread_change=change, units=request.units,
+        current_spread=latest.spread, window=request.window,
+        window_observations=min(request.window, series.total_points),
+        rolling_mean=latest.rolling_mean, rolling_std=latest.rolling_std,
+        z_score=latest.z_score, percentile_rank=latest.percentile_rank,
+        assumed_spread_change=change, units=request.units,
         gross_pnl=round(gross, 2), estimated_costs=round(costs, 2),
         estimated_net_pnl=round(net, 2), break_even_move_pct=round(break_even, 4) if break_even is not None else None,
         holding_days=request.holding_days, status="hypothetical_scenario",
         assumptions=[
             f"Assumes a spread move of {request.spread_move_pct}% of the absolute latest historical spread; direction is assumed favourable.",
+            f"Rolling statistics use up to the latest {request.window} synchronized observations; {min(request.window, series.total_points)} observation(s) were available in the selected window.",
+            "The window changes the displayed rolling mean, standard deviation, Z-score and percentile; scenario P&L remains based on the user-assumed move applied to the latest spread.",
             f"Holding period is a user-selected {request.holding_days} calendar day(s); no future observations are used.",
+            f"Entered costs: transaction ₹{request.transaction_cost_per_10g:.2f}/10g + slippage ₹{request.slippage_per_10g:.2f}/10g; round-trip per unit ₹{(request.transaction_cost_per_10g + request.slippage_per_10g) * 2:.2f}; total for {request.units} unit(s) ₹{costs:.2f}.",
             "Costs are charged as a round-trip per unit from the user-configured transaction-cost and slippage assumptions.",
             "P&L is a simplified normalized ₹ per 10g illustration; it excludes margin, taxes not represented in inputs, and contract-specific execution effects.",
+            *_scenario_horizon_warnings(latest.trade_date, latest.expiry_date, request.holding_days),
             "This is not a forecast, recommendation, or executable quote."
         ],
     )
@@ -162,14 +217,20 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
     if split < request.window or len(points) - split < 10:
         raise HTTPException(status_code=422, detail="The chronological split leaves too few training or holdout observations.")
     train, test = points[:split], points[split:]
-    # Threshold is selected from training-only absolute z-scores, bounded to avoid an
-    # extreme threshold that simply eliminates all test observations.
-    abs_z = sorted(abs(p.z_score) for p in train if p.z_score is not None)
-    threshold = max(1.0, min(3.0, abs_z[int(0.9 * (len(abs_z) - 1))])) if abs_z else request.entry_z
+    # Select the threshold from training-only absolute z-scores, but treat the
+    # user-entered entry_z as a minimum. The UI parameter must never be silently ignored.
+    threshold = _select_training_threshold([p.z_score for p in train], request.entry_z)
     cost_per_roundtrip = (request.transaction_cost_per_10g + request.slippage_per_10g) * 2 * request.units
     outcomes = []
+    expiry_transition_exclusions = 0
     for idx in range(len(test) - 1):
         current, nxt = test[idx], test[idx + 1]
+        # Settlement-level spread changes across different contract expiries
+        # include a roll gap, not a same-contract return. Keep the observation
+        # in the sample, but never score that transition as a trade outcome.
+        if current.expiry_date != nxt.expiry_date:
+            expiry_transition_exclusions += 1
+            continue
         z = current.z_score
         if z is None or abs(z) < threshold:
             continue
@@ -177,6 +238,7 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
         direction = -1.0 if z > 0 else 1.0
         gross = (nxt.spread - current.spread) * direction * request.units
         outcomes.append({"date": str(current.trade_date), "next_date": str(nxt.trade_date),
+                         "expiry_date": str(current.expiry_date) if current.expiry_date else None,
                          "z_score": round(z, 4), "gross_pnl": round(gross, 2),
                          "estimated_costs": round(cost_per_roundtrip, 2),
                          "net_pnl": round(gross - cost_per_roundtrip, 2)})
@@ -189,15 +251,98 @@ def walk_forward_validation(request: WalkForwardRequest, db: Session = Depends(g
         "training_start": train[0].trade_date, "training_end": train[-1].trade_date,
         "holdout_start": test[0].trade_date, "holdout_end": test[-1].trade_date,
         "train_fraction": request.train_fraction, "entry_threshold_selected_from_training": round(threshold, 4),
+        "expiry_transition_exclusions": expiry_transition_exclusions,
         "holdout_signal_count": len(outcomes), "gross_pnl": round(gross_total, 2),
         "estimated_costs": round(cost_per_roundtrip * len(outcomes), 2), "net_pnl": round(net_total, 2),
         "win_rate_pct": round(wins / len(outcomes) * 100, 2) if outcomes else None,
         "holdout_outcomes": outcomes,
         "assumptions": [
             "Rolling Z-scores are computed causally from trailing history; no future observation is used to form a signal.",
-            "Threshold selection uses only the training segment; holdout outcomes are not used to choose it.",
+            "The training-only 90th-percentile threshold is bounded by the user-configured entry Z minimum; holdout outcomes do not influence threshold selection.",
             "Each signal is evaluated over the next synchronized observation, not a portfolio-level position simulator.",
+            "Transitions between different explicit expiries are excluded from outcome scoring; no contract-roll level gap is booked as P&L.",
             "Settlement prices are proxies, not executable quotes. Costs are estimates and actual contract/margin/tax effects may differ.",
             "Historical performance is not a guarantee of future results."
         ]
     })
+
+
+@router.post("/walk-forward-expanding")
+def expanding_walk_forward_validation(request: ExpandingWalkForwardRequest, db: Session = Depends(get_db)):
+    """Evaluate contiguous out-of-sample folds with an expanding training window."""
+    a, b, inverted, canonical_pair = _pair(request.pair)
+    series = RelativeValueAnalyticsService(db).calculate_pairwise_spread_series(
+        leg_a=a, leg_b=b, window_days=request.window, invert_spread=inverted
+    )
+    points = [p for p in series.data_points if p.spread is not None and p.z_score is not None]
+    minimum = max(request.window + request.folds * 2, 30)
+    if len(points) < minimum:
+        raise HTTPException(status_code=422, detail=f"Insufficient eligible history: need at least {minimum} usable points for {request.folds} folds; found {len(points)}.")
+    initial_train_size = int(len(points) * request.train_fraction)
+    test_points = len(points) - initial_train_size
+    if initial_train_size < request.window or test_points < request.folds * 2:
+        raise HTTPException(status_code=422, detail="The selected training fraction and fold count leave fewer than two test observations per fold.")
+    per_roundtrip_cost = (request.transaction_cost_per_10g + request.slippage_per_10g) * 2 * request.units
+    fold_sizes = [test_points // request.folds] * request.folds
+    for index in range(test_points % request.folds):
+        fold_sizes[index] += 1
+    results, outcomes = [], []
+    cursor = initial_train_size
+    for number, size in enumerate(fold_sizes, start=1):
+        training = points[:cursor]
+        testing = points[cursor:cursor + size]
+        threshold = _select_training_threshold([point.z_score for point in training], request.entry_z)
+        fold_outcomes = []
+        expiry_transition_exclusions = 0
+        for index in range(len(testing) - 1):
+            current, following = testing[index], testing[index + 1]
+            # A return is only meaningful when both spread observations refer
+            # to the same explicit contract expiry. Never book a roll gap.
+            if current.expiry_date != following.expiry_date:
+                expiry_transition_exclusions += 1
+                continue
+            z = current.z_score
+            if z is None or abs(z) < threshold:
+                continue
+            direction = -1.0 if z > 0 else 1.0
+            gross = (following.spread - current.spread) * direction * request.units
+            fold_outcomes.append({"date": str(current.trade_date), "next_date": str(following.trade_date),
+                                  "z_score": round(z, 4), "gross_pnl": round(gross, 2),
+                                  "estimated_costs": round(per_roundtrip_cost, 2),
+                                  "net_pnl": round(gross - per_roundtrip_cost, 2)})
+        outcomes.extend(fold_outcomes)
+        results.append({"fold": number, "training_start": training[0].trade_date,
+                        "training_end": training[-1].trade_date, "training_observations": len(training),
+                        "testing_start": testing[0].trade_date, "testing_end": testing[-1].trade_date,
+                        "testing_observations": len(testing),
+                        "expiry_transition_exclusions": expiry_transition_exclusions,
+                        "entry_threshold_selected_from_training": round(threshold, 4),
+                        "signal_count": len(fold_outcomes),
+                        "gross_pnl": round(sum(item["gross_pnl"] for item in fold_outcomes), 2),
+                        "estimated_costs": round(per_roundtrip_cost * len(fold_outcomes), 2),
+                        "net_pnl": round(sum(item["net_pnl"] for item in fold_outcomes), 2)})
+        cursor += size
+    test = points[initial_train_size:]
+    total_gross = sum(item["gross_pnl"] for item in outcomes)
+    total_net = sum(item["net_pnl"] for item in outcomes)
+    wins = sum(item["net_pnl"] > 0 for item in outcomes)
+    return StandardResponse(success=True, message="Expanding-window historical validation completed; fold outcomes are settlement-to-settlement estimates.", data={
+        "pair": canonical_pair, "status": "completed", "data_mode": "historical_csv_not_provider_verified",
+        "observations": len(points), "training_observations": initial_train_size,
+        "holdout_observations": len(test), "training_start": points[0].trade_date,
+        "training_end": points[initial_train_size - 1].trade_date,
+        "holdout_start": test[0].trade_date, "holdout_end": test[-1].trade_date,
+        "train_fraction": request.train_fraction, "fold_count": len(results), "folds": results,
+        "holdout_signal_count": len(outcomes), "gross_pnl": round(total_gross, 2),
+        "expiry_transition_exclusions": sum(fold["expiry_transition_exclusions"] for fold in results),
+        "estimated_costs": round(per_roundtrip_cost * len(outcomes), 2), "net_pnl": round(total_net, 2),
+        "win_rate_pct": round(wins / len(outcomes) * 100, 2) if outcomes else None,
+        "holdout_outcomes": outcomes,
+        "assumptions": [
+            "Each fold's training data includes only the initial training segment and earlier chronology; the training window expands between folds.",
+            "Entry threshold is selected from training-only trailing Z-scores, subject to the configured minimum; the test fold does not influence its threshold.",
+            "Each signal is scored against the next synchronized observation inside the same test fold; fold-boundary returns are intentionally omitted.",
+            "Signals whose next observation uses a different explicit expiry are excluded; contract-roll level changes are not booked as returns.",
+            "Settlement changes are not executable bid/ask fills. Costs and slippage are user-entered estimates, not independently verified MCX cost assumptions.",
+            "This is a one-step signal experiment, not a portfolio position simulator; results are not a forecast or guarantee."
+        ]})

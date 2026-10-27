@@ -179,6 +179,21 @@ def test_backtest_runs_on_eligible_observations(db_session):
     assert result.metrics.total_trades > 0
     assert all(trade.units == 3 for trade in result.trades)
     assert result.metrics.total_costs is not None
+    # Leg decomposition must reconcile to gross spread P&L and remain distinct
+    # from the capital-scaled passive outright benchmarks below.
+    assert result.metrics.leg_a_gross_pnl == pytest.approx(
+        sum(trade.leg_a_gross_pnl for trade in result.trades)
+    )
+    assert result.metrics.leg_b_gross_pnl == pytest.approx(
+        sum(trade.leg_b_gross_pnl for trade in result.trades)
+    )
+    assert result.metrics.leg_a_gross_pnl + result.metrics.leg_b_gross_pnl == pytest.approx(
+        result.metrics.gross_pnl, abs=0.02
+    )
+    assert all(
+        trade.leg_a_gross_pnl + trade.leg_b_gross_pnl == pytest.approx(trade.gross_pnl, abs=0.02)
+        for trade in result.trades
+    )
     # Passive normalized-price benchmarks use the same first/last synchronized dates.
     assert result.metrics.benchmark_leg_a_return_pct is not None
     assert result.metrics.benchmark_leg_b_return_pct == pytest.approx(0.0)
@@ -337,3 +352,33 @@ def test_backtest_sharpe_matches_final_equity_curve_after_exit_costs(db_session)
     assert result.metrics.total_trades > 0
     assert result.metrics.sharpe_ratio == pytest.approx(expected_sharpe, abs=0.0001)
     assert result.metrics.total_pnl == pytest.approx(equity[-1] - request.capital, abs=0.01)
+
+
+def test_backtest_excludes_non_finite_or_non_positive_normalized_prices(db_session):
+    day = date(2026, 6, 3)
+    expiry = date(2026, 7, 30)
+    db_session.add_all([
+        MarketObservation(
+            symbol="GOLDM", trade_date=day, expiry_date=expiry,
+            close_price=62500, normalized_price_per_gram=6250,
+            normalized_price_10g_basis=float("inf"),
+            data_source="csv_upload", is_synthetic=False,
+        ),
+        MarketObservation(
+            symbol="GOLDPETAL", trade_date=day, expiry_date=expiry,
+            close_price=62500, normalized_price_per_gram=6250,
+            normalized_price_10g_basis=62500,
+            data_source="csv_upload", is_synthetic=False,
+        ),
+    ])
+    db_session.commit()
+
+    request = BacktestRequest(pair="GOLDM-GOLDPETAL", lookback=5)
+    service = BacktestService(db_session)
+
+    assert service._eligible_rows("GOLDM", None, None) == []
+    assert service._paired_rows(request) == []
+    result = service.run(request)
+    assert result.status == "no_eligible_data"
+    assert result.metrics.total_return_pct is None
+    assert result.equity_curve == []
