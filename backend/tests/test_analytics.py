@@ -211,10 +211,20 @@ def test_api_radar_endpoint(client):
     assert "GOLDGUINEA-GOLDPETAL" in pair_names
 
     for p in data["pairs"]:
-        assert 0.0 <= p["deviation_intensity"] <= 100.0
-        assert 0.0 <= p["opportunity_score"] <= 100.0
-        assert 0.0 <= p["trap_risk_score"] <= 100.0
+        assert p["deviation_intensity"] is None or 0.0 <= p["deviation_intensity"] <= 100.0
         assert p["classification"] in ("Investigate", "Watch", "Cost-Blocked", "Expiry-Risk", "No Signal")
+        if p["snapshot_freshness"] in ("historical", "future-dated") and p["spread"] is not None:
+            # Old/future snapshots may retain historical metrics but cannot expose
+            # current actionable scores from the default/latest radar.
+            assert p["classification"] == "No Signal"
+            assert p["opportunity_score"] is None
+            assert p["trap_risk_score"] is None
+            assert p["gross_edge"] is None
+            assert p["net_edge"] is None
+            assert "scoring suppressed" in p["reason"].lower()
+        else:
+            assert p["opportunity_score"] is None or 0.0 <= p["opportunity_score"] <= 100.0
+            assert p["trap_risk_score"] is None or 0.0 <= p["trap_risk_score"] <= 100.0
         if p["spread"] is not None:
             assert p["trade_date"] == data["evaluation_date"]
             assert p["expiry_date"] == "2026-10-30"
