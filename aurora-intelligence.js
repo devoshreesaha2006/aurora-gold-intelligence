@@ -7,17 +7,19 @@
   const API_BASE = (window.AURORA_API_BASE || 'http://127.0.0.1:8000').replace(/\/$/, '');
   const css = `
   #auroraIntelLauncher{position:fixed;right:22px;bottom:22px;z-index:12000;border:1px solid rgba(240,185,11,.55);border-radius:999px;padding:12px 17px;background:linear-gradient(135deg,#f0b90b,#b87908);color:#101323;font:700 12px Inter,Arial,sans-serif;letter-spacing:.3px;box-shadow:0 8px 30px #0008;cursor:pointer}
-  #auroraIntelOverlay{position:fixed;inset:0;z-index:12001;background:rgba(3,6,18,.78);backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:18px}
+  #auroraIntelOverlay{position:fixed;inset:0;z-index:12001;background:rgba(3,3,2,.76);backdrop-filter:blur(14px) saturate(115%);display:none;align-items:center;justify-content:center;padding:18px}
   #auroraIntelOverlay.open{display:flex}
-  #auroraIntelPanel{width:min(1040px,100%);max-height:min(88vh,900px);overflow:auto;background:#0b1024;color:#e8edf6;border:1px solid rgba(240,185,11,.32);border-radius:18px;box-shadow:0 25px 90px #000a;font:13px/1.5 Inter,Arial,sans-serif}
+  #auroraIntelPanel{position:relative;width:min(1080px,100%);max-height:min(90vh,940px);overflow:auto;background:linear-gradient(145deg,rgba(22,21,17,.94),rgba(7,8,10,.93) 56%,rgba(18,15,9,.95));color:#f4f0e5;border:1px solid rgba(218,183,91,.32);border-radius:22px;box-shadow:0 28px 100px #000b,inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(22px) saturate(120%);font:14px/1.55 Inter,Arial,sans-serif}
+  #auroraIntelPanel:before{content:"";position:absolute;inset:0 0 auto;height:180px;pointer-events:none;background:radial-gradient(ellipse at 78% 0,rgba(220,177,72,.11),transparent 62%)}
   #auroraIntelPanel *{box-sizing:border-box}#auroraIntelPanel [hidden]{display:none!important}
-  .ai-head{position:sticky;top:0;background:#0b1024f2;border-bottom:1px solid #ffffff18;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:2}
-  .ai-eyebrow{color:#f0b90b;font-size:10px;letter-spacing:1.8px;font-weight:800}.ai-title{font-size:20px;font-weight:800;margin:3px 0}.ai-muted{color:#9ca9bf;font-size:12px}
-  .ai-close{border:1px solid #ffffff25;background:#151c32;color:#fff;border-radius:9px;padding:8px 12px;cursor:pointer}
-  .ai-tabs{display:flex;gap:8px;padding:14px 22px 0;flex-wrap:wrap}.ai-tab{background:#141b30;border:1px solid #ffffff1a;color:#cbd5e1;border-radius:9px;padding:9px 12px;cursor:pointer}.ai-tab.active{color:#f6d56d;border-color:#d6a91a;background:#302812}
-  .ai-content{padding:18px 22px 24px}.ai-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.ai-field{display:flex;flex-direction:column;gap:6px;color:#aab6ca;font-size:11px}.ai-field input,.ai-field select{min-width:0;width:100%;border:1px solid #ffffff20;background:#111a2d;color:#f8fafc;border-radius:8px;padding:10px;font:13px Inter,Arial,sans-serif}.ai-actions{display:flex;gap:9px;margin:14px 0;flex-wrap:wrap}.ai-run{background:#eabf35;color:#171717;border:0;border-radius:9px;padding:10px 15px;font-weight:800;cursor:pointer}.ai-run:disabled{opacity:.55;cursor:wait}.ai-status{padding:10px 12px;background:#111a2d;border:1px solid #ffffff16;border-radius:9px;color:#cbd5e1;margin:12px 0}.ai-status.error{border-color:#b91c1c;color:#fecaca}.ai-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.ai-metric{padding:13px;border:1px solid #ffffff17;background:#11182b;border-radius:11px;min-width:0}.ai-metric small{display:block;color:#98a6bc;font-size:10px;margin-bottom:5px}.ai-metric strong{display:block;font-size:17px;overflow-wrap:anywhere}.ai-section{border:1px solid #ffffff17;background:#0e1629;border-radius:11px;padding:13px;margin-top:12px}.ai-section h3{font-size:13px;margin:0 0 9px;color:#f4d16a}.ai-table-wrap{overflow:auto}.ai-table{border-collapse:collapse;width:100%;font-size:11px}.ai-table th,.ai-table td{text-align:left;padding:8px;border-bottom:1px solid #ffffff14;vertical-align:top}.ai-table th{color:#e7c85d;font-weight:700}.ai-chip{display:inline-block;border:1px solid #ffffff25;border-radius:999px;padding:3px 8px;color:#f3d16a;font-size:10px}.ai-list{margin:0;padding-left:18px;color:#b9c5d8}.ai-list li{margin:5px 0}.ai-disclaimer{font-size:11px;color:#a8b4c8;margin-top:12px;line-height:1.6}
+  .ai-head{position:sticky;top:0;background:rgba(13,13,11,.91);backdrop-filter:blur(18px);border-bottom:1px solid rgba(230,198,117,.16);padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:2}
+  .ai-eyebrow{color:#d8b85e;font-size:10px;letter-spacing:2px;font-weight:800}.ai-title{font-size:23px;font-weight:750;margin:4px 0;color:#f5f0e3}.ai-muted{color:#b2ac9c;font-size:13px}
+  .ai-close{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.055);color:#eee9dc;border-radius:10px;padding:9px 14px;cursor:pointer;transition:background .2s,border-color .2s}.ai-close:hover{background:rgba(255,255,255,.11);border-color:rgba(218,183,91,.42)}
+  .ai-tabs{display:flex;gap:9px;padding:16px 26px 0;flex-wrap:wrap}.ai-tab{background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.12);color:#c9c2b3;border-radius:11px;padding:10px 15px;cursor:pointer;transition:all .2s}.ai-tab:hover{border-color:rgba(218,183,91,.42);color:#f4e9c8}.ai-tab.active{color:#17140b;border-color:#e8cf83;background:linear-gradient(135deg,#f4e1a0,#c8a54d);box-shadow:0 5px 18px rgba(201,161,65,.2);font-weight:750}
+  .ai-content{padding:20px 26px 26px}.ai-content form{padding:18px;border:1px solid rgba(225,196,119,.16);border-radius:15px;background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(255,255,255,.018));box-shadow:inset 0 1px rgba(255,255,255,.04)}.ai-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.ai-field{display:flex;flex-direction:column;gap:7px;color:#c2bcad;font-size:12px;font-weight:550}.ai-field input,.ai-field select{min-width:0;width:100%;border:1px solid rgba(255,255,255,.14);background:rgba(4,5,6,.66);color:#f6f0df;border-radius:10px;padding:11px 12px;font:14px Inter,Arial,sans-serif;outline:none;transition:border-color .2s,box-shadow .2s}.ai-field input:focus,.ai-field select:focus{border-color:#d9b95f;box-shadow:0 0 0 3px rgba(217,185,95,.12)}.ai-actions{display:flex;align-items:center;gap:13px;margin:17px 0 0;flex-wrap:wrap}.ai-run{background:linear-gradient(135deg,#f4e19b,#c69c3e);color:#17140b;border:1px solid rgba(255,237,180,.72);border-radius:10px;padding:11px 18px;font-weight:800;cursor:pointer;box-shadow:0 7px 20px rgba(185,143,43,.17);transition:transform .2s,filter .2s,box-shadow .2s}.ai-run:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.07);box-shadow:0 9px 24px rgba(185,143,43,.25)}.ai-run:disabled{opacity:.62;cursor:wait}.ai-status{padding:12px 14px;background:rgba(255,255,255,.045);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:11px;color:#ddd6c7;margin:14px 0}.ai-status.error{border-color:rgba(229,91,86,.55);color:#ffd0ca;background:rgba(95,27,25,.2)}.ai-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:15px 0}.ai-metric{padding:14px;border:1px solid rgba(225,196,119,.14);background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.025));backdrop-filter:blur(12px);border-radius:13px;min-width:0;box-shadow:inset 0 1px rgba(255,255,255,.035)}.ai-metric small{display:block;color:#b6ae9b;font-size:11px;line-height:1.4;margin-bottom:7px}.ai-metric strong{display:block;color:#f2e7c9;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}.ai-section{border:1px solid rgba(225,196,119,.14);background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));backdrop-filter:blur(12px);border-radius:14px;padding:16px;margin-top:13px}.ai-section h3{font-size:14px;margin:0 0 10px;color:#e3c66d}.ai-table-wrap{overflow:auto}.ai-table{border-collapse:collapse;width:100%;font-size:12px}.ai-table th,.ai-table td{text-align:left;padding:9px;border-bottom:1px solid rgba(255,255,255,.09);vertical-align:top}.ai-table th{color:#e3c66d;font-weight:700}.ai-chip{display:inline-block;border:1px solid rgba(225,196,119,.3);border-radius:999px;padding:4px 9px;color:#e6d39a;font-size:11px}.ai-list{margin:0;padding-left:19px;color:#c9c2b4}.ai-list li{margin:6px 0}.ai-disclaimer{font-size:12px;color:#aaa392;margin-top:14px;line-height:1.65}
   .ai-chart{border:1px solid #ffffff17;background:#0e1629;border-radius:11px;padding:14px;margin-top:12px;overflow:hidden}.ai-chart h3{font-size:13px;margin:0 0 4px;color:#f4d16a}.ai-chart-note{font-size:10px;color:#9ca9bf;margin:0 0 10px}.ai-chart svg{display:block;width:100%;height:auto;min-height:150px}.ai-chart text{font-family:Inter,Arial,sans-serif;fill:#cbd5e1;font-size:11px}.ai-chart .axis{stroke:#64748b;stroke-width:1}.ai-chart .bar{fill:#eabf35}.ai-chart .bar.secondary{fill:#4f8cff}.ai-chart .bar.tertiary{fill:#2dd4bf}
-  @media(max-width:700px){#auroraIntelOverlay{padding:7px}#auroraIntelPanel{max-height:94vh}.ai-grid,.ai-results{grid-template-columns:repeat(2,minmax(0,1fr))}.ai-head,.ai-content{padding-left:14px;padding-right:14px}.ai-tabs{padding-left:14px;padding-right:14px}#auroraIntelLauncher{right:12px;bottom:12px}}
+  @media(max-width:700px){#auroraIntelOverlay{padding:7px}#auroraIntelPanel{max-height:94vh;border-radius:16px}.ai-grid,.ai-results{grid-template-columns:repeat(2,minmax(0,1fr))}.ai-head,.ai-content{padding-left:14px;padding-right:14px}.ai-content form{padding:13px}.ai-tabs{padding-left:14px;padding-right:14px}#auroraIntelLauncher{right:12px;bottom:12px}}
+  @media(max-width:460px){.ai-grid,.ai-results{grid-template-columns:1fr}.ai-title{font-size:20px}.ai-head{padding-top:16px;padding-bottom:16px}}
   @media(prefers-reduced-motion:reduce){#auroraIntelOverlay *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
   `;
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
@@ -74,7 +76,16 @@
   overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
   window.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))close();});
   function escape(value){return String(value??'Unavailable').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-  function metric(label,value){return '<div class="ai-metric"><small>'+escape(label)+'</small><strong>'+escape(value===null||value===undefined||value===''?'Unavailable':value)+'</strong></div>';}
+  function displayValue(label,value){
+    if(value===null||value===undefined||value==='')return 'Unavailable';
+    if(typeof value==='number'&&Number.isFinite(value)){
+      const wholeNumber=/observations|units|signals|count|days|window/i.test(label);
+      const precision=/p&l|cost|spread|mean|std|score|z-score|percent|threshold|move|ratio/i.test(label)?2:4;
+      return value.toLocaleString('en-IN',{maximumFractionDigits:wholeNumber?0:precision});
+    }
+    return value;
+  }
+  function metric(label,value){return '<div class="ai-metric"><small>'+escape(label)+'</small><strong>'+escape(displayValue(label,value))+'</strong></div>';}
   function list(items){return '<ul class="ai-list">'+(items||[]).map(x=>'<li>'+escape(x)+'</li>').join('')+'</ul>';}
   function section(title,body){return '<section class="ai-section"><h3>'+escape(title)+'</h3>'+body+'</section>';}
   function table(headers,rows){return '<div class="ai-table-wrap"><table class="ai-table"><thead><tr>'+headers.map(h=>'<th>'+escape(h)+'</th>').join('')+'</tr></thead><tbody>'+rows.map(row=>'<tr>'+row.map(v=>'<td>'+escape(v===null||v===undefined?'Unavailable':v)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';}
@@ -90,7 +101,7 @@
   function render(data){
     if(activeTab==='explain'){
       output.innerHTML='<div class="ai-results">'+[
-        metric('Classification',data.classification),metric('Opportunity score',data.opportunity_score),metric('Trap risk score',data.trap_risk_score),metric('Evaluation snapshot date',data.evaluation_date),metric('Matched trade date',data.trade_date),
+        metric('Classification',data.classification),metric('Heuristic opportunity score (not a probability)',data.opportunity_score),metric('Heuristic trap risk score',data.trap_risk_score),metric('Evaluation snapshot date',data.evaluation_date),metric('Matched trade date',data.trade_date),
         metric('Expiry date',data.expiry_date),metric('Spread (₹/10g)',data.spread),metric('Z-score',data.z_score),metric('Historical percentile',data.percentile_rank),
         metric('Gross edge (₹/10g)',data.gross_edge),metric('Net edge (₹/10g)',data.net_edge),metric('Cost hurdle (₹/10g)',data.estimated_cost_hurdle),metric('Data mode',data.data_mode)
       ].join('')+'</div>'+section('Classification reason','<p>'+escape(data.reason||'No reason supplied')+'</p>')+section('Rule evidence',table(['Factor','Value','Unit','Effect','Available'],(data.evidence||[]).map(e=>[e.factor,e.value,e.unit,e.effect,e.available?'Yes':'No'])))+section('Caveats',list(data.caveats||[]));
@@ -112,13 +123,19 @@
     busy=true;run.disabled=true;status.className='ai-status';status.textContent='Loading backend-calculated historical analysis…';output.replaceChildren();
     try{
       const response=await fetch(url,{method,headers:body?{'Content-Type':'application/json','Accept':'application/json'}:{'Accept':'application/json'},body:body?JSON.stringify(body):undefined});
-      let payload;try{payload=await response.json();}catch{throw new Error('The API returned a non-JSON response.');}
-      if(!response.ok)throw new Error(payload.detail?typeof payload.detail==='string'?payload.detail:JSON.stringify(payload.detail):'Request failed with HTTP '+response.status);
+      let payload;try{payload=await response.json();}catch{const error=new Error('The API returned a non-JSON response.');error.status=response.status;throw error;}
+      if(!response.ok){const error=new Error(payload.detail?typeof payload.detail==='string'?payload.detail:JSON.stringify(payload.detail):'The request was rejected.');error.status=response.status;throw error;}
       if(payload.success===false)throw new Error(payload.message||'The API reported that the request failed.');
       const data=payload.data;if(!data||typeof data!=='object')throw new Error('The API response did not contain a data object.');
       status.textContent='Analysis received · '+(data.data_mode||'historical observations')+' · '+(data.evaluation_date||data.trade_date||data.holdout_end||'date unavailable');
       render(data);
-    }catch(err){status.className='ai-status error';status.textContent='Could not load analysis: '+err.message+' Check that the backend is running and CORS allows this frontend origin.';output.replaceChildren();}
+    }catch(err){
+      status.className='ai-status error';
+      if(Number.isInteger(err.status))status.textContent='Analysis unavailable (HTTP '+err.status+'): '+err.message+(err.status===422?' Check the selected pair, date, and eligible historical observations.':'');
+      else if(err instanceof TypeError)status.textContent='Could not reach the analysis service. Check that the backend is running and that this frontend origin is allowed.';
+      else status.textContent='Could not load analysis: '+err.message;
+      output.replaceChildren();
+    }
     finally{busy=false;run.disabled=false;}
   });
   switchTab('explain');
