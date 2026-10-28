@@ -1,4 +1,8 @@
 # AURORA — Commodity Intelligence & Relative-Value Platform
+
+> **🚀 Live Demo:** [Open AURORA on Render](https://aurora-gold-intelligence-1.onrender.com)
+
+
 ### Phase 2: Relative-Value Intelligence Engine (MCX Gold)
 
 AURORA transforms Multi Commodity Exchange of India (MCX) gold commodity futures settlement data into an explainable relative-value market intelligence product. It standardizes physically distinct contracts (**GOLDM**, **GOLDTEN**, **GOLDGUINEA**, **GOLDPETAL**) to a common fine-gold basis, calculates pairwise normalized spreads across all six contract combinations, detects statistically unusual relative pricing (rolling Z-scores & empirical percentiles), audits liquidity, expiry friction, and transaction hurdles, and provides complete audit evidence trails for decision support.
